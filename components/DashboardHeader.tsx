@@ -1,10 +1,32 @@
 "use client"
 
 import { useSession, signOut } from "next-auth/react"
+import { useState, useEffect } from "react"
 import { LogOut, User, Bell, ChevronLeft, Moon } from "lucide-react"
 
 export default function DashboardHeader() {
   const { data: session } = useSession()
+  const [avatar, setAvatar] = useState<string | null | undefined>(session?.user?.image)
+
+  useEffect(() => {
+    if (session?.user?.email) {
+        fetch('/api/user')
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.image) {
+                    setAvatar(data.image)
+                }
+            })
+            .catch(err => console.error("Failed to load avatar", err))
+    }
+  }, [session])
+
+  // Update avatar if session changes (e.g. initial load) and strict equality check to avoid overwrite if we have better data
+  useEffect(() => {
+     if (session?.user?.image && !avatar) {
+         setAvatar(session.user.image)
+     }
+  }, [session, avatar])
 
   return (
     <header className="flex h-16 items-center justify-between border-b border-white/5 bg-zinc-900/50 px-6 backdrop-blur-xl">
@@ -34,12 +56,12 @@ export default function DashboardHeader() {
               <p className="text-xs text-zinc-500">{session?.user?.email || ""}</p>
            </div>
            
-           {session?.user?.image ? (
+           {avatar ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img 
-                    src={session.user.image} 
+                    src={avatar} 
                     alt="Profile" 
-                    className="h-10 w-10 rounded-full border border-white/10" 
+                    className="h-10 w-10 rounded-full border border-white/10 object-cover" 
                 />
            ) : (
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-800 text-zinc-400">

@@ -63,8 +63,8 @@ export default function SettingsForm() {
         
         if (!res.ok) throw new Error("Failed to update")
         
-        // Update session
-        await update({ name: formData.name, image: formData.image })
+        // Update session (only name, avoid sending base64 image to cookie)
+        await update({ name: formData.name })
 
         showModal({
             title: "Configuración guardada",
