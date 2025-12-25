@@ -3,20 +3,31 @@
 
 import { useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Upload, X, File, CheckCircle, AlertCircle } from "lucide-react"
+import { Upload, X, File, CheckCircle, AlertCircle, Clock } from "lucide-react"
 
 import { useSession } from "next-auth/react"
+import { useModal } from "@/components/ModalProvider"
 
 export default function DropZone() {
   const { data: session } = useSession()
+  const { showModal } = useModal()
   const [file, setFile] = useState<File | null>(null)
+  
+  // Expiration state (hours), default 7 days (168h)
+  // Expiration state (hours), default 7 days (168h)
+  const [expirationHours, setExpirationHours] = useState(168)
   
   const MAX_SIZE = session ? 200 * 1024 * 1024 : 10 * 1024 * 1024
   const MAX_SIZE_LABEL = session ? "200MB" : "10MB"
 
   const validateFile = (file: File) => {
       if (file.size > MAX_SIZE) {
-          alert(`El archivo es demasiado grande. El límite es ${MAX_SIZE_LABEL}. ${!session ? 'Inicia sesión para subir hasta 200MB.' : ''}`)
+          showModal({
+              title: "Archivo Demasiado Grande",
+              message: `El archivo excede el límite de ${MAX_SIZE_LABEL}. ${!session ? 'Inicia sesión para subir hasta 200MB.' : ''}`,
+              type: "warning",
+              confirmText: "Entendido"
+          })
           return false
       }
       return true
@@ -72,7 +83,8 @@ export default function DropZone() {
             body: JSON.stringify({
                 name: file.name,
                 type: file.type,
-                size: file.size
+                size: file.size,
+                expiresInHours: session ? expirationHours : null
             }),
             headers: { 'Content-Type': 'application/json' }
         })
@@ -118,6 +130,7 @@ export default function DropZone() {
     setFile(null)
     setUploadStatus('idle')
     setProgress(0)
+    setDownloadUrl('')
     setDownloadUrl('')
   }
 
@@ -189,6 +202,38 @@ export default function DropZone() {
                 )}
              </div>
              
+             {/* Expiration Selector for Logged In Users */}
+             {session && uploadStatus === 'idle' && (
+                 <div className="mb-6">
+                    <label className="flex items-center gap-2 text-sm font-medium text-zinc-400 mb-2">
+                        <Clock className="w-4 h-4" />
+                        Caducidad del enlace
+                    </label>
+                    <div className="grid grid-cols-4 gap-2">
+                        {[
+                            { label: '1 h', value: 1 },
+                            { label: '1 d', value: 24 },
+                            { label: '3 d', value: 72 },
+                            { label: '7 d', value: 168 },
+                        ].map((option) => (
+                            <button
+                                key={option.value}
+                                onClick={() => setExpirationHours(option.value)}
+                                className={`
+                                    py-2 px-1 rounded-lg text-xs font-medium transition-all
+                                    ${expirationHours === option.value 
+                                        ? 'bg-white text-zinc-900 shadow-lg' 
+                                        : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200'
+                                    }
+                                `}
+                            >
+                                {option.label}
+                            </button>
+                        ))}
+                    </div>
+                 </div>
+             )}
+             
              {uploadStatus === 'idle' && (
                  <button
                     onClick={handleUpload}
@@ -233,7 +278,11 @@ export default function DropZone() {
                          <button 
                             onClick={() => {
                                 navigator.clipboard.writeText(downloadUrl)
-                                alert('¡Enlace copiado!')
+                                showModal({
+                                    title: "Enlace Copiado",
+                                    message: "El enlace de descarga ha sido copiado al portapapeles.",
+                                    type: "success"
+                                })
                             }}
                             className="flex-1 rounded-xl bg-primary py-3 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
                         >
