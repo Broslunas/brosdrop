@@ -9,9 +9,10 @@ interface Props {
     fileName: string
     fileSize: number
     downloadUrl: string
+    branding?: any
 }
 
-export default function DownloadClient({ id, fileName, fileSize, downloadUrl }: Props) {
+export default function DownloadClient({ id, fileName, fileSize, downloadUrl, branding }: Props) {
     const handleDownload = () => {
         // Fire and forget tracking
         fetch(`/api/files/${id}/download`, { method: 'POST' }).catch(err => console.error(err))
@@ -24,9 +25,15 @@ export default function DownloadClient({ id, fileName, fileSize, downloadUrl }: 
             className="w-full max-w-md rounded-3xl border border-zinc-800 bg-zinc-900/50 p-8 backdrop-blur-xl"
         >
             <div className="mb-8 text-center">
-                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <Download className="h-10 w-10" />
-                </div>
+                {branding?.logo ? (
+                     <div className="mx-auto mb-6 h-24 flex items-center justify-center">
+                         <img src={branding.logo} alt="Logo" className="max-h-full max-w-full object-contain drop-shadow-lg" />
+                     </div>
+                ) : (
+                    <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-primary">
+                        <Download className="h-10 w-10" />
+                    </div>
+                )}
                 <h2 className="mb-2 text-2xl font-bold text-white">Ready to download</h2>
                 <p className="text-zinc-400">Your file is ready.</p>
             </div>

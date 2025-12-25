@@ -11,9 +11,10 @@ interface Props {
     fileSize: number
     isProtected: boolean
     initialDownloadUrl?: string
+    branding?: any
 }
 
-export default function DownloadManager({ id, fileName, fileSize, isProtected, initialDownloadUrl }: Props) {
+export default function DownloadManager({ id, fileName, fileSize, isProtected, initialDownloadUrl, branding }: Props) {
     const [unlockedUrl, setUnlockedUrl] = useState<string | null>(initialDownloadUrl || null)
 
     if (isProtected && !unlockedUrl) {
@@ -21,6 +22,7 @@ export default function DownloadManager({ id, fileName, fileSize, isProtected, i
             <PasswordGuard 
                 id={id} 
                 onUnlock={(url) => setUnlockedUrl(url)} 
+                branding={branding}
             />
         )
     }
@@ -33,6 +35,7 @@ export default function DownloadManager({ id, fileName, fileSize, isProtected, i
             fileName={fileName}
             fileSize={fileSize}
             downloadUrl={unlockedUrl}
+            branding={branding}
         />
     )
 }

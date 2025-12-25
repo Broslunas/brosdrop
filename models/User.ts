@@ -11,6 +11,11 @@ const UserSchema = new Schema({
   plan: { type: String, default: 'free', enum: ['free', 'plus', 'pro'] },
   defaultView: { type: String, default: 'grid', enum: ['grid', 'list'] },
   verificationToken: { type: String },
+  branding: {
+    logo: { type: String },
+    background: { type: String },
+    enabled: { type: Boolean, default: true }
+  },
 }, { timestamps: true })
 
 // Force model recompilation in development to handle schema changes

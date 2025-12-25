@@ -7,9 +7,10 @@ import { Lock, ArrowRight, Loader2 } from "lucide-react"
 interface Props {
     id: string
     onUnlock: (url: string) => void
+    branding?: any
 }
 
-export default function PasswordGuard({ id, onUnlock }: Props) {
+export default function PasswordGuard({ id, onUnlock, branding }: Props) {
     const [password, setPassword] = useState("")
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(false)
@@ -42,11 +43,16 @@ export default function PasswordGuard({ id, onUnlock }: Props) {
     }
 
     return (
-        <div className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center p-4">
              <div className="w-full max-w-md rounded-3xl border border-zinc-800 bg-zinc-900/50 p-8 backdrop-blur-xl">
-                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <Lock className="h-10 w-10" />
-                </div>
+                {branding?.logo ? (
+                     <div className="mx-auto mb-6 h-24 flex items-center justify-center">
+                         <img src={branding.logo} alt="Logo" className="max-h-full max-w-full object-contain drop-shadow-lg" />
+                     </div>
+                ) : (
+                    <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-primary">
+                        <Lock className="h-10 w-10" />
+                    </div>
+                )}
                 
                 <h2 className="mb-2 text-2xl font-bold text-white text-center">Archivo Protegido</h2>
                 <p className="text-zinc-400 mb-6 text-center">Este archivo requiere contraseña para ser descargado.</p>
@@ -83,6 +89,5 @@ export default function PasswordGuard({ id, onUnlock }: Props) {
                     </button>
                 </form>
              </div>
-        </div>
     )
 }

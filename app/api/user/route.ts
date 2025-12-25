@@ -38,6 +38,14 @@ export async function PUT(req: Request) {
     // Assuming data contains: { name, image, newsletterSubscribed, emailNotifications }
 
     await dbConnect()
+
+    if (data.branding) {
+        const currentUser = await User.findOne({ email: session.user.email })
+        if (currentUser?.plan !== 'pro') {
+             delete data.branding
+        }
+    }
+
     const user = await User.findOneAndUpdate(
         { email: session.user.email }, 
         { ...data },

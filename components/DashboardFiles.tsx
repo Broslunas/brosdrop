@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react"
 import { ITransfer } from "@/models/Transfer"
-import { Trash2, ExternalLink, Copy, FileIcon, Calendar, Download, HardDrive, Eye, Search, Filter, ArrowUpDown, Check, X, Grid, List as ListIcon, Edit2, Lock } from "lucide-react"
+import { Trash2, ExternalLink, Copy, FileIcon, Calendar, Download, HardDrive, Eye, Search, Filter, ArrowUpDown, Check, X, Grid, List as ListIcon, Edit2, Lock, Music, Video, Image as ImageIcon, FileText, Archive, FileCode } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useModal } from "@/components/ModalProvider"
@@ -16,6 +16,20 @@ const formatBytes = (bytes: number, decimals = 2) => {
   const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+}
+
+const getFileIcon = (filename: string) => {
+  const ext = filename.split('.').pop()?.toLowerCase()
+  if (!ext) return FileIcon
+
+  if (['mp3', 'wav', 'ogg', 'm4a', 'flac'].includes(ext)) return Music
+  if (['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(ext)) return Video
+  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) return ImageIcon
+  if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) return Archive
+  if (['js', 'ts', 'tsx', 'jsx', 'py', 'html', 'css', 'json'].includes(ext)) return FileCode
+  if (['pdf', 'doc', 'docx', 'txt', 'md'].includes(ext)) return FileText
+  
+  return FileIcon
 }
 
 export default function DashboardClient({ 

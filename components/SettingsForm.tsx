@@ -4,7 +4,7 @@
 import { useState, useRef, useEffect } from "react"
 import { useSession, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { User, Mail, Bell, Trash2, Camera, Save, Loader2, LayoutGrid, List } from "lucide-react"
+import { User, Mail, Bell, Trash2, Camera, Save, Loader2, LayoutGrid, List, Image as ImageIcon, File } from "lucide-react"
 import { useModal } from "@/components/ModalProvider"
 
 export default function SettingsForm() {
@@ -20,7 +20,9 @@ export default function SettingsForm() {
     image: "",
     newsletterSubscribed: false,
     emailNotifications: true,
-    defaultView: 'grid'
+    defaultView: 'grid',
+    branding: { logo: '', background: '', enabled: true },
+    plan: 'free'
   })
 
   // Load initial data
@@ -34,7 +36,9 @@ export default function SettingsForm() {
                     image: data.image || session?.user?.image || "",
                     newsletterSubscribed: data.newsletterSubscribed || false,
                     emailNotifications: data.emailNotifications ?? true,
-                    defaultView: data.defaultView || 'grid'
+                    defaultView: data.defaultView || 'grid',
+                    branding: data.branding || { logo: '', background: '', enabled: true },
+                    plan: data.plan || 'free'
                 })
             }
         })
@@ -225,6 +229,118 @@ export default function SettingsForm() {
                     </div>
                 </div>
 
+                <div className="h-px bg-zinc-800 my-8" />
+                
+                {formData.plan === 'pro' ? (
+                    <>
+                        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                            <LayoutGrid className="w-5 h-5 text-purple-500" /> Personalización (Pro)
+                        </h3>
+                        
+                        <div className="space-y-6">
+                             {/* Enabled Toggle */}
+                             <label className="flex items-center justify-between p-4 rounded-xl bg-purple-500/10 border border-purple-500/20 cursor-pointer hover:bg-purple-500/20 transition-colors">
+                                <div>
+                                    <p className="font-medium text-zinc-200">Personalización Activada</p>
+                                    <p className="text-xs text-zinc-500">Muestra tu logo y fondo en la página de descarga.</p>
+                                </div>
+                                <div className={`w-12 h-6 rounded-full transition-colors relative ${formData.branding?.enabled ? 'bg-purple-500' : 'bg-zinc-700'}`}>
+                                    <input 
+                                        type="checkbox" 
+                                        className="hidden" 
+                                        checked={formData.branding?.enabled ?? true}
+                                        onChange={e => setFormData({...formData, branding: { ...formData.branding, enabled: e.target.checked }})}
+                                    />
+                                    <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${formData.branding?.enabled ? 'translate-x-6' : ''}`} />
+                                </div>
+                            </label>
+
+                            {/* Logo Upload */}
+                            <div>
+                                <label className="block text-sm font-medium text-zinc-400 mb-2">Logo Personalizado</label>
+                                <div className="flex items-center gap-4">
+                                     <div className="w-16 h-16 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center overflow-hidden relative group">
+                                         {formData.branding?.logo ? (
+                                             <img src={formData.branding.logo} className="w-full h-full object-contain p-2" />
+                                         ) : (
+                                             <File className="w-6 h-6 text-zinc-600" />
+                                         )}
+                                          <label className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
+                                             <Camera className="w-4 h-4 text-white" />
+                                             <input type="file" accept="image/*" className="hidden" 
+                                                 onChange={(e) => {
+                                                     const file = e.target.files?.[0]
+                                                     if (file) {
+                                                         const reader = new FileReader()
+                                                         reader.onloadend = () => setFormData((prev: any) => ({...prev, branding: { ...prev.branding, logo: reader.result as string }}))
+                                                         reader.readAsDataURL(file)
+                                                     }
+                                                 }}
+                                             />
+                                         </label>
+                                     </div>
+                                     <div className="text-xs text-zinc-500">
+                                         <p>Sube tu logo (PNG transparente recomendado).</p>
+                                         <button type="button" onClick={() => setFormData({...formData, branding: { ...formData.branding, logo: '' }})} className="text-red-400 hover:text-red-300 mt-1">Eliminar logo</button>
+                                     </div>
+                                </div>
+                            </div>
+
+                            {/* Background Upload */}
+                            <div>
+                                <label className="block text-sm font-medium text-zinc-400 mb-2">Fondo de Pantalla</label>
+                                <div className="h-32 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center overflow-hidden relative group">
+                                     {formData.branding?.background ? (
+                                         <img src={formData.branding.background} className="w-full h-full object-cover" />
+                                     ) : (
+                                         <div className="text-zinc-600 flex flex-col items-center">
+                                             <ImageIcon className="w-8 h-8 mb-2" />
+                                             <span>Sin fondo personalizado</span>
+                                         </div>
+                                     )}
+                                     <label className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
+                                         <div className="bg-zinc-900/80 px-4 py-2 rounded-lg text-white text-sm flex items-center gap-2">
+                                             <Camera className="w-4 h-4" /> Cambiar Fondo
+                                         </div>
+                                         <input type="file" accept="image/*" className="hidden" 
+                                             onChange={(e) => {
+                                                 const file = e.target.files?.[0]
+                                                 if (file) {
+                                                     const reader = new FileReader()
+                                                     reader.onloadend = () => setFormData((prev: any) => ({...prev, branding: { ...prev.branding, background: reader.result as string }}))
+                                                     reader.readAsDataURL(file)
+                                                 }
+                                             }}
+                                         />
+                                     </label>
+                                </div>
+                                {formData.branding?.background && (
+                                     <button type="button" onClick={() => setFormData({...formData, branding: { ...formData.branding, background: '' }})} className="text-xs text-red-400 hover:text-red-300 mt-2">Eliminar fondo</button>
+                                )}
+                            </div>
+                        </div>
+                    </>
+                ) : (
+                     <>
+                        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                            <LayoutGrid className="w-5 h-5 text-zinc-500" /> Personalización de Marca
+                        </h3>
+                        <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-2xl p-6 relative overflow-hidden group cursor-pointer hover:border-purple-500/40 transition-colors" onClick={() => router.push('/pricing')}>
+                             <div className="relative z-10 flex flex-col items-start gap-4">
+                                 <div>
+                                    <h4 className="text-base font-bold text-white mb-2">Desbloquea Branding Personalizado</h4>
+                                    <p className="text-zinc-400 text-sm">
+                                        Con el Plan Pro, puedes añadir tu propio logo y un fondo personalizado a todas tus páginas de descarga.
+                                    </p>
+                                 </div>
+                                 <button type="button" className="bg-white text-black px-4 py-2 rounded-lg text-sm font-bold hover:bg-zinc-200 transition-colors">
+                                     Mejorar a Pro
+                                 </button>
+                             </div>
+                        </div>
+                     </>
+                )}
+                
                 <div className="pt-4">
                     <button 
                         type="submit" 

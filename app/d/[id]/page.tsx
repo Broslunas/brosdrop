@@ -8,6 +8,7 @@ import { s3Client } from "@/lib/s3"
 import DownloadManager from "@/components/DownloadManager"
 
 import ExpiredTransfer from "@/models/ExpiredTransfer"
+import User from "@/models/User"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -75,15 +76,31 @@ export default async function DownloadPage({ params }: Props) {
         downloadUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 })
       }
 
+      let branding = null
+      if (transfer.senderId) {
+          const sender = await User.findById(transfer.senderId).lean() as any
+          if (sender?.plan === 'pro' && sender?.branding?.enabled) {
+              branding = sender.branding
+          }
+      }
+
       return (
-          <div className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center p-4">
-              <DownloadManager 
-                  id={id}
-                  fileName={transfer.originalName}
-                  fileSize={transfer.size}
-                  isProtected={isProtected}
-                  initialDownloadUrl={downloadUrl}
-              />
+          <div 
+             className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center p-4 bg-cover bg-center relative"
+             style={branding?.background ? { backgroundImage: `url(${branding.background})` } : undefined}
+          >
+             {branding?.background && <div className="absolute inset-0 bg-black/60 pointer-events-none" />}
+              
+              <div className="relative z-10 w-full flex justify-center">
+                  <DownloadManager 
+                      id={id}
+                      fileName={transfer.originalName}
+                      fileSize={transfer.size}
+                      isProtected={isProtected}
+                      initialDownloadUrl={downloadUrl}
+                      branding={branding}
+                  />
+              </div>
           </div>
       )
   } catch (error) {
