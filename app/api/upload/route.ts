@@ -25,7 +25,9 @@ export async function POST(req: Request) {
     const MAX_SIZE_GUEST = 10 * 1024 * 1024 // 10MB
     const MAX_SIZE_USER = 200 * 1024 * 1024 // 200MB
 
-    const limit = session ? MAX_SIZE_USER : MAX_SIZE_GUEST
+    // Verified users: 200MB, Unverified/Guests: 10MB
+    const isVerified = session?.user && (session.user as any).emailVerified
+    const limit = isVerified ? MAX_SIZE_USER : MAX_SIZE_GUEST
     
     if (size > limit) {
         return NextResponse.json({ 
@@ -35,18 +37,20 @@ export async function POST(req: Request) {
 
     await dbConnect()
 
-    // Determine expiration
-    let expirationTime = new Date(Date.now() + 30 * 60 * 1000) // Default guest: 30 mins
-
-    if (session) {
-        // User default: 7 days
-        let hours = 24 * 7 
+    // Calculate expiration
+    // Verified users: up to 7 days, Unverified/Guests: 30 minutes
+    let expirationTime: Date;
+    
+    if (isVerified) {
+        let hours = 24 * 7 // Default for verified users: 7 days
 
         if (expiresInHours && typeof expiresInHours === 'number') {
             hours = Math.min(Math.max(1, expiresInHours), 168) // Clamp between 1 and 168 hours (7 days)
         }
-        
         expirationTime = new Date(Date.now() + hours * 60 * 60 * 1000)
+    } else {
+        // Guest or unverified user: 30 minutes
+        expirationTime = new Date(Date.now() + 30 * 60 * 1000)
     }
 
     const fileKey = `${randomUUID()}-${name.replace(/\s+/g, '-')}`

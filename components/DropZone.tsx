@@ -17,14 +17,18 @@ export default function DropZone() {
   // Expiration state (hours), default 7 days (168h)
   const [expirationHours, setExpirationHours] = useState(168)
   
-  const MAX_SIZE = session ? 200 * 1024 * 1024 : 10 * 1024 * 1024
-  const MAX_SIZE_LABEL = session ? "200MB" : "10MB"
+  // Check if verified (use as any because of type definitions)
+  const isVerified = (session?.user as any)?.emailVerified
+
+  // Limits: Verified users get 200MB, others 10MB
+  const MAX_SIZE = isVerified ? 200 * 1024 * 1024 : 10 * 1024 * 1024
+  const MAX_SIZE_LABEL = isVerified ? "200MB" : "10MB"
 
   const validateFile = (file: File) => {
       if (file.size > MAX_SIZE) {
           showModal({
               title: "Archivo Demasiado Grande",
-              message: `El archivo excede el límite de ${MAX_SIZE_LABEL}. ${!session ? 'Inicia sesión para subir hasta 200MB.' : ''}`,
+              message: `El archivo excede el límite de ${MAX_SIZE_LABEL}. ${!session ? 'Inicia sesión para subir hasta 200MB.' : !isVerified ? 'Verifica tu email para desbloquear 200MB.' : ''}`,
               type: "warning",
               confirmText: "Entendido"
           })
@@ -202,8 +206,8 @@ export default function DropZone() {
                 )}
              </div>
              
-             {/* Expiration Selector for Logged In Users */}
-             {session && uploadStatus === 'idle' && (
+             {/* Expiration Selector for Verified Users Only */}
+             {isVerified && uploadStatus === 'idle' && (
                  <div className="mb-6">
                     <label className="flex items-center gap-2 text-sm font-medium text-zinc-400 mb-2">
                         <Clock className="w-4 h-4" />
