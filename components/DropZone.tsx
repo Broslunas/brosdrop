@@ -1,0 +1,242 @@
+
+"use client"
+
+import { useState, useRef } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Upload, X, File, CheckCircle, AlertCircle } from "lucide-react"
+
+export default function DropZone() {
+  const [file, setFile] = useState<File | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle')
+  const [progress, setProgress] = useState(0)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setFile(e.dataTransfer.files[0])
+    }
+  }
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0])
+    }
+  }
+
+  const [downloadUrl, setDownloadUrl] = useState('')
+
+  const handleUpload = async () => {
+    if (!file) return
+
+    setUploadStatus('uploading')
+    setProgress(0)
+
+    try {
+        // 1. Get Signed URL
+        const res = await fetch('/api/upload', {
+            method: 'POST',
+            body: JSON.stringify({
+                name: file.name,
+                type: file.type,
+                size: file.size
+            }),
+            headers: { 'Content-Type': 'application/json' }
+        })
+
+        if (!res.ok) throw new Error('Failed to start upload')
+        
+        const { url, id } = await res.json()
+
+        // 2. Upload to R2
+        const xhr = new XMLHttpRequest()
+        xhr.open('PUT', url, true)
+        xhr.setRequestHeader('Content-Type', file.type)
+
+        xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable) {
+                const percentComplete = (e.loaded / e.total) * 100
+                setProgress(Math.round(percentComplete))
+            }
+        }
+
+        xhr.onload = () => {
+            if (xhr.status === 200) {
+                setUploadStatus('success')
+                setDownloadUrl(`${window.location.origin}/d/${id}`)
+            } else {
+                setUploadStatus('error')
+            }
+        }
+
+        xhr.onerror = () => {
+             setUploadStatus('error')
+        }
+
+        xhr.send(file)
+
+    } catch (err) {
+        console.error(err)
+        setUploadStatus('error') // TODO: Show error message
+    }
+  }
+
+  const reset = () => {
+    setFile(null)
+    setUploadStatus('idle')
+    setProgress(0)
+    setDownloadUrl('')
+  }
+
+  return (
+    <div className="w-full max-w-xl mx-auto">
+      <AnimatePresence mode="wait">
+        {!file ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className={`
+              relative group cursor-pointer overflow-hidden rounded-3xl border-2 border-dashed
+              transition-all duration-300 ease-in-out
+              ${isDragging 
+                ? 'border-primary bg-primary/5 scale-[1.02]' 
+                : 'border-zinc-700 hover:border-zinc-600 bg-zinc-900/50 hover:bg-zinc-900'
+              }
+            `}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+          >
+             <div className="flex flex-col items-center justify-center p-16 text-center">
+                <div className={`
+                    mb-6 rounded-2xl p-4 transition-colors duration-300
+                    ${isDragging ? 'bg-primary/20 text-primary' : 'bg-zinc-800 text-zinc-400 group-hover:bg-zinc-700 group-hover:text-zinc-200'}
+                `}>
+                    <Upload className="h-10 w-10" />
+                </div>
+                <h3 className="mb-2 text-xl font-bold tracking-tight">
+                    Upload Files
+                </h3>
+                <p className="text-sm text-zinc-400 max-w-[260px]">
+                    Drag & drop your files here or click to browse
+                </p>
+             </div>
+             <input 
+                type="file" 
+                ref={fileInputRef} 
+                className="hidden" 
+                onChange={handleFileSelect} 
+             />
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="rounded-3xl border border-zinc-800 bg-zinc-900/80 p-6 backdrop-blur-xl"
+          >
+             <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-4 overflow-hidden">
+                    <div className="rounded-xl bg-primary/10 p-3 text-primary">
+                        <File className="h-6 w-6" />
+                    </div>
+                    <div className="flex flex-col overflow-hidden">
+                        <span className="truncate font-medium text-zinc-100 max-w-[200px] sm:max-w-xs">{file.name}</span>
+                        <span className="text-xs text-zinc-500">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                    </div>
+                </div>
+                {uploadStatus !== 'uploading' && uploadStatus !== 'success' && (
+                    <button 
+                        onClick={(e) => { e.stopPropagation(); reset(); }}
+                        className="rounded-full p-2 text-zinc-500 hover:bg-zinc-800 hover:text-red-400 transition-colors"
+                    >
+                        <X className="h-5 w-5" />
+                    </button>
+                )}
+             </div>
+             
+             {uploadStatus === 'idle' && (
+                 <button
+                    onClick={handleUpload}
+                    className="w-full py-4 rounded-xl bg-primary font-bold text-white shadow-lg shadow-primary/20 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                 >
+                    Transfer File
+                 </button>
+             )}
+
+             {uploadStatus === 'uploading' && (
+                 <div className="space-y-2">
+                    <div className="flex justify-between text-xs text-zinc-400">
+                        <span>Uploading...</span>
+                        <span>{progress}%</span>
+                    </div>
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-800">
+                        <motion.div 
+                            className="h-full bg-primary"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${progress}%` }}
+                            transition={{ ease: "linear" }}
+                        />
+                    </div>
+                 </div>
+             )}
+             
+             {uploadStatus === 'success' && (
+                 <div className="text-center py-4">
+                     <motion.div 
+                        initial={{ scale: 0 }} 
+                        animate={{ scale: 1 }}
+                        className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-green-500/10 text-green-500"
+                     >
+                         <CheckCircle className="h-6 w-6" />
+                     </motion.div>
+                     <h4 className="text-lg font-bold text-green-500">Sent!</h4>
+                     <p className="text-sm text-zinc-500 mb-4">Your file is ready to share.</p>
+                     <div className="flex gap-2">
+                         <button onClick={reset} className="flex-1 rounded-xl bg-zinc-800 py-3 text-sm font-medium hover:bg-zinc-700 transition-colors">
+                             Send another
+                         </button>
+                         <button 
+                            onClick={() => {
+                                navigator.clipboard.writeText(downloadUrl)
+                                alert('Link copied!')
+                            }}
+                            className="flex-1 rounded-xl bg-primary py-3 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
+                        >
+                             Copy Link
+                         </button>
+                     </div>
+                 </div>
+             )}
+             
+             {uploadStatus === 'error' && (
+                  <div className="text-center py-4">
+                     <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-red-500">
+                         <AlertCircle className="h-6 w-6" />
+                     </div>
+                     <h4 className="text-lg font-bold text-red-500">Upload Failed</h4>
+                     <p className="text-sm text-zinc-500 mb-4">Something went wrong.</p>
+                     <button onClick={reset} className="w-full rounded-xl bg-zinc-800 py-3 text-sm font-medium hover:bg-zinc-700 transition-colors">
+                         Try Again
+                     </button>
+                  </div>
+             )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
