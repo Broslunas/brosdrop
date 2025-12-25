@@ -24,7 +24,7 @@ export default function DashboardClient({ initialFiles }: { initialFiles: any[] 
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this file? This action cannot be undone.")) return
+    if (!confirm("¿Estás seguro de que quieres eliminar este archivo? Esta acción no se puede deshacer.")) return
 
     setDeletingId(id)
     try {
@@ -35,7 +35,7 @@ export default function DashboardClient({ initialFiles }: { initialFiles: any[] 
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert("Error deleting file")
+      alert("Error al eliminar el archivo")
     } finally {
       setDeletingId(null)
     }
@@ -52,8 +52,8 @@ export default function DashboardClient({ initialFiles }: { initialFiles: any[] 
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-zinc-400">
         <HardDrive className="w-16 h-16 mb-4 opacity-50" />
-        <h3 className="text-xl font-medium text-white">No files found</h3>
-        <p>Upload files to see them here.</p>
+        <h3 className="text-xl font-medium text-white">Sin archivos</h3>
+        <p>Sube archivos para verlos aquí.</p>
       </div>
     )
   }
@@ -78,7 +78,7 @@ export default function DashboardClient({ initialFiles }: { initialFiles: any[] 
                     <button 
                         onClick={() => copyLink(file._id)}
                         className="p-2 hover:bg-white/10 rounded-lg text-zinc-400 hover:text-white transition-colors"
-                        title="Copy Link"
+                        title="Copiar Link"
                     >
                         <Copy className="w-4 h-4" />
                     </button>
@@ -86,7 +86,7 @@ export default function DashboardClient({ initialFiles }: { initialFiles: any[] 
                         onClick={() => handleDelete(file._id)}
                         disabled={deletingId === file._id}
                         className="p-2 hover:bg-red-500/10 rounded-lg text-zinc-400 hover:text-red-400 transition-colors disabled:opacity-50"
-                        title="Delete"
+                        title="Eliminar"
                     >
                         <Trash2 className="w-4 h-4" />
                     </button>
@@ -103,7 +103,7 @@ export default function DashboardClient({ initialFiles }: { initialFiles: any[] 
              <div className="flex items-center justify-between text-xs text-zinc-500 border-t border-white/5 pt-4">
                 <div className="flex items-center gap-1.5" title={new Date(file.expiresAt).toLocaleString()}>
                     <Calendar className="w-3.5 h-3.5" />
-                    <span>Expires {new Date(file.expiresAt).toLocaleDateString()}</span>
+                    <span>Expira el {new Date(file.expiresAt).toLocaleDateString()}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                     <Download className="w-3.5 h-3.5" />

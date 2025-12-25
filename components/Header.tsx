@@ -3,10 +3,14 @@
 
 import { useSession, signIn, signOut } from "next-auth/react"
 import Link from "next/link"
-import { LogIn, LogOut, UploadCloud, User } from "lucide-react"
+import { LogIn, LogOut, UploadCloud, User, LayoutDashboard } from "lucide-react"
+import { usePathname } from "next/navigation"
 
 export default function Header() {
   const { data: session } = useSession()
+  const pathname = usePathname()
+
+  if (pathname?.startsWith("/dashboard")) return null
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-background/50 backdrop-blur-md">
@@ -31,6 +35,15 @@ export default function Header() {
                 )}
                 <span className="hidden sm:inline">{session?.user?.name}</span>
               </div>
+              
+              <Link
+                href="/dashboard"
+                className="rounded-lg bg-zinc-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 flex items-center gap-2 border border-zinc-700"
+              >
+                 <LayoutDashboard className="h-4 w-4" />
+                 <span className="hidden sm:inline">Dashboard</span>
+              </Link>
+
               <button
                 onClick={() => signOut()}
                 className="rounded-lg bg-zinc-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 flex items-center gap-2 border border-zinc-700"

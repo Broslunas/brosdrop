@@ -43,8 +43,8 @@ export default async function Dashboard() {
     <div className="w-full space-y-8 py-8">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">My Transfers</h1>
-          <p className="text-zinc-400 mt-1">Manage your active files and view download stats.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Mis Transferencias</h1>
+          <p className="text-zinc-400 mt-1">Gestiona tus archivos activos y ve las estadísticas de descarga.</p>
         </div>
       </header>
 

@@ -129,10 +129,10 @@ export default function DropZone() {
                     <Upload className="h-10 w-10" />
                 </div>
                 <h3 className="mb-2 text-xl font-bold tracking-tight">
-                    Upload Files
+                    Subir Archivos
                 </h3>
                 <p className="text-sm text-zinc-400 max-w-[260px]">
-                    Drag & drop your files here or click to browse
+                    Arrastra tus archivos aquí o haz clic para explorar
                 </p>
              </div>
              <input 
@@ -173,14 +173,14 @@ export default function DropZone() {
                     onClick={handleUpload}
                     className="w-full py-4 rounded-xl bg-primary font-bold text-white shadow-lg shadow-primary/20 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all"
                  >
-                    Transfer File
+                    Transferir Archivo
                  </button>
              )}
 
              {uploadStatus === 'uploading' && (
                  <div className="space-y-2">
                     <div className="flex justify-between text-xs text-zinc-400">
-                        <span>Uploading...</span>
+                        <span>Subiendo...</span>
                         <span>{progress}%</span>
                     </div>
                     <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-800">
@@ -203,20 +203,20 @@ export default function DropZone() {
                      >
                          <CheckCircle className="h-6 w-6" />
                      </motion.div>
-                     <h4 className="text-lg font-bold text-green-500">Sent!</h4>
-                     <p className="text-sm text-zinc-500 mb-4">Your file is ready to share.</p>
+                     <h4 className="text-lg font-bold text-green-500">¡Enviado!</h4>
+                     <p className="text-sm text-zinc-500 mb-4">Tu archivo está listo para compartir.</p>
                      <div className="flex gap-2">
                          <button onClick={reset} className="flex-1 rounded-xl bg-zinc-800 py-3 text-sm font-medium hover:bg-zinc-700 transition-colors">
-                             Send another
+                             Enviar otro
                          </button>
                          <button 
                             onClick={() => {
                                 navigator.clipboard.writeText(downloadUrl)
-                                alert('Link copied!')
+                                alert('¡Enlace copiado!')
                             }}
                             className="flex-1 rounded-xl bg-primary py-3 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
                         >
-                             Copy Link
+                             Copiar Link
                          </button>
                      </div>
                  </div>
@@ -227,10 +227,10 @@ export default function DropZone() {
                      <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-red-500">
                          <AlertCircle className="h-6 w-6" />
                      </div>
-                     <h4 className="text-lg font-bold text-red-500">Upload Failed</h4>
-                     <p className="text-sm text-zinc-500 mb-4">Something went wrong.</p>
+                     <h4 className="text-lg font-bold text-red-500">Error al subir</h4>
+                     <p className="text-sm text-zinc-500 mb-4">Algo salió mal.</p>
                      <button onClick={reset} className="w-full rounded-xl bg-zinc-800 py-3 text-sm font-medium hover:bg-zinc-700 transition-colors">
-                         Try Again
+                         Intentar de nuevo
                      </button>
                   </div>
              )}
