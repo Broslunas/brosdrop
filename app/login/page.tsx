@@ -14,14 +14,14 @@ export default function LoginPage() {
         </div>
         <div className="flex flex-col gap-4">
           <button
-            onClick={() => signIn("google", { callbackUrl: "/" })}
+            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
             className="flex items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/50 py-3 text-sm font-medium hover:bg-zinc-800 transition-colors"
           >
             <Mail className="h-4 w-4" />
             Sign in with Google
           </button>
           <button
-            onClick={() => signIn("github", { callbackUrl: "/" })}
+            onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
             className="flex items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/50 py-3 text-sm font-medium hover:bg-zinc-800 transition-colors"
           >
             <Github className="h-4 w-4" />

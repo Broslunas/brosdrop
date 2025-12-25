@@ -1,11 +1,20 @@
 import Sidebar from "@/components/Sidebar"
 import DashboardHeader from "@/components/DashboardHeader"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/authOptions"
+import { redirect } from "next/navigation"
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const session = await getServerSession(authOptions)
+
+  if (!session) {
+    redirect("/login")
+  }
+
   return (
     <div className="flex h-screen w-full override-main-layout bg-background overflow-hidden">
       <Sidebar />
