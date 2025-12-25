@@ -3,7 +3,7 @@
 
 import { useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Upload, X, File, CheckCircle, AlertCircle, Clock } from "lucide-react"
+import { Upload, X, File, CheckCircle, AlertCircle, Clock, Calendar } from "lucide-react"
 
 import { useSession } from "next-auth/react"
 import { useModal } from "@/components/ModalProvider"
@@ -16,6 +16,8 @@ export default function DropZone() {
   // Expiration state (hours), default 7 days (168h)
   // Expiration state (hours), default 7 days (168h)
   const [expirationHours, setExpirationHours] = useState(168)
+  const [useCustomDate, setUseCustomDate] = useState(false)
+  const [customDateValue, setCustomDateValue] = useState('')
   
   // Check if verified (use as any because of type definitions)
   const isVerified = (session?.user as any)?.emailVerified
@@ -88,7 +90,8 @@ export default function DropZone() {
                 name: file.name,
                 type: file.type,
                 size: file.size,
-                expiresInHours: session ? expirationHours : null
+                expiresInHours: session && !useCustomDate ? expirationHours : null,
+                customExpiresAt: session && useCustomDate ? customDateValue : null
             }),
             headers: { 'Content-Type': 'application/json' }
         })
@@ -135,7 +138,8 @@ export default function DropZone() {
     setUploadStatus('idle')
     setProgress(0)
     setDownloadUrl('')
-    setDownloadUrl('')
+    setUseCustomDate(false)
+    setCustomDateValue('')
   }
 
   return (
@@ -209,32 +213,63 @@ export default function DropZone() {
              {/* Expiration Selector for Verified Users Only */}
              {isVerified && uploadStatus === 'idle' && (
                  <div className="mb-6">
-                    <label className="flex items-center gap-2 text-sm font-medium text-zinc-400 mb-2">
-                        <Clock className="w-4 h-4" />
-                        Caducidad del enlace
+                    <label className="flex items-center justify-between text-sm font-medium text-zinc-400 mb-2">
+                        <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4" />
+                            Caducidad del enlace
+                        </div>
+                        {useCustomDate && (
+                             <button 
+                                onClick={() => { setUseCustomDate(false); setCustomDateValue('') }}
+                                className="text-xs text-primary hover:text-primary/80"
+                             >
+                                Volver a predefinidos
+                             </button>
+                        )}
                     </label>
-                    <div className="grid grid-cols-4 gap-2">
-                        {[
-                            { label: '1 h', value: 1 },
-                            { label: '1 d', value: 24 },
-                            { label: '3 d', value: 72 },
-                            { label: '7 d', value: 168 },
-                        ].map((option) => (
+                    
+                    {!useCustomDate ? (
+                        <div className="grid grid-cols-5 gap-2">
+                            {[
+                                { label: '1 h', value: 1 },
+                                { label: '1 d', value: 24 },
+                                { label: '3 d', value: 72 },
+                                { label: '7 d', value: 168 },
+                            ].map((option) => (
+                                <button
+                                    key={option.value}
+                                    onClick={() => setExpirationHours(option.value)}
+                                    className={`
+                                        py-2 px-1 rounded-lg text-xs font-medium transition-all
+                                        ${expirationHours === option.value 
+                                            ? 'bg-white text-zinc-900 shadow-lg' 
+                                            : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200'
+                                        }
+                                    `}
+                                >
+                                    {option.label}
+                                </button>
+                            ))}
                             <button
-                                key={option.value}
-                                onClick={() => setExpirationHours(option.value)}
-                                className={`
-                                    py-2 px-1 rounded-lg text-xs font-medium transition-all
-                                    ${expirationHours === option.value 
-                                        ? 'bg-white text-zinc-900 shadow-lg' 
-                                        : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200'
-                                    }
-                                `}
+                                onClick={() => setUseCustomDate(true)}
+                                className="py-2 px-1 rounded-lg text-xs font-medium bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200 transition-all flex items-center justify-center"
+                                title="Personalizar Fecha"
                             >
-                                {option.label}
+                                <Calendar className="w-4 h-4" />
                             </button>
-                        ))}
-                    </div>
+                        </div>
+                    ) : (
+                        <div className="relative">
+                            <input 
+                                type="datetime-local" 
+                                value={customDateValue}
+                                onChange={(e) => setCustomDateValue(e.target.value)}
+                                min={new Date().toISOString().slice(0, 16)}
+                                max={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16)}
+                                className="w-full rounded-xl bg-zinc-800 border border-zinc-700 p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                            />
+                        </div>
+                    )}
                  </div>
              )}
              

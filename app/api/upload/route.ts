@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     // Optional: Force login?
     // if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const { name, type, size, expiresInHours } = await req.json()
+    const { name, type, size, expiresInHours, customExpiresAt } = await req.json()
 
     if (!process.env.R2_BUCKET_NAME) {
         return NextResponse.json({ error: "Server Configuration Error: R2 Bucket not set" }, { status: 500 })
@@ -42,12 +42,25 @@ export async function POST(req: Request) {
     let expirationTime: Date;
     
     if (isVerified) {
-        let hours = 24 * 7 // Default for verified users: 7 days
-
-        if (expiresInHours && typeof expiresInHours === 'number') {
-            hours = Math.min(Math.max(1, expiresInHours), 168) // Clamp between 1 and 168 hours (7 days)
+        // Check for Custom Date first
+        if (customExpiresAt) {
+             const customDate = new Date(customExpiresAt)
+             const maxDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+             
+             // Check validity and max constraint
+             if (!isNaN(customDate.getTime()) && customDate > new Date() && customDate <= maxDate) {
+                 expirationTime = customDate
+             } else {
+                 // Fallback to default if invalid
+                 expirationTime = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+             }
+        } else {
+            let hours = 24 * 7 // Default for verified users: 7 days
+            if (expiresInHours && typeof expiresInHours === 'number') {
+                hours = Math.min(Math.max(1, expiresInHours), 168) // Clamp between 1 and 168 hours (7 days)
+            }
+            expirationTime = new Date(Date.now() + hours * 60 * 60 * 1000)
         }
-        expirationTime = new Date(Date.now() + hours * 60 * 60 * 1000)
     } else {
         // Guest or unverified user: 30 minutes
         expirationTime = new Date(Date.now() + 30 * 60 * 1000)
