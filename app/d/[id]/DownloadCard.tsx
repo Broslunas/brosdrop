@@ -1,7 +1,7 @@
 
 "use client"
 
-import { Download, File } from "lucide-react"
+import { Download, File, Music, Video, Image as ImageIcon, FileText, Archive, FileCode } from "lucide-react"
 import { motion } from "framer-motion"
 
 interface Props {
@@ -10,6 +10,34 @@ interface Props {
     fileSize: number
     downloadUrl: string
     branding?: any
+}
+
+const getFileIcon = (filename: string) => {
+  const ext = filename.split('.').pop()?.toLowerCase()
+  if (!ext) return File
+
+  if (['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac', 'wma'].includes(ext)) return Music
+  if (['mp4', 'mov', 'avi', 'mkv', 'webm', 'flv', 'wmv'].includes(ext)) return Video
+  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico'].includes(ext)) return ImageIcon
+  if (['zip', 'rar', '7z', 'tar', 'gz', 'bz2'].includes(ext)) return Archive
+  if (['js', 'ts', 'tsx', 'jsx', 'py', 'html', 'css', 'json', 'xml', 'java', 'cpp', 'c', 'php', 'rb', 'go'].includes(ext)) return FileCode
+  if (['pdf', 'doc', 'docx', 'txt', 'md', 'rtf', 'odt'].includes(ext)) return FileText
+  
+  return File
+}
+
+const getFileIconColor = (filename: string) => {
+  const ext = filename.split('.').pop()?.toLowerCase()
+  if (!ext) return 'bg-zinc-800 text-zinc-400'
+
+  if (['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac', 'wma'].includes(ext)) return 'bg-green-500/10 text-green-400'
+  if (['mp4', 'mov', 'avi', 'mkv', 'webm', 'flv', 'wmv'].includes(ext)) return 'bg-purple-500/10 text-purple-400'
+  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico'].includes(ext)) return 'bg-pink-500/10 text-pink-400'
+  if (['zip', 'rar', '7z', 'tar', 'gz', 'bz2'].includes(ext)) return 'bg-orange-500/10 text-orange-400'
+  if (['js', 'ts', 'tsx', 'jsx', 'py', 'html', 'css', 'json', 'xml', 'java', 'cpp', 'c', 'php', 'rb', 'go'].includes(ext)) return 'bg-cyan-500/10 text-cyan-400'
+  if (['pdf', 'doc', 'docx', 'txt', 'md', 'rtf', 'odt'].includes(ext)) return 'bg-red-500/10 text-red-400'
+  
+  return 'bg-zinc-800 text-zinc-400'
 }
 
 export default function DownloadClient({ id, fileName, fileSize, downloadUrl, branding }: Props) {
@@ -40,8 +68,11 @@ export default function DownloadClient({ id, fileName, fileSize, downloadUrl, br
 
             <div className="mb-8 rounded-2xl bg-black/20 p-4 border border-white/5">
                 <div className="flex items-center gap-4">
-                    <div className="rounded-xl bg-zinc-800 p-3 text-zinc-400">
-                        <File className="h-6 w-6" />
+                    <div className={`rounded-xl p-3 ${getFileIconColor(fileName)}`}>
+                        {(() => {
+                            const Icon = getFileIcon(fileName)
+                            return <Icon className="h-6 w-6" />
+                        })()}
                     </div>
                     <div className="overflow-hidden">
                         <h3 className="truncate font-medium text-zinc-200">{fileName}</h3>

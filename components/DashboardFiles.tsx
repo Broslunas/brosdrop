@@ -32,6 +32,20 @@ const getFileIcon = (filename: string) => {
   return FileIcon
 }
 
+const getFileIconColor = (filename: string) => {
+  const ext = filename.split('.').pop()?.toLowerCase()
+  if (!ext) return 'bg-blue-500/10 text-blue-400'
+
+  if (['mp3', 'wav', 'ogg', 'm4a', 'flac'].includes(ext)) return 'bg-green-500/10 text-green-400'
+  if (['mp4', 'mov', 'avi', 'mkv', 'webm'].includes(ext)) return 'bg-purple-500/10 text-purple-400'
+  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) return 'bg-pink-500/10 text-pink-400'
+  if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) return 'bg-orange-500/10 text-orange-400'
+  if (['js', 'ts', 'tsx', 'jsx', 'py', 'html', 'css', 'json'].includes(ext)) return 'bg-cyan-500/10 text-cyan-400'
+  if (['pdf', 'doc', 'docx', 'txt', 'md'].includes(ext)) return 'bg-red-500/10 text-red-400'
+  
+  return 'bg-blue-500/10 text-blue-400'
+}
+
 export default function DashboardClient({ 
     initialFiles, 
     historyFiles = [], 
@@ -371,8 +385,11 @@ export default function DashboardClient({
 
                         {/* Icon */}
                         <div className={`${viewMode === 'list' ? 'shrink-0' : 'mb-4 flex justify-between items-start'}`}>
-                            <div className={`relative p-3 rounded-xl ${tab === 'history' ? 'bg-zinc-800 text-zinc-500' : 'bg-blue-500/10 text-blue-400'}`}>
-                                <FileIcon className="w-6 h-6" />
+                            <div className={`relative p-3 rounded-xl ${tab === 'history' ? 'bg-zinc-800 text-zinc-500' : getFileIconColor(file.originalName)}`}>
+                                {(() => {
+                                    const Icon = getFileIcon(file.originalName)
+                                    return <Icon className="w-6 h-6" />
+                                })()}
                                 {file.passwordHash && (
                                     <div className="absolute -top-2 -right-2 bg-zinc-900 rounded-full p-1 border border-zinc-800 shadow-sm" title="Protegido con contraseña">
                                         <Lock className="w-3 h-3 text-orange-400" />

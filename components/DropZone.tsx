@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Upload, X, File, CheckCircle, AlertCircle, Clock, Calendar, Lock } from "lucide-react"
+import { Upload, X, File, CheckCircle, AlertCircle, Clock, Calendar, Lock, Music, Video, Image as ImageIcon, FileText, Archive, FileCode } from "lucide-react"
 
 import { useSession } from "next-auth/react"
 import { useModal } from "@/components/ModalProvider"
@@ -12,6 +12,34 @@ interface DropZoneProps {
     maxSizeLabel?: string
     planName?: string
     maxDays?: number
+}
+
+const getFileIcon = (filename: string) => {
+  const ext = filename.split('.').pop()?.toLowerCase()
+  if (!ext) return File
+
+  if (['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac', 'wma'].includes(ext)) return Music
+  if (['mp4', 'mov', 'avi', 'mkv', 'webm', 'flv', 'wmv'].includes(ext)) return Video
+  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico'].includes(ext)) return ImageIcon
+  if (['zip', 'rar', '7z', 'tar', 'gz', 'bz2'].includes(ext)) return Archive
+  if (['js', 'ts', 'tsx', 'jsx', 'py', 'html', 'css', 'json', 'xml', 'java', 'cpp', 'c', 'php', 'rb', 'go'].includes(ext)) return FileCode
+  if (['pdf', 'doc', 'docx', 'txt', 'md', 'rtf', 'odt'].includes(ext)) return FileText
+  
+  return File
+}
+
+const getFileIconColor = (filename: string) => {
+  const ext = filename.split('.').pop()?.toLowerCase()
+  if (!ext) return 'bg-primary/10 text-primary'
+
+  if (['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac', 'wma'].includes(ext)) return 'bg-green-500/10 text-green-400'
+  if (['mp4', 'mov', 'avi', 'mkv', 'webm', 'flv', 'wmv'].includes(ext)) return 'bg-purple-500/10 text-purple-400'
+  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico'].includes(ext)) return 'bg-pink-500/10 text-pink-400'
+  if (['zip', 'rar', '7z', 'tar', 'gz', 'bz2'].includes(ext)) return 'bg-orange-500/10 text-orange-400'
+  if (['js', 'ts', 'tsx', 'jsx', 'py', 'html', 'css', 'json', 'xml', 'java', 'cpp', 'c', 'php', 'rb', 'go'].includes(ext)) return 'bg-cyan-500/10 text-cyan-400'
+  if (['pdf', 'doc', 'docx', 'txt', 'md', 'rtf', 'odt'].includes(ext)) return 'bg-red-500/10 text-red-400'
+  
+  return 'bg-primary/10 text-primary'
 }
 
 export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: DropZoneProps) {
@@ -218,8 +246,11 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
           >
              <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-4 overflow-hidden">
-                    <div className="rounded-xl bg-primary/10 p-3 text-primary">
-                        <File className="h-6 w-6" />
+                    <div className={`rounded-xl p-3 ${getFileIconColor(file.name)}`}>
+                        {(() => {
+                            const Icon = getFileIcon(file.name)
+                            return <Icon className="h-6 w-6" />
+                        })()}
                     </div>
                     <div className="flex flex-col overflow-hidden">
                         <span className="truncate font-medium text-zinc-100 max-w-[200px] sm:max-w-xs">{file.name}</span>
