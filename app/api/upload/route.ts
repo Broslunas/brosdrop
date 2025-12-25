@@ -21,6 +21,17 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Server Configuration Error: R2 Bucket not set" }, { status: 500 })
     }
 
+    const MAX_SIZE_GUEST = 10 * 1024 * 1024 // 10MB
+    const MAX_SIZE_USER = 200 * 1024 * 1024 // 200MB
+
+    const limit = session ? MAX_SIZE_USER : MAX_SIZE_GUEST
+    
+    if (size > limit) {
+        return NextResponse.json({ 
+            error: `File too large. Max size is ${session ? '200MB' : '10MB'}.` 
+        }, { status: 400 })
+    }
+
     await dbConnect()
 
     const fileKey = `${randomUUID()}-${name.replace(/\s+/g, '-')}`

@@ -5,8 +5,23 @@ import { useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Upload, X, File, CheckCircle, AlertCircle } from "lucide-react"
 
+import { useSession } from "next-auth/react"
+
 export default function DropZone() {
+  const { data: session } = useSession()
   const [file, setFile] = useState<File | null>(null)
+  
+  const MAX_SIZE = session ? 200 * 1024 * 1024 : 10 * 1024 * 1024
+  const MAX_SIZE_LABEL = session ? "200MB" : "10MB"
+
+  const validateFile = (file: File) => {
+      if (file.size > MAX_SIZE) {
+          alert(`El archivo es demasiado grande. El límite es ${MAX_SIZE_LABEL}. ${!session ? 'Inicia sesión para subir hasta 200MB.' : ''}`)
+          return false
+      }
+      return true
+  }
+
   const [isDragging, setIsDragging] = useState(false)
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle')
   const [progress, setProgress] = useState(0)
@@ -26,13 +41,19 @@ export default function DropZone() {
     e.preventDefault()
     setIsDragging(false)
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFile(e.dataTransfer.files[0])
+      const droppedFile = e.dataTransfer.files[0]
+      if (validateFile(droppedFile)) {
+          setFile(droppedFile)
+      }
     }
   }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0])
+      const selectedFile = e.target.files[0]
+      if (validateFile(selectedFile)) {
+        setFile(selectedFile)
+      }
     }
   }
 
@@ -132,7 +153,7 @@ export default function DropZone() {
                     Subir Archivos
                 </h3>
                 <p className="text-sm text-zinc-400 max-w-[260px]">
-                    Arrastra tus archivos aquí o haz clic para explorar
+                    Arrastra tus archivos aquí o haz clic para explorar. Máximo {MAX_SIZE_LABEL}.
                 </p>
              </div>
              <input 
