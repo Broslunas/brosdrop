@@ -29,7 +29,7 @@ export default function LimitEnforcer({ isOverLimit, message }: LimitEnforcerPro
             if (!hasShown.current) {
                 hasShown.current = true
                 showModal({
-                    title: "⚠️ ACCIÓN REQUERIDA",
+                    title: "ACCIÓN REQUERIDA",
                     message: (
                         <div className="space-y-4">
                             <p className="font-medium text-red-200">
