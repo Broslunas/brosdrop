@@ -11,6 +11,7 @@ export interface IExpiredTransfer {
   senderEmail?: string
   senderId?: string
   downloads: number
+  views: number
   hidden: boolean
   expiresAt: string
   createdAt: string
@@ -25,9 +26,15 @@ const ExpiredTransferSchema = new Schema<IExpiredTransfer>({
   senderEmail: { type: String },
   senderId: { type: String },
   downloads: { type: Number, default: 0 },
+  views: { type: Number, default: 0 },
   hidden: { type: Boolean, default: false },
   expiresAt: { type: String, required: true },
 }, { timestamps: true })
+
+// Force model recompilation in development
+if (process.env.NODE_ENV === 'development') {
+    delete models.ExpiredTransfer
+}
 
 const ExpiredTransfer = models.ExpiredTransfer || model<IExpiredTransfer>('ExpiredTransfer', ExpiredTransferSchema)
 

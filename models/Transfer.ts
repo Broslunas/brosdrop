@@ -11,6 +11,7 @@ export interface ITransfer {
   senderEmail?: string
   senderId?: string
   downloads: number
+  views: number
   expiresAt: string
   createdAt: string
   updatedAt: string
@@ -24,8 +25,14 @@ const TransferSchema = new Schema<ITransfer>({
   senderEmail: { type: String }, // Optional if logged in
   senderId: { type: String }, // Link to NextAuth user ID
   downloads: { type: Number, default: 0 },
+  views: { type: Number, default: 0 },
   expiresAt: { type: String, required: true, index: true },
 }, { timestamps: true })
+
+// Force model recompilation in development to handle schema changes
+if (process.env.NODE_ENV === 'development') {
+  delete models.Transfer
+}
 
 const Transfer = models.Transfer || model<ITransfer>('Transfer', TransferSchema)
 

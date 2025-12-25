@@ -5,12 +5,18 @@ import { Download, File } from "lucide-react"
 import { motion } from "framer-motion"
 
 interface Props {
+    id: string
     fileName: string
     fileSize: number
     downloadUrl: string
 }
 
-export default function DownloadClient({ fileName, fileSize, downloadUrl }: Props) {
+export default function DownloadClient({ id, fileName, fileSize, downloadUrl }: Props) {
+    const handleDownload = () => {
+        // Fire and forget tracking
+        fetch(`/api/files/${id}/download`, { method: 'POST' }).catch(err => console.error(err))
+    }
+
     return (
         <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
@@ -39,6 +45,7 @@ export default function DownloadClient({ fileName, fileSize, downloadUrl }: Prop
 
             <a 
                 href={downloadUrl}
+                onClick={handleDownload}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-4 font-bold text-white shadow-lg shadow-primary/20 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all"
             >
                 Download File

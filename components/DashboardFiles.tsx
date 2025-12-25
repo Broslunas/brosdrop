@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { ITransfer } from "@/models/Transfer"
-import { Trash2, ExternalLink, Copy, FileIcon, Calendar, Download, HardDrive } from "lucide-react"
+import { Trash2, ExternalLink, Copy, FileIcon, Calendar, Download, HardDrive, Eye } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -155,9 +155,15 @@ export default function DashboardClient({ initialFiles, historyFiles = [] }: { i
                                 <Calendar className="w-3.5 h-3.5" />
                                 <span>Expira el {new Date(file.expiresAt).toLocaleDateString()}</span>
                             </div>
-                            <div className="flex items-center gap-1.5">
-                                <Download className="w-3.5 h-3.5" />
-                                <span>{file.downloads}</span>
+                            <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-1.5" title="Descargas">
+                                    <Download className="w-3.5 h-3.5" />
+                                    <span>{file.downloads}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5" title="Visitas">
+                                    <Eye className="w-3.5 h-3.5" />
+                                    <span>{file.views || 0}</span>
+                                </div>
                             </div>
                         </div>
                     </motion.div>
@@ -217,9 +223,15 @@ export default function DashboardClient({ initialFiles, historyFiles = [] }: { i
                                 <div>
                                     No disponible
                                 </div>
-                                <div className="flex items-center gap-1.5">
-                                    <Download className="w-3.5 h-3.5" />
-                                    <span>{file.downloads}</span>
+                                <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-1.5" title="Descargas">
+                                        <Download className="w-3.5 h-3.5" />
+                                        <span>{file.downloads}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5" title="Visitas">
+                                        <Eye className="w-3.5 h-3.5" />
+                                        <span>{file.views || 0}</span>
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>

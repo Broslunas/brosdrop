@@ -19,11 +19,16 @@ export default async function DownloadPage({ params }: Props) {
   await dbConnect()
 
   try {
-      const transfer = await Transfer.findById(id)
+      // Increment views and fetch
+      const transfer = await Transfer.findByIdAndUpdate(id, { $inc: { views: 1 } }, { new: true })
 
       if (!transfer) {
           // Check if it exists in the expired history
-          const expiredRecord = await ExpiredTransfer.findOne({ transferId: id })
+          const expiredRecord = await ExpiredTransfer.findOneAndUpdate(
+              { transferId: id }, 
+              { $inc: { views: 1 } },
+              { new: true }
+          )
           
           if (expiredRecord) {
               return (
@@ -69,6 +74,7 @@ export default async function DownloadPage({ params }: Props) {
       return (
           <div className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center p-4">
               <DownloadClient 
+                  id={id}
                   fileName={transfer.originalName}
                   fileSize={transfer.size}
                   downloadUrl={downloadUrl}
