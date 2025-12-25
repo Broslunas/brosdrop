@@ -42,7 +42,7 @@ export async function POST(req: Request) {
         referer = new URL(process.env.NEXTAUTH_URL || 'http://localhost:3000').origin
     }
 
-    await fetch('https://n8n.broslunas.com/webhook/brosdrop', {
+    await fetch('https://n8n.broslunas.com/webhook/brosdrop-welcome-email', {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',

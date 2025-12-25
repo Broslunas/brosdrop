@@ -67,7 +67,7 @@ export const authOptions: NextAuthOptions = {
         
         await User.findByIdAndUpdate(user.id, { verificationToken: token })
 
-        await fetch('https://n8n.broslunas.com/webhook/brosdrop', {
+        await fetch('https://n8n.broslunas.com/webhook/brosdrop-welcome-email', {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json',
