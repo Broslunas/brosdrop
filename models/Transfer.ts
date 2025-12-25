@@ -12,6 +12,7 @@ export interface ITransfer {
   senderId?: string
   downloads: number
   views: number
+  passwordHash?: string // Optional password protection
   expiresAt: string
   createdAt: string
   updatedAt: string
@@ -26,6 +27,7 @@ const TransferSchema = new Schema<ITransfer>({
   senderId: { type: String }, // Link to NextAuth user ID
   downloads: { type: Number, default: 0 },
   views: { type: Number, default: 0 },
+  passwordHash: { type: String },
   expiresAt: { type: String, required: true, index: true },
 }, { timestamps: true })
 

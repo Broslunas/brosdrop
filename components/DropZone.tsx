@@ -3,7 +3,7 @@
 
 import { useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Upload, X, File, CheckCircle, AlertCircle, Clock, Calendar } from "lucide-react"
+import { Upload, X, File, CheckCircle, AlertCircle, Clock, Calendar, Lock } from "lucide-react"
 
 import { useSession } from "next-auth/react"
 import { useModal } from "@/components/ModalProvider"
@@ -18,6 +18,8 @@ export default function DropZone() {
   const [expirationHours, setExpirationHours] = useState(168)
   const [useCustomDate, setUseCustomDate] = useState(false)
   const [customDateValue, setCustomDateValue] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPasswordInput, setShowPasswordInput] = useState(false)
   
   // Check if verified (use as any because of type definitions)
   const isVerified = (session?.user as any)?.emailVerified
@@ -91,7 +93,8 @@ export default function DropZone() {
                 type: file.type,
                 size: file.size,
                 expiresInHours: session && !useCustomDate ? expirationHours : null,
-                customExpiresAt: session && useCustomDate ? customDateValue : null
+                customExpiresAt: session && useCustomDate ? customDateValue : null,
+                password: session && password ? password : null
             }),
             headers: { 'Content-Type': 'application/json' }
         })
@@ -140,6 +143,8 @@ export default function DropZone() {
     setDownloadUrl('')
     setUseCustomDate(false)
     setCustomDateValue('')
+    setPassword('')
+    setShowPasswordInput(false)
   }
 
   return (
@@ -270,6 +275,26 @@ export default function DropZone() {
                             />
                         </div>
                     )}
+                 </div>
+             )}
+             
+             {/* Password Protection for Verified Users */}
+             {isVerified && uploadStatus === 'idle' && (
+                 <div className="mb-6">
+                    <label className="flex items-center gap-2 text-sm font-medium text-zinc-400 mb-2">
+                        <Lock className="w-4 h-4" />
+                        Contraseña (opcional)
+                    </label>
+                    <input 
+                        type="password"
+                        value={password}
+                        onChange={(e) => { 
+                            setPassword(e.target.value)
+                            setShowPasswordInput(!!e.target.value) 
+                        }}
+                        placeholder="Establecer contraseña..."
+                        className="w-full rounded-xl bg-zinc-800 border border-zinc-700 p-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                    />
                  </div>
              )}
              

@@ -12,6 +12,7 @@ export interface IExpiredTransfer {
   senderId?: string
   downloads: number
   views: number
+  passwordHash?: string
   hidden: boolean
   expiresAt: string
   createdAt: string
@@ -27,6 +28,7 @@ const ExpiredTransferSchema = new Schema<IExpiredTransfer>({
   senderId: { type: String },
   downloads: { type: Number, default: 0 },
   views: { type: Number, default: 0 },
+  passwordHash: { type: String },
   hidden: { type: Boolean, default: false },
   expiresAt: { type: String, required: true },
 }, { timestamps: true })

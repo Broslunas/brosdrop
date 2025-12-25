@@ -5,7 +5,7 @@ import Transfer from "@/models/Transfer"
 import { GetObjectCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import { s3Client } from "@/lib/s3"
-import DownloadClient from "./DownloadCard"
+import DownloadManager from "@/components/DownloadManager"
 
 import ExpiredTransfer from "@/models/ExpiredTransfer"
 
@@ -63,21 +63,26 @@ export default async function DownloadPage({ params }: Props) {
           )
       }
 
-      const command = new GetObjectCommand({
-          Bucket: process.env.R2_BUCKET_NAME,
-          Key: transfer.fileKey,
-          ResponseContentDisposition: `attachment; filename="${transfer.originalName}"`,
-      })
+      const isProtected = !!transfer.passwordHash
+      let downloadUrl: string | undefined = undefined
 
-      const downloadUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 })
+      if (!isProtected) {
+        const command = new GetObjectCommand({
+            Bucket: process.env.R2_BUCKET_NAME,
+            Key: transfer.fileKey,
+            ResponseContentDisposition: `attachment; filename="${transfer.originalName}"`,
+        })
+        downloadUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 })
+      }
 
       return (
           <div className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center p-4">
-              <DownloadClient 
+              <DownloadManager 
                   id={id}
                   fileName={transfer.originalName}
                   fileSize={transfer.size}
-                  downloadUrl={downloadUrl}
+                  isProtected={isProtected}
+                  initialDownloadUrl={downloadUrl}
               />
           </div>
       )

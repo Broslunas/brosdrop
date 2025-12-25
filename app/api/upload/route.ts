@@ -9,6 +9,7 @@ import { s3Client } from "@/lib/s3"
 import dbConnect from "@/lib/db"
 import Transfer from "@/models/Transfer"
 import { randomUUID } from "crypto"
+import bcrypt from "bcryptjs"
 
 export async function POST(req: Request) {
   try {
@@ -16,7 +17,7 @@ export async function POST(req: Request) {
     // Optional: Force login?
     // if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const { name, type, size, expiresInHours, customExpiresAt } = await req.json()
+    const { name, type, size, expiresInHours, customExpiresAt, password } = await req.json()
 
     if (!process.env.R2_BUCKET_NAME) {
         return NextResponse.json({ error: "Server Configuration Error: R2 Bucket not set" }, { status: 500 })
@@ -36,6 +37,12 @@ export async function POST(req: Request) {
     }
 
     await dbConnect()
+
+    // Password Hashing
+    let passwordHash = undefined
+    if (isVerified && password) {
+        passwordHash = await bcrypt.hash(password, 10)
+    }
 
     // Calculate expiration
     // Verified users: up to 7 days, Unverified/Guests: 30 minutes
@@ -86,6 +93,7 @@ export async function POST(req: Request) {
       senderId: session?.user?.id,
       senderEmail: session?.user?.email,
       expiresAt: expirationTime.toISOString(),
+      hashedPassword: passwordHash ? 'Yes' : 'No'
     })
 
     // Save metadata
@@ -97,6 +105,7 @@ export async function POST(req: Request) {
       senderId: session?.user?.id,
       senderEmail: session?.user?.email,
       expiresAt: expirationTime.toISOString(),
+      passwordHash
     })
 
     await ExpiredTransfer.create({
@@ -108,6 +117,7 @@ export async function POST(req: Request) {
         senderId: session?.user?.id,
         senderEmail: session?.user?.email,
         expiresAt: expirationTime.toISOString(),
+        passwordHash
     })
 
     return NextResponse.json({
