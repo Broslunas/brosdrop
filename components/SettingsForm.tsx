@@ -4,7 +4,7 @@
 import { useState, useRef, useEffect } from "react"
 import { useSession, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { User, Mail, Bell, Trash2, Camera, Save, Loader2 } from "lucide-react"
+import { User, Mail, Bell, Trash2, Camera, Save, Loader2, LayoutGrid, List } from "lucide-react"
 import { useModal } from "@/components/ModalProvider"
 
 export default function SettingsForm() {
@@ -19,7 +19,8 @@ export default function SettingsForm() {
     name: "",
     image: "",
     newsletterSubscribed: false,
-    emailNotifications: true
+    emailNotifications: true,
+    defaultView: 'grid'
   })
 
   // Load initial data
@@ -32,7 +33,8 @@ export default function SettingsForm() {
                     name: data.name || session?.user?.name || "",
                     image: data.image || session?.user?.image || "",
                     newsletterSubscribed: data.newsletterSubscribed || false,
-                    emailNotifications: data.emailNotifications ?? true
+                    emailNotifications: data.emailNotifications ?? true,
+                    defaultView: data.defaultView || 'grid'
                 })
             }
         })
@@ -199,9 +201,28 @@ export default function SettingsForm() {
                                 checked={formData.emailNotifications}
                                 onChange={e => setFormData({...formData, emailNotifications: e.target.checked})}
                             />
-                            <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${formData.emailNotifications ? 'translate-x-6' : ''}`} />
                         </div>
                     </label>
+
+                    <div className="pt-2">
+                         <label className="block text-sm font-medium text-zinc-400 mb-3">Vista por defecto</label>
+                         <div className="grid grid-cols-2 gap-4">
+                             <div 
+                                 onClick={() => setFormData({...formData, defaultView: 'grid'})}
+                                 className={`cursor-pointer p-4 rounded-xl border flex items-center gap-3 transition-all ${formData.defaultView === 'grid' ? 'bg-primary/10 border-primary text-primary' : 'bg-zinc-800/50 border-zinc-800 text-zinc-400 hover:bg-zinc-800'}`}
+                             >
+                                 <LayoutGrid className="w-5 h-5" />
+                                 <span className="font-medium">Cuadrícula</span>
+                             </div>
+                             <div 
+                                 onClick={() => setFormData({...formData, defaultView: 'list'})}
+                                 className={`cursor-pointer p-4 rounded-xl border flex items-center gap-3 transition-all ${formData.defaultView === 'list' ? 'bg-primary/10 border-primary text-primary' : 'bg-zinc-800/50 border-zinc-800 text-zinc-400 hover:bg-zinc-800'}`}
+                             >
+                                 <List className="w-5 h-5" />
+                                 <span className="font-medium">Lista</span>
+                             </div>
+                         </div>
+                    </div>
                 </div>
 
                 <div className="pt-4">

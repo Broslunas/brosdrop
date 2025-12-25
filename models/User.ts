@@ -8,6 +8,8 @@ const UserSchema = new Schema({
   emailVerified: { type: Date },
   newsletterSubscribed: { type: Boolean, default: false },
   emailNotifications: { type: Boolean, default: true },
+  plan: { type: String, default: 'free', enum: ['free', 'plus', 'pro'] },
+  defaultView: { type: String, default: 'grid', enum: ['grid', 'list'] },
   verificationToken: { type: String },
 }, { timestamps: true })
 

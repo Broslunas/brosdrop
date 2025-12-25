@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import dbConnect from "@/lib/db"
 import Transfer from "@/models/Transfer"
 import ExpiredTransfer from "@/models/ExpiredTransfer"
+import User from "@/models/User"
 import DashboardFiles from "@/components/DashboardFiles"
 
 // Force dynamic rendering ensure validation on every request
@@ -17,6 +18,9 @@ export default async function Dashboard() {
   }
 
   await dbConnect()
+
+  const user = await User.findById(session.user.id).select('defaultView').lean()
+  const defaultView = (user as any)?.defaultView || 'grid'
 
   // Find files for this user
   const transfers = await Transfer.find({ senderId: session.user.id })
@@ -75,7 +79,7 @@ export default async function Dashboard() {
       </header>
 
       <div className="w-full">
-         <DashboardFiles initialFiles={serializedTransfers} historyFiles={historyFiles} />
+         <DashboardFiles initialFiles={serializedTransfers} historyFiles={historyFiles} defaultView={defaultView} />
       </div>
     </div>
   )

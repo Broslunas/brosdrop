@@ -35,7 +35,7 @@ export default function Home() {
                 <div className="relative group mx-auto">
                     <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-[2.5rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
                     <div className="relative p-8 md:p-12 bg-zinc-950/60 border border-white/10 backdrop-blur-3xl rounded-[2rem] shadow-2xl ring-1 ring-white/5">
-                        <DropZone />
+                        <DropZone maxBytes={10 * 1024 * 1024} maxSizeLabel="10MB" planName="guest" />
                     </div>
                 </div>
             </div>

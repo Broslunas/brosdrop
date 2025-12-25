@@ -8,6 +8,8 @@ import ExpiredTransfer from "@/models/ExpiredTransfer"
 import { s3Client } from "@/lib/s3"
 import dbConnect from "@/lib/db"
 import Transfer from "@/models/Transfer"
+import User from "@/models/User"
+import { PLAN_LIMITS, formatBytes } from "@/lib/plans"
 import { randomUUID } from "crypto"
 import bcrypt from "bcryptjs"
 
@@ -23,53 +25,74 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Server Configuration Error: R2 Bucket not set" }, { status: 500 })
     }
 
-    const MAX_SIZE_GUEST = 10 * 1024 * 1024 // 10MB
-    const MAX_SIZE_USER = 200 * 1024 * 1024 // 200MB
-
-    // Verified users: 200MB, Unverified/Guests: 10MB
-    const isVerified = session?.user && (session.user as any).emailVerified
-    const limit = isVerified ? MAX_SIZE_USER : MAX_SIZE_GUEST
-    
-    if (size > limit) {
-        return NextResponse.json({ 
-            error: `File too large. Max size is ${session ? '200MB' : '10MB'}.` 
-        }, { status: 400 })
-    }
-
     await dbConnect()
 
-    // Password Hashing
-    let passwordHash = undefined
-    if (isVerified && password) {
-        passwordHash = await bcrypt.hash(password, 10)
+    // Fetch user plan details
+    let plan = 'free'
+    if (session?.user?.id) {
+        const user = await User.findById(session.user.id).lean() as any
+        if (user) plan = user.plan || 'free'
     }
 
-    // Calculate expiration
-    // Verified users: up to 7 days, Unverified/Guests: 30 minutes
+    // Limits are imported from @/lib/plans
+
+    const isVerified = session?.user && (session.user as any).emailVerified
+    const currentLimits = isVerified ? PLAN_LIMITS[plan as keyof typeof PLAN_LIMITS] : PLAN_LIMITS.guest
+
+    // 1. Check Size
+    if (size > currentLimits.maxBytes) {
+         return NextResponse.json({ error: `Tu plan ${plan.toUpperCase()} limita archivos a ${formatBytes(currentLimits.maxBytes)}. Mejora tu plan.` }, { status: 400 })
+    }
+
+    // 2. Check Active Files (Simultaneous)
+    if (session?.user?.id) {
+        const activeCount = await Transfer.countDocuments({ senderId: session.user.id })
+        if (activeCount >= currentLimits.maxFiles) {
+             return NextResponse.json({ error: `Límite de archivos activos (${currentLimits.maxFiles}) alcanzado. Elimina archivos o mejora tu plan.` }, { status: 403 })
+        }
+
+        // Check Total Storage
+        if (currentLimits.maxTotalStorage) {
+             const transfers = await Transfer.find({ senderId: session.user.id }).select('size').lean()
+             const usedBytes = transfers.reduce((acc, curr: any) => acc + (curr.size || 0), 0)
+             
+             if (usedBytes + size > currentLimits.maxTotalStorage) {
+                 return NextResponse.json({ error: `Has superado tu límite de almacenamiento de ${formatBytes(currentLimits.maxTotalStorage)}. Uso actual: ${formatBytes(usedBytes)}.` }, { status: 403 })
+             }
+        }
+    }
+
+    // 3. Password Check
+    let passwordHash = undefined
+    if (password) {
+         if (!isVerified) {
+             return NextResponse.json({ error: "Regístrate para usar contraseñas." }, { status: 403 })
+         }
+         
+         const activePwdCount = await Transfer.countDocuments({ senderId: session.user.id, passwordHash: { $exists: true } })
+         if (activePwdCount >= currentLimits.maxPwd) {
+             return NextResponse.json({ error: `Tu plan ${plan.toUpperCase()} solo permite ${currentLimits.maxPwd} archivo protegido. Mejora a Plus.` }, { status: 403 })
+         }
+         passwordHash = await bcrypt.hash(password, 10)
+    }
+
+    // 4. Calculate Expiration
     let expirationTime: Date;
     
     if (isVerified) {
-        // Check for Custom Date first
         if (customExpiresAt) {
              const customDate = new Date(customExpiresAt)
-             const maxDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+             const maxDate = new Date(Date.now() + currentLimits.maxDays * 24 * 60 * 60 * 1000)
              
-             // Check validity and max constraint
              if (!isNaN(customDate.getTime()) && customDate > new Date() && customDate <= maxDate) {
                  expirationTime = customDate
              } else {
-                 // Fallback to default if invalid
-                 expirationTime = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                 return NextResponse.json({ error: `La fecha de expiración excede el máximo de ${currentLimits.maxDays} días de tu plan.` }, { status: 400 })
              }
         } else {
-            let hours = 24 * 7 // Default for verified users: 7 days
-            if (expiresInHours && typeof expiresInHours === 'number') {
-                hours = Math.min(Math.max(1, expiresInHours), 168) // Clamp between 1 and 168 hours (7 days)
-            }
-            expirationTime = new Date(Date.now() + hours * 60 * 60 * 1000)
+            expirationTime = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) 
         }
     } else {
-        // Guest or unverified user: 30 minutes
         expirationTime = new Date(Date.now() + 30 * 60 * 1000)
     }
 

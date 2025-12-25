@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useRef } from "react"
@@ -8,25 +7,47 @@ import { Upload, X, File, CheckCircle, AlertCircle, Clock, Calendar, Lock } from
 import { useSession } from "next-auth/react"
 import { useModal } from "@/components/ModalProvider"
 
-export default function DropZone() {
+interface DropZoneProps {
+    maxBytes?: number
+    maxSizeLabel?: string
+    planName?: string
+    maxDays?: number
+}
+
+export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: DropZoneProps) {
   const { data: session } = useSession()
   const { showModal } = useModal()
   const [file, setFile] = useState<File | null>(null)
   
-  // Expiration state (hours), default 7 days (168h)
-  // Expiration state (hours), default 7 days (168h)
-  const [expirationHours, setExpirationHours] = useState(168)
+  // Check if verified (use as any because of type definitions)
+  const isVerified = (session?.user as any)?.emailVerified
+
+  // Limits: Use props if available, else default
+  const MAX_SIZE = maxBytes || (isVerified ? 200 * 1024 * 1024 : 10 * 1024 * 1024)
+  const MAX_SIZE_LABEL = maxSizeLabel || (isVerified ? "200MB" : "10MB")
+  // Default to 7 days if verified, 30 mins if not, unless maxDays provided
+  const MAX_DAYS = maxDays !== undefined ? maxDays : (isVerified ? 7 : 0.02)
+
+  // Default expiration to MAX_DAYS (in hours) or 7 days, maxed at MAX_DAYS
+  // If MAX_DAYS is huge (365), maybe default to 7 days?
+  const initialHours = Math.min(168, MAX_DAYS * 24) 
+  const [expirationHours, setExpirationHours] = useState(initialHours)
+
   const [useCustomDate, setUseCustomDate] = useState(false)
   const [customDateValue, setCustomDateValue] = useState('')
   const [password, setPassword] = useState('')
   const [showPasswordInput, setShowPasswordInput] = useState(false)
   
-  // Check if verified (use as any because of type definitions)
-  const isVerified = (session?.user as any)?.emailVerified
+  const generateExpirationOptions = () => {
+      const options = [{ label: '1 h', value: 1 }]
+      if (MAX_DAYS >= 1) options.push({ label: '1 d', value: 24 })
+      if (MAX_DAYS >= 3) options.push({ label: '3 d', value: 72 })
+      if (MAX_DAYS >= 7) options.push({ label: '7 d', value: 168 })
+      if (MAX_DAYS >= 30) options.push({ label: '30 d', value: 720 })
+      if (MAX_DAYS >= 365) options.push({ label: '1 a', value: 8760 })
+      return options
+  }
 
-  // Limits: Verified users get 200MB, others 10MB
-  const MAX_SIZE = isVerified ? 200 * 1024 * 1024 : 10 * 1024 * 1024
-  const MAX_SIZE_LABEL = isVerified ? "200MB" : "10MB"
 
   const validateFile = (file: File) => {
       if (file.size > MAX_SIZE) {
@@ -235,12 +256,7 @@ export default function DropZone() {
                     
                     {!useCustomDate ? (
                         <div className="grid grid-cols-5 gap-2">
-                            {[
-                                { label: '1 h', value: 1 },
-                                { label: '1 d', value: 24 },
-                                { label: '3 d', value: 72 },
-                                { label: '7 d', value: 168 },
-                            ].map((option) => (
+                            {generateExpirationOptions().map((option) => (
                                 <button
                                     key={option.value}
                                     onClick={() => setExpirationHours(option.value)}
@@ -270,7 +286,7 @@ export default function DropZone() {
                                 value={customDateValue}
                                 onChange={(e) => setCustomDateValue(e.target.value)}
                                 min={new Date().toISOString().slice(0, 16)}
-                                max={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16)}
+                                max={new Date(Date.now() + MAX_DAYS * 24 * 60 * 60 * 1000).toISOString().slice(0, 16)}
                                 className="w-full rounded-xl bg-zinc-800 border border-zinc-700 p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                             />
                         </div>

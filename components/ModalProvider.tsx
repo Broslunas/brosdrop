@@ -14,6 +14,7 @@ interface ModalOptions {
   cancelText?: string
   onConfirm?: () => void
   onCancel?: () => void
+  persistent?: boolean
 }
 
 interface ModalContextType {
@@ -49,6 +50,8 @@ export default function ModalProvider({ children }: { children: ReactNode }) {
     if (modalConfig?.onConfirm) {
       modalConfig.onConfirm()
     }
+    // Only hide if not manually handled? Usually we always hide on confirm actions unless specified otherwise... 
+    // but for persistent warning modal that acts as "Go to X", we might usually perform navigation which unmounts or we just close.
     hideModal()
   }
 
@@ -83,7 +86,7 @@ export default function ModalProvider({ children }: { children: ReactNode }) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={hideModal}
+              onClick={!modalConfig.persistent ? hideModal : undefined}
               className="fixed inset-0 bg-black/60 backdrop-blur-sm"
             />
             <motion.div
@@ -104,12 +107,14 @@ export default function ModalProvider({ children }: { children: ReactNode }) {
                     {modalConfig.message}
                   </div>
                 </div>
-                <button
-                  onClick={hideModal}
-                  className="absolute top-4 right-4 rounded-lg p-1 text-zinc-500 hover:bg-white/10 hover:text-white transition-colors"
-                >
-                  <X className="h-5 w-5" />
-                </button>
+                {!modalConfig.persistent && (
+                    <button
+                      onClick={hideModal}
+                      className="absolute top-4 right-4 rounded-lg p-1 text-zinc-500 hover:bg-white/10 hover:text-white transition-colors"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                )}
               </div>
 
               <div className="mt-6 flex justify-end gap-3">

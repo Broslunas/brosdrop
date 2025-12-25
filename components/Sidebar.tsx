@@ -11,7 +11,8 @@ import {
   LogOut, 
   ChevronLeft, 
   ChevronRight,
-  Menu
+  Menu,
+  PieChart
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 
@@ -22,6 +23,7 @@ export default function Sidebar() {
   const navItems = [
     { name: "Mis Archivos", href: "/dashboard", icon: LayoutDashboard },
     { name: "Subir Archivo", href: "/dashboard/upload", icon: UploadCloud },
+    { name: "Límites", href: "/dashboard/limits", icon: PieChart },
     { name: "Configuración", href: "/dashboard/settings", icon: Settings },
   ]
 
