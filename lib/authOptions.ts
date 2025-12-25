@@ -25,9 +25,17 @@ export const authOptions: NextAuthOptions = {
     error: '/auth/error',
   },
   callbacks: {
+    async jwt({ token, trigger, session }) {
+      if (trigger === "update" && session) {
+        return { ...token, ...session }
+      }
+      return token
+    },
     async session({ session, token }) {
       if (session.user && token.sub) {
         session.user.id = token.sub
+        session.user.name = token.name
+        session.user.image = token.picture // 'picture' is the standard JWT field for image
       }
       return session
     },

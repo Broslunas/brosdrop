@@ -22,7 +22,7 @@ export default function Sidebar() {
   const navItems = [
     { name: "Mis Archivos", href: "/dashboard", icon: LayoutDashboard },
     { name: "Subir Archivo", href: "/dashboard/upload", icon: UploadCloud },
-    // { name: "Configuración", href: "/dashboard/settings", icon: Settings },
+    { name: "Configuración", href: "/dashboard/settings", icon: Settings },
   ]
 
   return (
