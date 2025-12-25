@@ -24,8 +24,7 @@ export default async function Dashboard() {
     .lean()
 
   // Serialize Mongoose docs to plain objects
-  // Serialize Mongoose docs to plain objects
-  const serializedTransfers = transfers.map(t => ({
+  const serializedTransfers = transfers.map((t: any) => ({
     ...t,
     _id: t._id.toString(),
     createdAt: t.createdAt?.toISOString(),
@@ -49,8 +48,8 @@ export default async function Dashboard() {
   }).sort({ createdAt: -1 }).lean()
 
   const historyFiles = expiredTransfers
-      .filter(t => !activeIds.has(t.transferId))
-      .map(t => ({
+      .filter((t: any) => !activeIds.has(t.transferId))
+      .map((t: any) => ({
         ...t,
         _id: t._id.toString(),
         createdAt: t.createdAt?.toISOString(),
