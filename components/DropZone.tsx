@@ -3,6 +3,7 @@
 import { useState, useRef, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Upload, AlertCircle } from "lucide-react"
+import { toast } from "sonner"
 import JSZip from "jszip"
 
 import { useSession } from "next-auth/react"
@@ -51,9 +52,6 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
   
   // Zip/Separate Toggle
   const [zipFiles, setZipFiles] = useState(true)
-
-  // QR Code State
-  const [showQR, setShowQR] = useState(false)
   
   const totalSize = useMemo(() => files.reduce((acc, f) => acc + f.size, 0), [files])
 
@@ -61,6 +59,7 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
       const newTotalSize = newFiles.reduce((acc, f) => acc + f.size, 0) + totalSize
       
       if (newTotalSize > MAX_SIZE) {
+          toast.warning("Límite de tamaño excedido")
           showModal({
               title: "Límite Excedido",
               message: `El tamaño total excede el límite de ${MAX_SIZE_LABEL}. ${!session ? 'Inicia sesión para subir hasta 200MB.' : !isVerified ? 'Verifica tu email para desbloquear 200MB.' : ''}`,
@@ -229,6 +228,7 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
             const link = await uploadFile(fileToUpload, 0, 1)
             setDownloadUrls([link])
             setUploadStatus('success')
+            toast.success("Archivo ZIP subido correctamente")
 
         } else {
             // SEPARATE FILES MODE (or single file)
@@ -242,11 +242,13 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
             }
             setDownloadUrls(links)
             setUploadStatus('success')
+            toast.success("Archivos subidos correctamente")
         }
 
     } catch (err) {
         console.error(err)
-        setUploadStatus('error') 
+        setUploadStatus('error')
+        toast.error("Error al subir los archivos") 
     }
   }
 
@@ -264,7 +266,6 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
     setOneTimeDownload(null)
     setRecipientEmail('')
     setZipFiles(true)
-    setShowQR(false)
   }
 
   return (
@@ -360,8 +361,6 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
                   <div className="rounded-3xl border border-zinc-800 bg-zinc-900/80 p-6 backdrop-blur-xl">
                      <UploadSuccess 
                         downloadUrls={downloadUrls}
-                        showQR={showQR}
-                        setShowQR={setShowQR}
                         onReset={reset}
                      />
                  </div>
