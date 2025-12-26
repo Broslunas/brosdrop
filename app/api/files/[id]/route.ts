@@ -20,7 +20,7 @@ export async function PUT(
     }
 
     const { id } = await params
-    const { name, password, removePassword, expiresAt, customLink, maxDownloads } = await req.json()
+    const { name, password, removePassword, expiresAt, customLink, maxDownloads, qrOptions } = await req.json()
 
     await dbConnect()
 
@@ -123,6 +123,23 @@ export async function PUT(
 
     if (maxDownloads !== undefined) {
         transfer.maxDownloads = maxDownloads ? Math.max(0, parseInt(maxDownloads)) : null
+    }
+
+    if (qrOptions) {
+        if (!currentLimits.canCustomizeQR) {
+             return NextResponse.json({ error: "Tu plan actual no permite personalizar el código QR." }, { status: 403 })
+        }
+        
+        // Basic validation
+        if (typeof qrOptions !== 'object') {
+             return NextResponse.json({ error: "Datos de QR inválidos." }, { status: 400 })
+        }
+
+        transfer.qrOptions = {
+            fgColor: qrOptions.fgColor || '#000000',
+            bgColor: qrOptions.bgColor || '#ffffff',
+            logoUrl: qrOptions.logoUrl || undefined
+        }
     }
 
     await transfer.save()

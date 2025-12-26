@@ -16,6 +16,11 @@ export interface ITransfer {
   passwordHash?: string // Optional password protection
   customLink?: string // Optional custom link slug
   expiresAt: string
+  qrOptions?: {
+      fgColor?: string
+      bgColor?: string
+      logoUrl?: string
+  }
   createdAt: string
   updatedAt: string
 }
@@ -33,6 +38,11 @@ const TransferSchema = new Schema<ITransfer>({
   passwordHash: { type: String },
   customLink: { type: String, unique: true, sparse: true, trim: true },
   expiresAt: { type: String, required: true, index: true },
+  qrOptions: {
+    fgColor: { type: String, default: '#000000' },
+    bgColor: { type: String, default: '#ffffff' },
+    logoUrl: { type: String }
+  }
 }, { timestamps: true })
 
 // Force model recompilation in development to handle schema changes

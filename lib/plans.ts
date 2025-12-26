@@ -15,7 +15,9 @@ export const PLAN_LIMITS = {
         maxPwd: 5,
         maxCustomLinks: 5, 
         maxDays: 30,
-        maxTotalStorage: 20 * 1000 * 1000 * 1000 // 20GB
+        maxTotalStorage: 20 * 1000 * 1000 * 1000, // 20GB
+        canCustomizeColors: true,
+        canCustomizeLogo: false
     },
     pro: { 
         name: "Pro",
@@ -24,7 +26,9 @@ export const PLAN_LIMITS = {
         maxPwd: 50,
         maxCustomLinks: 25, 
         maxDays: 365,
-        maxTotalStorage: 200 * 1000 * 1000 * 1000 // 200GB
+        maxTotalStorage: 200 * 1000 * 1000 * 1000, // 200GB
+        canCustomizeColors: true,
+        canCustomizeLogo: true
     },
     guest: { 
         name: "Invitado",

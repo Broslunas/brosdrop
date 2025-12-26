@@ -1,11 +1,9 @@
 
-"use client"
-
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, Save, Lock, Edit2, Clock, Globe } from "lucide-react"
 
-import QRCode from "react-qr-code"
+import { useSession } from "next-auth/react"
 
 interface EditFileModalProps {
   isOpen: boolean
@@ -15,12 +13,18 @@ interface EditFileModalProps {
 }
 
 export default function EditFileModal({ isOpen, onClose, file, onSave }: EditFileModalProps) {
+  const { data: session } = useSession()
+  // Cast user to any to access plan
+  const userPlan = (session?.user as any)?.plan || 'free'
+  const isPro = userPlan === 'pro' || userPlan === 'admin' // Simple check, ideally use PLAN_LIMITS
+
   const [name, setName] = useState(file?.originalName || "")
   const [password, setPassword] = useState("")
   const [hasPassword, setHasPassword] = useState(false)
   const [newExpiration, setNewExpiration] = useState("")
   const [customLink, setCustomLink] = useState("")
   const [maxDownloads, setMaxDownloads] = useState<number | null>(null)
+  
   const [isSaving, setIsSaving] = useState(false)
 
   // Reset state when file changes or modal opens
@@ -227,22 +231,6 @@ export default function EditFileModal({ isOpen, onClose, file, onSave }: EditFil
                                 />
                             </div>
                         </div>
-                    </div>
-
-                    {/* QR Code Section */}
-                    <div className="p-4 rounded-2xl border border-white/5 bg-white flex flex-col items-center justify-center gap-4">
-                        <div className="text-center">
-                            <h4 className="text-black font-bold mb-1">Código QR</h4>
-                            <p className="text-xs text-zinc-500">Escanea para descargar en móvil</p>
-                        </div>
-                         {customLink || file?._id ? (
-                            <div className="p-2 bg-white rounded-lg">
-                                <QRCode 
-                                    value={`${window.location.origin}/d/${customLink || file?._id}`} 
-                                    size={150} 
-                                />
-                            </div>
-                         ) : null}
                     </div>
 
                 </div>

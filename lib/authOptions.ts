@@ -35,6 +35,8 @@ export const authOptions: NextAuthOptions = {
         session.user.emailVerified = user.emailVerified
         // @ts-ignore
         session.user.createdAt = user.createdAt
+        // @ts-ignore
+        session.user.plan = user.plan
       }
       return session
     },

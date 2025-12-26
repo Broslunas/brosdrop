@@ -2,11 +2,12 @@
 
 import { useState, useMemo, useEffect } from "react"
 import { ITransfer } from "@/models/Transfer"
-import { Trash2, ExternalLink, Copy, FileIcon, Calendar, Download, HardDrive, Eye, Search, Filter, ArrowUpDown, Check, X, Grid, List as ListIcon, Edit2, Lock, Music, Video, Image as ImageIcon, FileText, Archive, FileCode, Clock } from "lucide-react"
+import { Trash2, ExternalLink, Copy, FileIcon, Calendar, Download, HardDrive, Eye, Search, Filter, ArrowUpDown, Check, X, Grid, List as ListIcon, Edit2, Lock, Music, Video, Image as ImageIcon, FileText, Archive, FileCode, Clock, QrCode } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useModal } from "@/components/ModalProvider"
 import EditFileModal from "@/components/EditFileModal"
+import QRModal from "@/components/QRModal"
 
 // Format bytes to human readable
 const formatBytes = (bytes: number, decimals = 2) => {
@@ -71,8 +72,9 @@ export default function DashboardClient({
   const { showModal } = useModal()
   
   const [editingFile, setEditingFile] = useState<ITransfer | null>(null)
+  const [activeModalMode, setActiveModalMode] = useState<'edit' | 'qr'>('edit')
 
-  const handleSaveEdit = async (id: string, newName: string, password?: string | null, newExpiration?: string, customLink?: string, maxDownloads?: number | null) => {
+  const handleSaveEdit = async (id: string, newName: string, password?: string | null, newExpiration?: string, customLink?: string, maxDownloads?: number | null, qrOptions?: { fgColor: string, bgColor: string, logoUrl?: string }) => {
       try {
           const res = await fetch(`/api/files/${id}`, {
               method: 'PUT',
@@ -83,7 +85,8 @@ export default function DashboardClient({
                   removePassword: password === null,
                   expiresAt: newExpiration,
                   customLink: customLink,
-                  maxDownloads: maxDownloads
+                  maxDownloads: maxDownloads,
+                  qrOptions: qrOptions
               })
           })
           
@@ -99,7 +102,8 @@ export default function DashboardClient({
               passwordHash: data.transfer.passwordHash,
               expiresAt: data.transfer.expiresAt || newExpiration,
               customLink: data.transfer.customLink,
-              maxDownloads: data.transfer.maxDownloads
+              maxDownloads: data.transfer.maxDownloads,
+              qrOptions: data.transfer.qrOptions
           }
           setFiles(prev => prev.map(f => f._id === id ? updated : f))
           if (onFileUpdated) onFileUpdated(updated)
@@ -470,11 +474,26 @@ export default function DashboardClient({
                                 </button>
                                 {tab === 'active' && (
                                     <button 
-                                        onClick={() => setEditingFile(file)}
+                                        onClick={() => {
+                                            setActiveModalMode('edit')
+                                            setEditingFile(file)
+                                        }}
                                         className="p-2 hover:bg-white/10 rounded-lg text-zinc-500 hover:text-white transition-colors"
                                         title="Editar"
                                     >
                                         <Edit2 className="w-4 h-4" />
+                                    </button>
+                                )}
+                                {tab === 'active' && (
+                                     <button 
+                                        onClick={() => {
+                                            setActiveModalMode('qr')
+                                            setEditingFile(file)
+                                        }}
+                                        className="p-2 hover:bg-white/10 rounded-lg text-zinc-500 hover:text-white transition-colors"
+                                        title="Código QR"
+                                    >
+                                        <QrCode className="w-4 h-4" />
                                     </button>
                                 )}
                                 <button 
@@ -492,10 +511,28 @@ export default function DashboardClient({
         )}
 
         <EditFileModal 
-            isOpen={!!editingFile}
+            isOpen={activeModalMode === 'edit' && !!editingFile}
             onClose={() => setEditingFile(null)}
             file={editingFile}
             onSave={handleSaveEdit}
+        />
+
+        <QRModal 
+            isOpen={activeModalMode === 'qr' && !!editingFile}
+            onClose={() => setEditingFile(null)}
+            file={editingFile}
+            onSave={async (id, qrOptions) => {
+                 if (!editingFile) return
+                 await handleSaveEdit(
+                    id, 
+                    editingFile.originalName, 
+                    undefined, 
+                    undefined, 
+                    editingFile.customLink || undefined, 
+                    editingFile.maxDownloads, 
+                    qrOptions
+                 )
+            }}
         />
     </div>
   )
