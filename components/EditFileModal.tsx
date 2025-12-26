@@ -5,11 +5,13 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, Save, Lock, Edit2, Clock, Globe } from "lucide-react"
 
+import QRCode from "react-qr-code"
+
 interface EditFileModalProps {
   isOpen: boolean
   onClose: () => void
   file: any
-  onSave: (id: string, newName: string, password?: string | null, newExpiration?: string, customLink?: string) => Promise<void>
+  onSave: (id: string, newName: string, password?: string | null, newExpiration?: string, customLink?: string, maxDownloads?: number | null) => Promise<void>
 }
 
 export default function EditFileModal({ isOpen, onClose, file, onSave }: EditFileModalProps) {
@@ -18,6 +20,7 @@ export default function EditFileModal({ isOpen, onClose, file, onSave }: EditFil
   const [hasPassword, setHasPassword] = useState(false)
   const [newExpiration, setNewExpiration] = useState("")
   const [customLink, setCustomLink] = useState("")
+  const [maxDownloads, setMaxDownloads] = useState<number | null>(null)
   const [isSaving, setIsSaving] = useState(false)
 
   // Reset state when file changes or modal opens
@@ -33,6 +36,7 @@ export default function EditFileModal({ isOpen, onClose, file, onSave }: EditFil
               setNewExpiration("")
           }
           setCustomLink(file.customLink || "")
+          setMaxDownloads(file.maxDownloads || null)
       }
   }, [file, isOpen])
 
@@ -43,7 +47,7 @@ export default function EditFileModal({ isOpen, onClose, file, onSave }: EditFil
           if (hasPassword && password) pwd = password
           if (!hasPassword) pwd = null 
           
-          await onSave(file._id, name, pwd, newExpiration, customLink)
+          await onSave(file._id, name, pwd, newExpiration, customLink, maxDownloads)
           onClose()
       } catch (e) {
           console.error(e)
@@ -202,6 +206,43 @@ export default function EditFileModal({ isOpen, onClose, file, onSave }: EditFil
                             </motion.div>
                         )}
                         </AnimatePresence>
+                    </div>
+
+                    {/* Max Downloads */}
+                    <div className="p-4 rounded-2xl border border-white/5 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors">
+                        <div className="flex items-start gap-3">
+                            <div className="mt-1 p-1.5 bg-orange-500/10 rounded-lg">
+                                <Clock className="w-4 h-4 text-orange-400" /> 
+                            </div>
+                            <div className="flex-1">
+                                <label className="block text-sm font-medium text-zinc-200 mb-1">Límite de Descargas</label>
+                                <p className="text-xs text-zinc-500 mb-3">0 o vacío para ilimitado.</p>
+                                <input 
+                                    type="number" 
+                                    min="0"
+                                    placeholder="Ilimitado"
+                                    value={maxDownloads || ''}
+                                    onChange={(e) => setMaxDownloads(e.target.value ? parseInt(e.target.value) : null)}
+                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:ring-1 focus:ring-orange-500/50 outline-none placeholder:text-zinc-700"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* QR Code Section */}
+                    <div className="p-4 rounded-2xl border border-white/5 bg-white flex flex-col items-center justify-center gap-4">
+                        <div className="text-center">
+                            <h4 className="text-black font-bold mb-1">Código QR</h4>
+                            <p className="text-xs text-zinc-500">Escanea para descargar en móvil</p>
+                        </div>
+                         {customLink || file?._id ? (
+                            <div className="p-2 bg-white rounded-lg">
+                                <QRCode 
+                                    value={`${window.location.origin}/d/${customLink || file?._id}`} 
+                                    size={150} 
+                                />
+                            </div>
+                         ) : null}
                     </div>
 
                 </div>

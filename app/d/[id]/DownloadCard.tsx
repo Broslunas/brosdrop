@@ -66,6 +66,8 @@ export default function DownloadClient({ id, fileName, fileSize, downloadUrl, br
                 <p className="text-zinc-400">Your file is ready.</p>
             </div>
 
+
+
             <div className="mb-8 rounded-2xl bg-black/20 p-4 border border-white/5">
                 <div className="flex items-center gap-4">
                     <div className={`rounded-xl p-3 ${getFileIconColor(fileName)}`}>

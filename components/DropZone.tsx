@@ -1,8 +1,10 @@
+
 "use client"
 
 import { useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Upload, X, File, CheckCircle, AlertCircle, Clock, Calendar, Lock, Music, Video, Image as ImageIcon, FileText, Archive, FileCode, Link as LinkIcon } from "lucide-react"
+import { Upload, X, File, CheckCircle, AlertCircle, Clock, Calendar, Lock, Music, Video, Image as ImageIcon, FileText, Archive, FileCode, Link as LinkIcon, Mail, Flame, QrCode } from "lucide-react"
+import QRCode from "react-qr-code"
 
 import { useSession } from "next-auth/react"
 import { useModal } from "@/components/ModalProvider"
@@ -67,6 +69,14 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
   const [showPasswordInput, setShowPasswordInput] = useState(false)
   const [customLink, setCustomLink] = useState('')
   const [showCustomLink, setShowCustomLink] = useState(false)
+
+  // New Features State
+  const [oneTimeDownload, setOneTimeDownload] = useState<number | null>(null) // Feature 5
+  const [recipientEmail, setRecipientEmail] = useState('') // Feature 2
+  const [showEmailInput, setShowEmailInput] = useState(false)
+  
+  // QR Code State
+  const [showQR, setShowQR] = useState(false)
   
   const generateExpirationOptions = () => {
       const options = [{ label: '1 h', value: 1 }]
@@ -146,14 +156,16 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
                 expiresInHours: session && !useCustomDate ? expirationHours : null,
                 customExpiresAt: session && useCustomDate ? customDateValue : null,
                 password: session && password ? password : null,
-                customLink: session && customLink ? customLink : null
+                customLink: session && customLink ? customLink : null,
+                maxDownloads: oneTimeDownload, // Feature 5
+                recipientEmail: recipientEmail || null // Feature 2
             }),
             headers: { 'Content-Type': 'application/json' }
         })
 
         if (!res.ok) throw new Error('Failed to start upload')
         
-        const { url, id } = await res.json()
+        const { url, id, expiresAt } = await res.json()
 
         // 2. Upload to R2
         const xhr = new XMLHttpRequest()
@@ -172,7 +184,30 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
                 setUploadStatus('success')
                 // Use custom link if we have one, otherwise ID
                 const identifier = (session && customLink) ? customLink : id
-                setDownloadUrl(`${window.location.origin}/d/${identifier}`)
+                const finalLink = `${window.location.origin}/d/${identifier}`
+                setDownloadUrl(finalLink)
+                
+                // Feature: Send Email via n8n Webhook
+                if (recipientEmail) {
+                    const recipients = recipientEmail.split(',').map(e => e.trim()).filter(e => e)
+                    if (recipients.length > 0) {
+                        fetch('https://n8n.broslunas.com/webhook/brosdrop-send-via-email', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                recipients,
+                                downloadUrl: finalLink,
+                                fileName: file.name,
+                                fileSize: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+                                senderEmail: session?.user?.email || 'guest',
+                                expiresAt, // Feature: Send Expiration Date
+                                hasPassword: !!password,
+                                password: password || null
+                            })
+                        }).catch(err => console.error("Failed to trigger email webhook", err))
+                    }
+                }
+
             } else {
                 setUploadStatus('error')
             }
@@ -201,6 +236,9 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
     setShowPasswordInput(false)
     setCustomLink('')
     setShowCustomLink(false)
+    setOneTimeDownload(null)
+    setRecipientEmail('')
+    setShowQR(false)
   }
 
   return (
@@ -274,118 +312,172 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
                 )}
              </div>
              
-             {/* Expiration Selector for Verified Users Only */}
+             {/* Main Settings Form */}
              {isVerified && uploadStatus === 'idle' && (
-                 <div className="mb-6">
-                    <label className="flex items-center justify-between text-sm font-medium text-zinc-400 mb-2">
-                        <div className="flex items-center gap-2">
-                            <Clock className="w-4 h-4" />
-                            Caducidad del enlace
-                        </div>
-                        {useCustomDate && (
-                             <button 
-                                onClick={() => { setUseCustomDate(false); setCustomDateValue('') }}
-                                className="text-xs text-primary hover:text-primary/80"
-                             >
-                                Volver a predefinidos
-                             </button>
-                        )}
-                    </label>
-                    
-                    {!useCustomDate ? (
-                        <div className="grid grid-cols-5 gap-2">
-                            {generateExpirationOptions().map((option) => (
+                 <div className="space-y-6">
+                    {/* Expiration */}
+                     <div className="">
+                        <label className="flex items-center justify-between text-sm font-medium text-zinc-400 mb-2">
+                            <div className="flex items-center gap-2">
+                                <Clock className="w-4 h-4" />
+                                Caducidad del enlace
+                            </div>
+                            {useCustomDate && (
+                                 <button 
+                                    onClick={() => { setUseCustomDate(false); setCustomDateValue('') }}
+                                    className="text-xs text-primary hover:text-primary/80"
+                                 >
+                                    Volver a predefinidos
+                                 </button>
+                            )}
+                        </label>
+                        
+                        {!useCustomDate ? (
+                            <div className="grid grid-cols-5 gap-2">
+                                {generateExpirationOptions().map((option) => (
+                                    <button
+                                        key={option.value}
+                                        onClick={() => setExpirationHours(option.value)}
+                                        className={`
+                                            py-2 px-1 rounded-lg text-xs font-medium transition-all
+                                            ${expirationHours === option.value 
+                                                ? 'bg-white text-zinc-900 shadow-lg' 
+                                                : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200'
+                                            }
+                                        `}
+                                    >
+                                        {option.label}
+                                    </button>
+                                ))}
                                 <button
-                                    key={option.value}
-                                    onClick={() => setExpirationHours(option.value)}
-                                    className={`
-                                        py-2 px-1 rounded-lg text-xs font-medium transition-all
-                                        ${expirationHours === option.value 
-                                            ? 'bg-white text-zinc-900 shadow-lg' 
-                                            : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200'
-                                        }
-                                    `}
+                                    onClick={() => setUseCustomDate(true)}
+                                    className="py-2 px-1 rounded-lg text-xs font-medium bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200 transition-all flex items-center justify-center"
+                                    title="Personalizar Fecha"
                                 >
-                                    {option.label}
+                                    <Calendar className="w-4 h-4" />
                                 </button>
-                            ))}
-                            <button
-                                onClick={() => setUseCustomDate(true)}
-                                className="py-2 px-1 rounded-lg text-xs font-medium bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200 transition-all flex items-center justify-center"
-                                title="Personalizar Fecha"
-                            >
-                                <Calendar className="w-4 h-4" />
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="relative">
+                            </div>
+                        ) : (
+                            <div className="relative">
+                                <input 
+                                    type="datetime-local" 
+                                    value={customDateValue}
+                                    onChange={(e) => setCustomDateValue(e.target.value)}
+                                    min={new Date().toISOString().slice(0, 16)}
+                                    max={new Date(Date.now() + MAX_DAYS * 24 * 60 * 60 * 1000).toISOString().slice(0, 16)}
+                                    className="w-full rounded-xl bg-zinc-800 border border-zinc-700 p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                />
+                            </div>
+                        )}
+                     </div>
+
+                    {/* Advanced Options Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Password */}
+                        <div>
+                            <label className="flex items-center gap-2 text-sm font-medium text-zinc-400 mb-2">
+                                <Lock className="w-4 h-4" />
+                                Contraseña
+                            </label>
                             <input 
-                                type="datetime-local" 
-                                value={customDateValue}
-                                onChange={(e) => setCustomDateValue(e.target.value)}
-                                min={new Date().toISOString().slice(0, 16)}
-                                max={new Date(Date.now() + MAX_DAYS * 24 * 60 * 60 * 1000).toISOString().slice(0, 16)}
-                                className="w-full rounded-xl bg-zinc-800 border border-zinc-700 p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                type="password"
+                                value={password}
+                                onChange={(e) => { 
+                                    setPassword(e.target.value)
+                                    setShowPasswordInput(!!e.target.value) 
+                                }}
+                                placeholder="Opcional"
+                                className="w-full rounded-xl bg-zinc-800 border border-zinc-700 p-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                             />
                         </div>
-                    )}
-                 </div>
-             )}
-             
-             {/* Password Protection for Verified Users */}
-             {isVerified && uploadStatus === 'idle' && (
-                 <>
-                 <div className="mb-6">
-                    <label className="flex items-center gap-2 text-sm font-medium text-zinc-400 mb-2">
-                        <Lock className="w-4 h-4" />
-                        Contraseña (opcional)
-                    </label>
-                    <input 
-                        type="password"
-                        value={password}
-                        onChange={(e) => { 
-                            setPassword(e.target.value)
-                            setShowPasswordInput(!!e.target.value) 
-                        }}
-                        placeholder="Establecer contraseña..."
-                        className="w-full rounded-xl bg-zinc-800 border border-zinc-700 p-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                    />
-                 </div>
 
-                 {/* Custom Link */}
-                 <div className="mb-6">
-                    <label className="flex items-center gap-2 text-sm font-medium text-zinc-400 mb-2">
-                        <LinkIcon className="w-4 h-4" />
-                        Enlace Personalizado
-                    </label>
-                    <div className="flex items-center rounded-xl bg-zinc-800 border border-zinc-700 overflow-hidden focus-within:ring-2 focus-within:ring-primary/50">
-                        <span className="pl-3 pr-1 text-zinc-500 text-sm bg-zinc-800 select-none">brosdrop.com/d/</span>
-                         <input 
-                            type="text"
-                            value={customLink}
-                            onChange={(e) => { 
-                                setCustomLink(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))
-                                setShowCustomLink(!!e.target.value) 
-                            }}
-                            placeholder="tu-enlace"
-                            className="w-full bg-zinc-800 border-none p-3 pl-1 text-sm text-white placeholder-zinc-600 outline-none"
-                        />
+                         {/* Custom Link */}
+                         <div>
+                            <label className="flex items-center gap-2 text-sm font-medium text-zinc-400 mb-2">
+                                <LinkIcon className="w-4 h-4" />
+                                Link Personalizado
+                            </label>
+                            <div className="flex items-center rounded-xl bg-zinc-800 border border-zinc-700 overflow-hidden focus-within:ring-2 focus-within:ring-primary/50">
+                                <span className="pl-3 pr-1 text-zinc-500 text-sm bg-zinc-800 select-none">/d/</span>
+                                 <input 
+                                    type="text"
+                                    value={customLink}
+                                    onChange={(e) => { 
+                                        setCustomLink(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))
+                                        setShowCustomLink(!!e.target.value) 
+                                    }}
+                                    placeholder="ej. fotos"
+                                    className="w-full bg-zinc-800 border-none p-3 pl-1 text-sm text-white placeholder-zinc-600 outline-none"
+                                />
+                            </div>
+                         </div>
+                    </div>
+
+                    {/* New Features: Max Downloads & Email */}
+                    <div className="p-4 rounded-xl bg-zinc-800/40 border border-white/5 space-y-4">
+                         {/* Max Downloads (Feature 5 update) */}
+                         <div className="flex items-center justify-between">
+                             <div className="flex items-center gap-2 text-sm text-zinc-300">
+                                 <Flame className={`w-4 h-4 ${oneTimeDownload ? 'text-orange-500' : 'text-zinc-500'}`} />
+                                 <span>Límite de Descargas</span>
+                             </div>
+                             <div className="flex items-center gap-2">
+                                 <input
+                                     type="number"
+                                     min="0"
+                                     placeholder="∞"
+                                     className="w-16 bg-zinc-900 border border-zinc-700 rounded-lg p-1 text-center text-sm text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                     onChange={(e) => {
+                                         const val = parseInt(e.target.value)
+                                         setOneTimeDownload(val > 0 ? val : null)
+                                     }}
+                                 />
+                             </div>
+                         </div>
+                         
+                         {/* Email Send (Feature 2) */}
+                         <div>
+                             <div 
+                                className="flex items-center justify-between cursor-pointer"
+                                onClick={() => setShowEmailInput(!showEmailInput)}
+                             >
+                                 <div className="flex items-center gap-2 text-sm text-zinc-300">
+                                     <Mail className={`w-4 h-4 ${recipientEmail ? 'text-blue-500' : 'text-zinc-500'}`} />
+                                     <span>Enviar por Email</span>
+                                 </div>
+                                 <span className="text-lg text-zinc-500 leading-none">{showEmailInput ? '-' : '+'}</span>
+                             </div>
+                             {showEmailInput && (
+                                 <motion.div 
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    className="mt-3 overflow-hidden"
+                                 >
+                                     <input 
+                                        type="text"
+                                        value={recipientEmail}
+                                        onChange={(e) => setRecipientEmail(e.target.value)}
+                                        placeholder="ej. correo1@ejemplo.com, correo2@ejemplo.com"
+                                        className="w-full rounded-xl bg-zinc-900 border border-zinc-700 p-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                                     />
+                                 </motion.div>
+                             )}
+                         </div>
                     </div>
                  </div>
-                 </>
              )}
              
              {uploadStatus === 'idle' && (
                  <button
                     onClick={handleUpload}
-                    className="w-full py-4 rounded-xl bg-primary font-bold text-white shadow-lg shadow-primary/20 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                    className="w-full mt-6 py-4 rounded-xl bg-primary font-bold text-white shadow-lg shadow-primary/20 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all"
                  >
                     Transferir Archivo
                  </button>
              )}
 
              {uploadStatus === 'uploading' && (
-                 <div className="space-y-2">
+                 <div className="space-y-2 mt-6">
                     <div className="flex justify-between text-xs text-zinc-400">
                         <span>Subiendo...</span>
                         <span>{progress}%</span>
@@ -412,22 +504,40 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
                      </motion.div>
                      <h4 className="text-lg font-bold text-green-500">¡Enviado!</h4>
                      <p className="text-sm text-zinc-500 mb-4">Tu archivo está listo para compartir.</p>
-                     <div className="flex gap-2">
-                         <button onClick={reset} className="flex-1 rounded-xl bg-zinc-800 py-3 text-sm font-medium hover:bg-zinc-700 transition-colors">
-                             Enviar otro
-                         </button>
+                     
+                     {/* Feature 1: QR Code Modal/Display */}
+                     {showQR && (
+                         <div className="mb-4 flex flex-col items-center p-4 bg-white rounded-xl">
+                             <QRCode value={downloadUrl} size={128} />
+                             <p className="text-xs text-black mt-2 font-medium">Escanéame</p>
+                         </div>
+                     )}
+
+                     <div className="flex flex-col gap-2">
+                         <div className="flex gap-2">
+                             <button onClick={reset} className="flex-1 rounded-xl bg-zinc-800 py-3 text-sm font-medium hover:bg-zinc-700 transition-colors">
+                                 Enviar otro
+                             </button>
+                             <button 
+                                onClick={() => {
+                                    navigator.clipboard.writeText(downloadUrl)
+                                    showModal({
+                                        title: "Enlace Copiado",
+                                        message: "El enlace de descarga ha sido copiado al portapapeles.",
+                                        type: "success"
+                                    })
+                                }}
+                                className="flex-1 rounded-xl bg-primary py-3 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
+                            >
+                                 Copiar Link
+                             </button>
+                         </div>
                          <button 
-                            onClick={() => {
-                                navigator.clipboard.writeText(downloadUrl)
-                                showModal({
-                                    title: "Enlace Copiado",
-                                    message: "El enlace de descarga ha sido copiado al portapapeles.",
-                                    type: "success"
-                                })
-                            }}
-                            className="flex-1 rounded-xl bg-primary py-3 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
-                        >
-                             Copiar Link
+                            onClick={() => setShowQR(!showQR)}
+                            className="w-full flex items-center justify-center gap-2 rounded-xl bg-zinc-800/50 border border-zinc-700 py-2 text-sm font-medium hover:bg-zinc-800 transition-colors"
+                         >
+                             <QrCode className="w-4 h-4" />
+                             {showQR ? "Ocultar QR" : "Mostrar QR Móvil"}
                          </button>
                      </div>
                  </div>

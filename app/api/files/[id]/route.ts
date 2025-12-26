@@ -20,7 +20,7 @@ export async function PUT(
     }
 
     const { id } = await params
-    const { name, password, removePassword, expiresAt, customLink } = await req.json()
+    const { name, password, removePassword, expiresAt, customLink, maxDownloads } = await req.json()
 
     await dbConnect()
 
@@ -119,6 +119,10 @@ export async function PUT(
 
         const hashedPassword = await bcrypt.hash(password, 10)
         transfer.passwordHash = hashedPassword
+    }
+
+    if (maxDownloads !== undefined) {
+        transfer.maxDownloads = maxDownloads ? Math.max(0, parseInt(maxDownloads)) : null
     }
 
     await transfer.save()

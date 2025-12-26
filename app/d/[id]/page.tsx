@@ -137,6 +137,16 @@ export default async function DownloadPage({ params }: Props) {
           }
       }
 
+      // Check Max Downloads (Feature 5)
+      if (transfer.maxDownloads !== null && transfer.maxDownloads !== undefined && transfer.downloads >= transfer.maxDownloads) {
+          return (
+            <div className="flex min-h-[50vh] flex-col items-center justify-center text-center">
+                <h1 className="text-2xl font-bold text-orange-500">Límite de Descargas Alcanzado</h1>
+                <p className="text-zinc-400">Este archivo ha alcanzado su límite máximo de descargas.</p>
+            </div>
+          )
+      }
+
       const isProtected = !!transfer.passwordHash
       let downloadUrl: string | undefined = undefined
 

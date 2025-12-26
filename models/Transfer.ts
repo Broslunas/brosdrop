@@ -11,6 +11,7 @@ export interface ITransfer {
   senderEmail?: string
   senderId?: string
   downloads: number
+  maxDownloads?: number | null
   views: number
   passwordHash?: string // Optional password protection
   customLink?: string // Optional custom link slug
@@ -27,6 +28,7 @@ const TransferSchema = new Schema<ITransfer>({
   senderEmail: { type: String }, // Optional if logged in
   senderId: { type: String }, // Link to NextAuth user ID
   downloads: { type: Number, default: 0 },
+  maxDownloads: { type: Number, default: null },
   views: { type: Number, default: 0 },
   passwordHash: { type: String },
   customLink: { type: String, unique: true, sparse: true, trim: true },

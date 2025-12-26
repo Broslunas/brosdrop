@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     // Optional: Force login?
     // if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const { name, type, size, expiresInHours, customExpiresAt, password, customLink } = await req.json()
+    const { name, type, size, expiresInHours, customExpiresAt, password, customLink, maxDownloads } = await req.json()
 
     if (!process.env.R2_BUCKET_NAME) {
         return NextResponse.json({ error: "Server Configuration Error: R2 Bucket not set" }, { status: 500 })
@@ -126,6 +126,9 @@ export async function POST(req: Request) {
              } else {
                  return NextResponse.json({ error: `La fecha de expiración excede el máximo de ${currentLimits.maxDays} días de tu plan.` }, { status: 400 })
              }
+        } else if (expiresInHours) {
+            const hours = Math.min(expiresInHours, currentLimits.maxDays * 24)
+            expirationTime = new Date(Date.now() + hours * 60 * 60 * 1000)
         } else {
             expirationTime = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) 
         }
@@ -166,7 +169,8 @@ export async function POST(req: Request) {
       senderEmail: session?.user?.email,
       expiresAt: expirationTime.toISOString(),
       passwordHash,
-      customLink
+      customLink: customLink || undefined,
+      maxDownloads: maxDownloads ? parseInt(maxDownloads) : undefined
     })
 
     await ExpiredTransfer.create({
@@ -185,7 +189,8 @@ export async function POST(req: Request) {
     return NextResponse.json({
       url: signedUrl,
       id: transfer._id,
-      key: fileKey
+      key: fileKey,
+      expiresAt: expirationTime.toISOString()
     })
 
   } catch (error) {
