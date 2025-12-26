@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, Save, Lock, Edit2, Clock, Globe } from "lucide-react"
+import { PLAN_LIMITS } from "@/lib/plans"
 
 import { useSession } from "next-auth/react"
 
@@ -128,7 +129,13 @@ export default function EditFileModal({ isOpen, onClose, file, onSave }: EditFil
                                 <input 
                                     type="datetime-local"
                                     value={newExpiration}
-                                    max={file?.expiresAt ? new Date(file.expiresAt).toISOString().slice(0, 16) : undefined}
+                                    max={(() => {
+                                        const plan = (userPlan as keyof typeof PLAN_LIMITS) in PLAN_LIMITS ? userPlan : 'free'
+                                        const days = PLAN_LIMITS[plan as keyof typeof PLAN_LIMITS].maxDays
+                                        const baseDate = file?.createdAt ? new Date(file.createdAt) : new Date()
+                                        const maxDate = new Date(baseDate.getTime() + days * 24 * 60 * 60 * 1000)
+                                        return maxDate.toISOString().slice(0, 16)
+                                    })()}
                                     onChange={(e) => setNewExpiration(e.target.value)}
                                     className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:ring-1 focus:ring-blue-500/50 outline-none text-zinc-300 [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-50"
                                 />

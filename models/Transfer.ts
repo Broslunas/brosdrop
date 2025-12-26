@@ -21,6 +21,11 @@ export interface ITransfer {
       bgColor?: string
       logoUrl?: string
   }
+  notificationsSent?: {
+      sevenDays: boolean
+      oneDay: boolean
+      fourHours: boolean
+  }
   createdAt: string
   updatedAt: string
 }
@@ -42,6 +47,11 @@ const TransferSchema = new Schema<ITransfer>({
     fgColor: { type: String, default: '#000000' },
     bgColor: { type: String, default: '#ffffff' },
     logoUrl: { type: String }
+  },
+  notificationsSent: {
+    sevenDays: { type: Boolean, default: false },
+    oneDay: { type: Boolean, default: false },
+    fourHours: { type: Boolean, default: false }
   }
 }, { timestamps: true })
 
