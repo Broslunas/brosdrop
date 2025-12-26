@@ -49,6 +49,9 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
   const [recipientEmail, setRecipientEmail] = useState('')
   const [showEmailInput, setShowEmailInput] = useState(false)
   
+  // Zip/Separate Toggle
+  const [zipFiles, setZipFiles] = useState(true)
+
   // QR Code State
   const [showQR, setShowQR] = useState(false)
   
@@ -110,18 +113,107 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
       setFiles(prev => prev.filter((_, i) => i !== index))
   }
 
-  const [downloadUrl, setDownloadUrl] = useState('')
+  const [downloadUrls, setDownloadUrls] = useState<string[]>([])
+
+  // Helper to upload a single file
+  const uploadFile = async (file: File, index: number, total: number) => {
+        // Calculate progress chunk for this file
+        // To keep it simple, we just show 0-100% for the current file or global progress
+        // Let's do global progress: (index / total) * 100 + (current_file_progress / total)
+
+        // 1. Get Signed URL
+        const res = await fetch('/api/upload', {
+            method: 'POST',
+            body: JSON.stringify({
+                name: file.name,
+                type: file.type,
+                size: file.size,
+                expiresInHours: session && !useCustomDate ? expirationHours : null,
+                customExpiresAt: session && useCustomDate ? customDateValue : null,
+                password: session && password ? password : null,
+                // Only use custom link for the first file if separate, or disable for multiple?
+                // Logic: If multiple files separate, we probably shouldn't use the SAME custom link. 
+                // Either disable custom link if zipFiles=false & count>1, or append index.
+                // For now, let's just ignore custom link for subsequent files or append suffix.
+                customLink: (session && customLink && total === 1) ? customLink : null, 
+                maxDownloads: oneTimeDownload, 
+                recipientEmail: recipientEmail || null 
+            }),
+            headers: { 'Content-Type': 'application/json' }
+        })
+
+        if (!res.ok) throw new Error(`Failed to start upload for ${file.name}`)
+        
+        const { url, id, expiresAt } = await res.json()
+
+        // 2. Upload to R2
+        return new Promise<string>((resolve, reject) => {
+            const xhr = new XMLHttpRequest()
+            xhr.open('PUT', url, true)
+            xhr.setRequestHeader('Content-Type', file.type)
+
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    const filePercent = (e.loaded / e.total) * 100
+                    // Global progress calculation
+                    const globalPercent = ((index * 100) + filePercent) / total
+                    setProgress(Math.round(globalPercent))
+                }
+            }
+
+            xhr.onload = () => {
+                if (xhr.status === 200) {
+                    const identifier = (session && customLink && total === 1) ? customLink : id
+                    const finalLink = `${window.location.origin}/d/${identifier}`
+                    resolve(finalLink)
+
+                    // Email logic could go here for individual files, but spamming is bad.
+                    // Maybe collect all and send one email at the end? 
+                    // Current logic inside uploadFile implies per-file hook if we copy-paste.
+                    // Let's skip email hook inside this helper and do it once at end if possible, 
+                    // OR just do it per file for now (simplest, though spammy for 10 files).
+                    // Actually, let's just trigger it here to ensure it works per file.
+                    if (recipientEmail) {
+                        const recipients = recipientEmail.split(',').map(e => e.trim()).filter(e => e)
+                        if (recipients.length > 0) {
+                             const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL || 'https://n8n.broslunas.com/webhook/brosdrop-send-via-email'
+                             fetch(webhookUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    recipients,
+                                    downloadUrl: finalLink,
+                                    fileName: file.name,
+                                    fileSize: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+                                    senderEmail: session?.user?.email || 'guest',
+                                    expiresAt,
+                                    hasPassword: !!password,
+                                    password: password || null
+                                })
+                            }).catch(err => console.error("Failed to trigger email webhook", err))
+                        }
+                    }
+
+                } else {
+                    reject(new Error(`Upload failed for ${file.name}`))
+                }
+            }
+
+            xhr.onerror = () => reject(new Error(`Network error for ${file.name}`))
+            xhr.send(file)
+        })
+  }
 
   const handleUpload = async () => {
     if (files.length === 0) return
 
-    setUploadStatus(files.length > 1 ? 'zipping' : 'uploading')
+    setUploadStatus(files.length > 1 && zipFiles ? 'zipping' : 'uploading')
     setProgress(0)
+    setDownloadUrls([])
 
     try {
-        let fileToUpload: File;
-
-        if (files.length > 1) {
+        if (files.length > 1 && zipFiles) {
+            // ZIP MODE
             const zip = new JSZip()
             files.forEach(f => {
                 zip.file(f.name, f)
@@ -129,85 +221,28 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
             const blob = await zip.generateAsync({ type: "blob" }, (metadata) => {
                 setProgress(Math.round(metadata.percent))
             })
-            fileToUpload = new File([blob], `brosdrop-bundle-${Date.now()}.zip`, { type: "application/zip" })
+            const fileToUpload = new File([blob], `brosdrop-bundle-${Date.now()}.zip`, { type: "application/zip" })
+            
             setUploadStatus('uploading')
             setProgress(0)
+            
+            const link = await uploadFile(fileToUpload, 0, 1)
+            setDownloadUrls([link])
+            setUploadStatus('success')
+
         } else {
-            fileToUpload = files[0]
-        }
-
-        // 1. Get Signed URL
-        const res = await fetch('/api/upload', {
-            method: 'POST',
-            body: JSON.stringify({
-                name: fileToUpload.name,
-                type: fileToUpload.type,
-                size: fileToUpload.size,
-                expiresInHours: session && !useCustomDate ? expirationHours : null,
-                customExpiresAt: session && useCustomDate ? customDateValue : null,
-                password: session && password ? password : null,
-                customLink: session && customLink ? customLink : null,
-                maxDownloads: oneTimeDownload, 
-                recipientEmail: recipientEmail || null 
-            }),
-            headers: { 'Content-Type': 'application/json' }
-        })
-
-        if (!res.ok) throw new Error('Failed to start upload')
-        
-        const { url, id, expiresAt } = await res.json()
-
-        // 2. Upload to R2
-        const xhr = new XMLHttpRequest()
-        xhr.open('PUT', url, true)
-        xhr.setRequestHeader('Content-Type', fileToUpload.type)
-
-        xhr.upload.onprogress = (e) => {
-            if (e.lengthComputable) {
-                const percentComplete = (e.loaded / e.total) * 100
-                setProgress(Math.round(percentComplete))
+            // SEPARATE FILES MODE (or single file)
+            const links: string[] = []
+            // If separate files mode with > 1 file, custom link should probably be ignored or handled 
+            // (already handled in uploadFile logic to only use it if total === 1)
+            
+            for (let i = 0; i < files.length; i++) {
+                const link = await uploadFile(files[i], i, files.length)
+                links.push(link)
             }
+            setDownloadUrls(links)
+            setUploadStatus('success')
         }
-
-        xhr.onload = () => {
-            if (xhr.status === 200) {
-                setUploadStatus('success')
-                const identifier = (session && customLink) ? customLink : id
-                const finalLink = `${window.location.origin}/d/${identifier}`
-                setDownloadUrl(finalLink)
-                
-                // Feature: Send Email via Hook
-                if (recipientEmail) {
-                    const recipients = recipientEmail.split(',').map(e => e.trim()).filter(e => e)
-                    if (recipients.length > 0) {
-                        const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL || 'https://n8n.broslunas.com/webhook/brosdrop-send-via-email'
-                        fetch(webhookUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                recipients,
-                                downloadUrl: finalLink,
-                                fileName: fileToUpload.name,
-                                fileSize: (fileToUpload.size / 1024 / 1024).toFixed(2) + ' MB',
-                                senderEmail: session?.user?.email || 'guest',
-                                expiresAt,
-                                hasPassword: !!password,
-                                password: password || null
-                            })
-                        }).catch(err => console.error("Failed to trigger email webhook", err))
-                    }
-                }
-
-            } else {
-                setUploadStatus('error')
-            }
-        }
-
-        xhr.onerror = () => {
-             setUploadStatus('error')
-        }
-
-        xhr.send(fileToUpload)
 
     } catch (err) {
         console.error(err)
@@ -219,7 +254,7 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
     setFiles([])
     setUploadStatus('idle')
     setProgress(0)
-    setDownloadUrl('')
+    setDownloadUrls([])
     setUseCustomDate(false)
     setCustomDateValue('')
     setPassword('')
@@ -228,6 +263,7 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
     setShowCustomLink(false)
     setOneTimeDownload(null)
     setRecipientEmail('')
+    setZipFiles(true)
     setShowQR(false)
   }
 
@@ -283,6 +319,7 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
                 <UploadForm
                     files={files}
                     isVerified={isVerified}
+                    planName={planName}
                     maxDays={MAX_DAYS}
                     expirationHours={expirationHours}
                     setExpirationHours={setExpirationHours}
@@ -306,6 +343,8 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
                     onRemoveFile={removeFile}
                     onCancelAll={reset}
                     onUpload={handleUpload}
+                    zipFiles={zipFiles}
+                    setZipFiles={setZipFiles}
                     fileInputRef={fileInputRef}
                     totalSize={totalSize}
                 />
@@ -320,7 +359,7 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
              {uploadStatus === 'success' && (
                   <div className="rounded-3xl border border-zinc-800 bg-zinc-900/80 p-6 backdrop-blur-xl">
                      <UploadSuccess 
-                        downloadUrl={downloadUrl}
+                        downloadUrls={downloadUrls}
                         showQR={showQR}
                         setShowQR={setShowQR}
                         onReset={reset}
@@ -334,7 +373,7 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
                          <AlertCircle className="h-6 w-6" />
                      </div>
                      <h4 className="text-lg font-bold text-red-500">Error al subir</h4>
-                     <p className="text-sm text-zinc-500 mb-4">Algo salió mal.</p>
+                     <p className="text-sm text-zinc-500 mb-4">Algo salió mal durante la subida.</p>
                      <button onClick={reset} className="w-full rounded-xl bg-zinc-800 py-3 text-sm font-medium hover:bg-zinc-700 transition-colors">
                          Intentar de nuevo
                      </button>

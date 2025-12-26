@@ -44,6 +44,7 @@ const plans = [
             "5 enlaces personalizados",
             "Personalización QR (Colores)",
             "Caducidad 30 días",
+            "Gestión Multi-archivo (Zip/Separado)",
             "Soporte por email"
         ],
         missing: [
@@ -70,6 +71,7 @@ const plans = [
             "25 enlaces personalizados",
             "Personalización QR (Colores + Logo)",
             "Caducidad 1 año",
+            "Gestión Multi-archivo (Zip/Separado)",
             "Tu Logo y Fondo"
         ],
         missing: [],
@@ -308,6 +310,7 @@ export default function PricingPage() {
                                         { name: "Personalización QR", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-600"/>, "Colores", "Colores + Logo"] },
                                         { name: "Soporte Prioritario", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-600"/>, <Check key="check" className="w-4 h-4 mx-auto text-blue-400"/>, <Check key="check2" className="w-4 h-4 mx-auto text-primary"/>] },
                                         { name: "Branding Personal", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x3" className="w-4 h-4 mx-auto text-zinc-600"/>, <Check key="check" className="w-4 h-4 mx-auto text-blue-400"/>] },
+                                        { name: "Multi-archivos (Zip/Separado)", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-600"/>, <Check key="check" className="w-4 h-4 mx-auto text-blue-400"/>, <Check key="check2" className="w-4 h-4 mx-auto text-primary"/>] },
                                     ].map((row, i) => (
                                         <tr key={i} className="group hover:bg-white/[0.02] transition-colors">
                                             <td className="p-6 pl-8 font-medium text-zinc-300 group-hover:text-white transition-colors">{row.name}</td>

@@ -2,8 +2,8 @@
 
 import { useState, useRef } from "react"
 import { motion } from "framer-motion"
-import { Plus, X, Trash2, Clock, Calendar, Lock, Link as LinkIcon, Flame, Mail } from "lucide-react"
-import { File as FileIcon, Music, Video, Image as ImageIcon, FileText, Archive, FileCode } from "lucide-react"
+import { Plus, X, Trash2, Clock, Calendar, Lock, Link as LinkIcon, Flame, Mail, Archive, Layers } from "lucide-react"
+import { File as FileIcon, Music, Video, Image as ImageIcon, FileText, FileCode } from "lucide-react"
 
 // Helpercitos
 const getFileIcon = (filename: string) => {
@@ -38,6 +38,7 @@ const getFileIconColor = (filename: string) => {
 interface UploadFormProps {
     files: File[]
     isVerified: boolean
+    planName?: string
     maxDays: number
     expirationHours: number
     setExpirationHours: (h: number) => void
@@ -64,6 +65,10 @@ interface UploadFormProps {
     onCancelAll: () => void
     onUpload: () => void
     
+    // Zip state
+    zipFiles: boolean
+    setZipFiles: (zip: boolean) => void
+
     // Refs
     fileInputRef: React.RefObject<HTMLInputElement | null>
     totalSize: number
@@ -72,6 +77,7 @@ interface UploadFormProps {
 export default function UploadForm({
     files,
     isVerified,
+    planName = 'free',
     maxDays,
     expirationHours,
     setExpirationHours,
@@ -95,6 +101,8 @@ export default function UploadForm({
     onRemoveFile,
     onCancelAll,
     onUpload,
+    zipFiles,
+    setZipFiles,
     fileInputRef,
     totalSize
 }: UploadFormProps) {
@@ -108,6 +116,8 @@ export default function UploadForm({
       if (maxDays >= 365) options.push({ label: '1 a', value: 8760 })
       return options
   }
+
+  const isProOrPlus = ['pro', 'plus'].includes(planName.toLowerCase())
 
   return (
     <motion.div
@@ -175,6 +185,26 @@ export default function UploadForm({
         {/* Main Settings Form */}
         {isVerified && (
             <div className="space-y-6">
+                 {/* Multi-file toggle for Pro/Plus */}
+                 {files.length > 1 && isProOrPlus && (
+                     <div className="p-1 rounded-xl bg-zinc-800 border border-zinc-700 flex">
+                         <button
+                            onClick={() => setZipFiles(true)}
+                            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${zipFiles ? 'bg-zinc-700 text-white shadow' : 'text-zinc-400 hover:text-zinc-200'}`}
+                         >
+                             <Archive className="w-4 h-4" />
+                             Comprimir ZIP
+                         </button>
+                         <button
+                            onClick={() => setZipFiles(false)}
+                            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${!zipFiles ? 'bg-zinc-700 text-white shadow' : 'text-zinc-400 hover:text-zinc-200'}`}
+                         >
+                             <Layers className="w-4 h-4" />
+                             Por Separado
+                         </button>
+                     </div>
+                 )}
+
             {/* Expiration */}
                 <div className="">
                 <label className="flex items-center justify-between text-sm font-medium text-zinc-400 mb-2">
@@ -182,14 +212,6 @@ export default function UploadForm({
                         <Clock className="w-4 h-4" />
                         Caducidad del enlace
                     </div>
-                    {useCustomDate && (
-                            <button 
-                            onClick={() => { setUseCustomDate(false); setCustomDateValue('') }}
-                            className="text-xs text-primary hover:text-primary/80"
-                            >
-                            Volver a predefinidos
-                            </button>
-                    )}
                 </label>
                 
                 {!useCustomDate ? (
@@ -227,6 +249,12 @@ export default function UploadForm({
                             max={new Date(Date.now() + maxDays * 24 * 60 * 60 * 1000).toISOString().slice(0, 16)}
                             className="w-full rounded-xl bg-zinc-800 border border-zinc-700 p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                         />
+                        <button 
+                            onClick={() => { setUseCustomDate(false); setCustomDateValue('') }}
+                            className="absolute right-3 top-3 text-xs text-zinc-500 hover:text-zinc-300"
+                        >
+                            Cancelar
+                        </button>
                     </div>
                 )}
                 </div>
@@ -331,7 +359,12 @@ export default function UploadForm({
             onClick={onUpload}
             className="w-full mt-6 py-4 rounded-xl bg-primary font-bold text-white shadow-lg shadow-primary/20 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all"
         >
-            {files.length > 1 ? 'Tu archivo Zip y Transferir' : 'Transferir Archivo'}
+            {files.length > 1 && zipFiles 
+                ? 'Comprimir y Transferir' 
+                : files.length > 1 
+                    ? `Transferir ${files.length} Archivos`
+                    : 'Transferir Archivo'
+            }
         </button>
     </motion.div>
   )
