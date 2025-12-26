@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useState, ReactNode } from "react"
+import React, { createContext, useContext, useState, ReactNode, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, AlertTriangle, Info, CheckCircle } from "lucide-react"
 
@@ -36,15 +36,15 @@ export default function ModalProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false)
   const [modalConfig, setModalConfig] = useState<ModalOptions | null>(null)
 
-  const showModal = (options: ModalOptions) => {
+  const showModal = useCallback((options: ModalOptions) => {
     setModalConfig(options)
     setIsOpen(true)
-  }
+  }, [])
 
-  const hideModal = () => {
+  const hideModal = useCallback(() => {
     setIsOpen(false)
     setTimeout(() => setModalConfig(null), 300) // Clear after animation
-  }
+  }, [])
 
   const handleConfirm = () => {
     if (modalConfig?.onConfirm) {

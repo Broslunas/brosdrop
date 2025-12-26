@@ -16,6 +16,7 @@ const UserSchema = new Schema({
     background: { type: String },
     enabled: { type: Boolean, default: true }
   },
+  planExpiresAt: { type: Date },
 }, { timestamps: true })
 
 // Force model recompilation in development to handle schema changes

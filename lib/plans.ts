@@ -43,6 +43,11 @@ export const PLAN_LIMITS = {
 
 export type PlanType = keyof typeof PLAN_LIMITS
 
+export const PRICING = {
+    plus: { monthly: 4.99, annual: 47.90 },
+    pro: { monthly: 14.99, annual: 143.90 }
+}
+
 export const formatBytes = (bytes: number, decimals = 2) => {
     if (!+bytes) return '0 Bytes'
     const k = 1000 // Base 1000 for standard SI prefixes

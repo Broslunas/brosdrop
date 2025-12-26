@@ -2,11 +2,66 @@
 
 import { useSession, signOut } from "next-auth/react"
 import { useState, useEffect } from "react"
-import { LogOut, User, Bell, ChevronLeft, Moon } from "lucide-react"
+import { LogOut, User, Bell, ChevronLeft, Moon, Crown, Zap, Check } from "lucide-react"
+import { useSearchParams, useRouter } from "next/navigation"
+import { useModal } from "@/components/ModalProvider"
 
 export default function DashboardHeader() {
   const { data: session } = useSession()
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const { showModal } = useModal()
+  
   const [avatar, setAvatar] = useState<string | null | undefined>(session?.user?.image)
+  const plan = (session?.user as any)?.plan || 'free'
+
+  useEffect(() => {
+    if (searchParams?.get('payment') === 'success') {
+         const planName = searchParams.get('plan') || 'plus'
+         const isPro = planName.toLowerCase().includes('pro')
+
+         showModal({
+             title: `¡Bienvenido al Plan ${isPro ? 'Pro' : 'Plus'}!`,
+             message: (
+                <div className="space-y-4 mt-2">
+                    <p className="text-zinc-300">Gracias por actualizar. Ahora tienes acceso a:</p>
+                    <ul className="space-y-2">
+                        <li className="flex items-center gap-2 text-sm text-zinc-200">
+                             <div className="p-1 rounded bg-green-500/10 text-green-400"><Check className="w-3 h-3" /></div>
+                             {isPro ? "5 GB por archivo" : "500 MB por archivo"}
+                        </li>
+                        <li className="flex items-center gap-2 text-sm text-zinc-200">
+                             <div className="p-1 rounded bg-green-500/10 text-green-400"><Check className="w-3 h-3" /></div>
+                             {isPro ? "Caducidad de 1 año" : "Caducidad de 30 días"}
+                        </li>
+                         <li className="flex items-center gap-2 text-sm text-zinc-200">
+                             <div className="p-1 rounded bg-green-500/10 text-green-400"><Check className="w-3 h-3" /></div>
+                             {isPro ? "QR con Logo y Colores" : "QR con Colores personalizados"}
+                        </li>
+                        {isPro && (
+                             <li className="flex items-center gap-2 text-sm text-zinc-200">
+                                 <div className="p-1 rounded bg-purple-500/10 text-purple-400"><Crown className="w-3 h-3" /></div>
+                                 Branding Personalizado (Logo y Fondo)
+                             </li>
+                        )}
+                        <li className="flex items-center gap-2 text-sm text-zinc-200">
+                             <div className="p-1 rounded bg-green-500/10 text-green-400"><Check className="w-3 h-3" /></div>
+                             Archivos protegidos con contraseña
+                        </li>
+                    </ul>
+                    <div className="pt-4 text-center">
+                         <p className="text-xs text-zinc-500">¡Disfruta de la experiencia completa!</p>
+                    </div>
+                </div>
+             ),
+             type: "success",
+             confirmText: "¡Empezar a compartir!"
+         })
+         
+         // Clean URL
+         router.replace('/dashboard')
+    }
+  }, [searchParams, showModal, router])
 
   useEffect(() => {
     if (session?.user?.email) {
@@ -42,7 +97,24 @@ export default function DashboardHeader() {
         {/* User Info */}
         <div className="flex items-center gap-4">
            <div className="hidden text-right sm:block">
-              <p className="text-sm font-medium text-white">{session?.user?.name || "Usuario"}</p>
+              <div className="flex items-center justify-end gap-2">
+                  <p className="text-sm font-medium text-white">{session?.user?.name || "Usuario"}</p>
+                  {plan === 'pro' && (
+                      <span className="flex items-center gap-1 bg-gradient-to-r from-orange-500/10 to-pink-500/10 border border-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider">
+                          Pro <Crown className="w-3 h-3" />
+                      </span>
+                  )}
+                  {plan === 'plus' && (
+                      <span className="flex items-center gap-1 bg-blue-500/10 border border-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider">
+                          Plus <Zap className="w-3 h-3" />
+                      </span>
+                  )}
+                  {plan === 'free' && (
+                      <span className="bg-zinc-800 text-zinc-500 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border border-white/5">
+                          Free
+                      </span>
+                  )}
+              </div>
               <p className="text-xs text-zinc-500">{session?.user?.email || ""}</p>
            </div>
            

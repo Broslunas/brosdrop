@@ -1,14 +1,16 @@
 "use client"
 
 import { useState } from "react"
+import { useSession } from "next-auth/react"
 import { Check, X, Zap, Crown, Star, Shield, Clock } from "lucide-react"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import PaymentModal from "@/components/PaymentModal"
 
 const plans = [
     {
         name: "Free",
-        price: "$0",
+        price: "€0",
         description: "Para uso personal básico.",
         icon: Star,
         features: [
@@ -30,7 +32,7 @@ const plans = [
     },
     {
         name: "Plus",
-        price: "$4.99",
+        price: "€4.99",
         period: "/mes",
         description: "Para freelancers y uso frecuente.",
         icon: Zap,
@@ -40,22 +42,23 @@ const plans = [
             "50 archivos activos simultáneos",
             "5 archivos con contraseña",
             "5 enlaces personalizados",
-            "Caducidad 30 días (Próximamente)",
+            "Personalización QR (Colores)",
+            "Caducidad 30 días",
             "Soporte por email"
         ],
         missing: [
             "Personalización de marca",
             "Archivos ilimitados"
         ],
-        cta: "Muy Pronto",
+        cta: "Seleccionar Plan",
         current: false,
-        disabled: true,
+        disabled: false,
         popular: false,
         gradient: "from-blue-500 to-cyan-500"
     },
     {
         name: "Pro",
-        price: "$14.99",
+        price: "€14.99",
         period: "/mes",
         description: "Para creativos y profesionales.",
         icon: Crown,
@@ -65,13 +68,14 @@ const plans = [
             "250 archivos activos simultáneos",
             "50 archivos con contraseña",
             "25 enlaces personalizados",
-            "Caducidad 1 año (Próximamente)",
-            "Tu Logo y Fondo (Próximamente)"
+            "Personalización QR (Colores + Logo)",
+            "Caducidad 1 año",
+            "Tu Logo y Fondo"
         ],
         missing: [],
-        cta: "Muy Pronto",
+        cta: "Seleccionar Plan",
         current: false,
-        disabled: true,
+        disabled: false,
         popular: true,
         gradient: "from-orange-500 to-pink-500"
     }
@@ -93,12 +97,24 @@ const itemVariants = {
 }
 
 export default function PricingPage() {
+    const { data: session } = useSession()
+    const userPlan = (session?.user as any)?.plan || 'free'
+
     const [isAnnual, setIsAnnual] = useState(false)
     const [selectedPlan, setSelectedPlan] = useState<{name: string, price: string} | null>(null)
 
     const openCheckout = (plan: any) => {
+        console.log("Opening checkout for plan:", plan)
         if (plan.name === 'Free') return;
-        setSelectedPlan({ name: plan.name, price: plan.price })
+        
+        let priceToCharge = plan.price
+        if (isAnnual) {
+             const base = parseFloat(plan.price.replace("€", ""))
+             // Annual price: Monthly Base * 12 * 0.8 (20% off)
+             priceToCharge = `€${(base * 12 * 0.8).toFixed(2)}` 
+        }
+
+        setSelectedPlan({ name: plan.name, price: priceToCharge })
     }
 
     return (
@@ -184,11 +200,11 @@ export default function PricingPage() {
                                 
                                 <div className="flex items-baseline gap-1">
                                     <span className="text-5xl font-bold text-white tracking-tight">
-                                        {isAnnual && plan.price !== "$0" 
-                                            ? `$${(parseFloat(plan.price.slice(1)) * 0.8).toFixed(2)}` 
+                                        {isAnnual && plan.price !== "€0" 
+                                            ? `€${(parseFloat(plan.price.slice(1)) * 0.8).toFixed(2)}` 
                                             : plan.price}
                                     </span>
-                                    {plan.price !== "$0" && <span className="text-zinc-500 text-lg">/mes</span>}
+                                    {plan.price !== "€0" && <span className="text-zinc-500 text-lg">/mes</span>}
                                 </div>
                             </div>
 
@@ -221,21 +237,31 @@ export default function PricingPage() {
                                 ))}
                             </div>
 
-                            <button 
-                                onClick={() => !(plan as any).disabled && openCheckout(plan)}
-                                disabled={plan.current || (plan as any).disabled}
-                                className={`
-                                    w-full py-4 rounded-xl font-bold text-sm tracking-wide transition-all duration-300 relative overflow-hidden group/btn hover:shadow-lg
-                                    ${plan.current || (plan as any).disabled
-                                        ? 'bg-white/5 text-zinc-500 cursor-not-allowed border border-white/5' 
-                                        : plan.popular 
-                                            ? 'bg-white text-black hover:scale-[1.02] shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)]' 
-                                            : 'bg-white/10 text-white hover:bg-white hover:text-black hover:scale-[1.02]'
-                                    }
-                                `}
-                            >
-                                <span className="relative z-10">{plan.cta}</span>
-                            </button>
+                                {(() => {
+                                    const isUserPlan = plan.name.toLowerCase() === userPlan
+                                    const isFree = plan.name === 'Free'
+                                    
+                                    return (
+                                        <button 
+                                            onClick={() => !isFree && !(plan as any).disabled && openCheckout(plan)}
+                                            disabled={isFree || (plan as any).disabled}
+                                            className={`
+                                                w-full py-4 rounded-xl font-bold text-sm tracking-wide transition-all duration-300 relative overflow-hidden group/btn hover:shadow-lg
+                                                ${isFree || (plan as any).disabled
+                                                    ? 'bg-white/5 text-zinc-500 cursor-not-allowed border border-white/5' 
+                                                    : plan.popular 
+                                                        ? 'bg-white text-black hover:scale-[1.02] shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)]' 
+                                                        : 'bg-white/10 text-white hover:bg-white hover:text-black hover:scale-[1.02]'
+                                                }
+                                            `}
+                                        >
+                                           {isFree 
+                                                ? (isUserPlan ? "Tu Plan Actual" : "Plan Gratuito")
+                                                : (isUserPlan ? "Extender/Renovar" : plan.cta)
+                                           }
+                                        </button>
+                                    )
+                                })()}
                         </motion.div>
                     ))}
                 </motion.div>
@@ -274,21 +300,22 @@ export default function PricingPage() {
                                 <tbody className="divide-y divide-white/5">
                                     {[
                                         { name: "Subida Máxima", vals: ["10 MB", "200 MB", "500 MB", "5 GB"] },
-                                        { name: "Caducidad Link", vals: ["30 min", "7 días", "30 días", "1 Año"], comingSoonUrl: [false, false, true, true] },
+                                        { name: "Caducidad Link", vals: ["30 min", "7 días", "30 días", "1 Año"] },
+                                        { name: "Almacenamiento Cloud", vals: ["-", "500 MB", "20 GB", "200 GB"] },
                                         { name: "Archivos Simultáneos", vals: ["-", "5", "50", "250"] },
                                         { name: "Archivos con Clave", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, "1", "5", "50"] },
-                                        { name: "Almacenamiento Cloud", vals: ["-", "500 MB", "20 GB", "200 GB"] },
-                                        { name: "Branding Personal", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x3" className="w-4 h-4 mx-auto text-zinc-600"/>, <span key="c" title="Próximamente" className="flex justify-center"><Clock className="w-4 h-4 text-zinc-400"/></span>] },
-                                        { name: "Soporte Prioritario", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-600"/>, <Check key="check" className="w-4 h-4 mx-auto text-blue-400"/>, <Check key="check2" className="w-4 h-4 mx-auto text-primary"/>] },
                                         { name: "Enlaces Personalizados", vals: ["-", "1", "5", "25"] },
+                                        { name: "Personalización QR", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-600"/>, "Colores", "Colores + Logo"] },
+                                        { name: "Soporte Prioritario", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-600"/>, <Check key="check" className="w-4 h-4 mx-auto text-blue-400"/>, <Check key="check2" className="w-4 h-4 mx-auto text-primary"/>] },
+                                        { name: "Branding Personal", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x3" className="w-4 h-4 mx-auto text-zinc-600"/>, <Check key="check" className="w-4 h-4 mx-auto text-blue-400"/>] },
                                     ].map((row, i) => (
                                         <tr key={i} className="group hover:bg-white/[0.02] transition-colors">
                                             <td className="p-6 pl-8 font-medium text-zinc-300 group-hover:text-white transition-colors">{row.name}</td>
                                             <td className="p-6 text-center text-zinc-500">{row.vals[0]}</td>
                                             <td className="p-6 text-center text-zinc-400">{row.vals[1]}</td>
-                                            <td className="p-6 text-center text-blue-200 font-medium">{row.vals[2]} {row.comingSoonUrl?.[2] && <Clock className="w-3 h-3 inline text-zinc-500 mb-0.5"/>}</td>
+                                            <td className="p-6 text-center text-blue-200 font-medium">{row.vals[2]}</td>
                                             <td className="p-6 text-center text-white font-bold bg-white/[0.02] group-hover:bg-white/[0.04] transition-colors shadow-[inset_1px_0_0_0_rgba(255,255,255,0.05)]">
-                                                {row.vals[3]} {row.comingSoonUrl?.[3] && <Clock className="w-3 h-3 inline text-zinc-500 mb-0.5"/>}
+                                                {row.vals[3]}
                                             </td>
                                         </tr>
                                     ))}
@@ -300,11 +327,20 @@ export default function PricingPage() {
 
                 <div className="text-center mt-20 pt-10 border-t border-white/10">
                     <p className="text-zinc-500 text-sm">
-                        Todos los precios están en USD. Puedes cancelar en cualquier momento desde tu panel.
+                        Todos los precios están en Euros (€). Puedes cancelar en cualquier momento desde tu panel.
                         ¿Dudas? <Link href="/contact" className="text-white hover:underline decoration-primary underline-offset-4">Contáctanos</Link>.
                     </p>
                 </div>
             </div>
+            
+            <PaymentModal 
+                isOpen={!!selectedPlan}
+                onClose={() => setSelectedPlan(null)}
+                planName={selectedPlan?.name || ""}
+                price={selectedPlan?.price || "0"}
+                isAnnual={isAnnual}
+                currentPlan={userPlan}
+            />
         </div>
     )
 }

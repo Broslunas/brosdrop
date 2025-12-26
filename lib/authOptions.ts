@@ -37,6 +37,31 @@ export const authOptions: NextAuthOptions = {
         session.user.createdAt = user.createdAt
         // @ts-ignore
         session.user.plan = user.plan
+
+        // Check Expiration
+        // @ts-ignore
+        if (user.planExpiresAt && new Date(user.planExpiresAt) < new Date()) {
+             // @ts-ignore
+             session.user.plan = 'free'
+             
+             // Lazy update DB
+             // @ts-ignore
+             if (user.plan !== 'free') {
+                 (async () => {
+                     try {
+                        const User = (await import("@/models/User")).default
+                        const dbConnect = (await import("@/lib/db")).default
+                        await dbConnect()
+                        await User.findByIdAndUpdate(user.id, { 
+                            plan: 'free', 
+                            planExpiresAt: null 
+                        })
+                     } catch(e) {
+                         console.error("Auto-downgrade error", e)
+                     }
+                 })()
+             }
+        }
       }
       return session
     },

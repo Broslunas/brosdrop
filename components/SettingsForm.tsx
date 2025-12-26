@@ -1,11 +1,16 @@
-
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { useSession, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { User, Mail, Bell, Trash2, Camera, Save, Loader2, LayoutGrid, List, Image as ImageIcon, File } from "lucide-react"
+import { User, Save, Loader2 } from "lucide-react"
 import { useModal } from "@/components/ModalProvider"
+
+import ProfileSection from "./settings/ProfileSection"
+import SubscriptionSection from "./settings/SubscriptionSection"
+import PreferencesSection from "./settings/PreferencesSection"
+import BrandingSection from "./settings/BrandingSection"
+import DangerZoneSection from "./settings/DangerZoneSection"
 
 export default function SettingsForm() {
   const { data: session, update } = useSession()
@@ -22,7 +27,8 @@ export default function SettingsForm() {
     emailNotifications: true,
     defaultView: 'grid',
     branding: { logo: '', background: '', enabled: true },
-    plan: 'free'
+    plan: 'free',
+    planExpiresAt: null as string | null
   })
 
   // Load initial data
@@ -38,23 +44,14 @@ export default function SettingsForm() {
                     emailNotifications: data.emailNotifications ?? true,
                     defaultView: data.defaultView || 'grid',
                     branding: data.branding || { logo: '', background: '', enabled: true },
-                    plan: data.plan || 'free'
+                    plan: data.plan || 'free',
+                    planExpiresAt: data.planExpiresAt || null
                 })
             }
         })
         .finally(() => setLoading(false))
   }, [session])
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-        const reader = new FileReader()
-        reader.onloadend = () => {
-            setFormData(prev => ({ ...prev, image: reader.result as string }))
-        }
-        reader.readAsDataURL(file)
-    }
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -123,224 +120,37 @@ export default function SettingsForm() {
                 <User className="w-5 h-5" /> Perfil
             </h2>
             
-            <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Profile Picture */}
-                <div className="flex items-center gap-6">
-                    <div className="relative group">
-                        <div className="w-24 h-24 rounded-full overflow-hidden bg-zinc-800 border-2 border-zinc-700 group-hover:border-primary transition-colors">
-                            {formData.image ? (
-                                <img src={formData.image} alt="Profile" className="w-full h-full object-cover" />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-zinc-500">
-                                    <User className="w-10 h-10" />
-                                </div>
-                            )}
-                        </div>
-                        <label className="absolute bottom-0 right-0 p-2 bg-primary text-white rounded-full cursor-pointer hover:bg-primary/90 transition-colors shadow-lg">
-                            <Camera className="w-4 h-4" />
-                            <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-                        </label>
-                    </div>
-                    <div>
-                        <p className="text-zinc-200 font-medium mb-1">Foto de Perfil</p>
-                        <p className="text-sm text-zinc-500">Haz clic en el icono de cámara para cambiar tu foto.</p>
-                    </div>
-                </div>
+            <form onSubmit={handleSubmit} className="space-y-8">
+                <ProfileSection 
+                    name={formData.name}
+                    image={formData.image}
+                    onNameChange={val => setFormData({...formData, name: val})}
+                    onImageChange={val => setFormData({...formData, image: val})}
+                />
 
-                {/* Name */}
-                <div>
-                    <label className="block text-sm font-medium text-zinc-400 mb-2">Nombre</label>
-                    <input 
-                        type="text" 
-                        value={formData.name}
-                        onChange={e => setFormData({...formData, name: e.target.value})}
-                        className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                        placeholder="Tu nombre"
-                    />
-                </div>
+                <div className="h-px bg-zinc-800" />
 
-                <div className="h-px bg-zinc-800 my-8" />
+                <SubscriptionSection 
+                    plan={formData.plan}
+                    planExpiresAt={formData.planExpiresAt}
+                />
 
-                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                    <Mail className="w-5 h-5" /> Preferencias
-                </h3>
+                <div className="h-px bg-zinc-800" />
 
-                {/* Toggles */}
-                <div className="space-y-4">
-                    <label className="flex items-center justify-between p-4 rounded-xl bg-zinc-800/50 border border-zinc-800 cursor-pointer hover:bg-zinc-800 transition-colors">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-400">
-                                <Mail className="w-5 h-5" />
-                            </div>
-                            <div>
-                                <p className="font-medium text-zinc-200">Newsletter</p>
-                                <p className="text-xs text-zinc-500">Recibe noticias y actualizaciones.</p>
-                            </div>
-                        </div>
-                        <div className={`w-12 h-6 rounded-full transition-colors relative ${formData.newsletterSubscribed ? 'bg-primary' : 'bg-zinc-700'}`}>
-                            <input 
-                                type="checkbox" 
-                                className="hidden" 
-                                checked={formData.newsletterSubscribed}
-                                onChange={e => setFormData({...formData, newsletterSubscribed: e.target.checked})}
-                            />
-                            <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${formData.newsletterSubscribed ? 'translate-x-6' : ''}`} />
-                        </div>
-                    </label>
+                <PreferencesSection 
+                    newsletter={formData.newsletterSubscribed}
+                    notifications={formData.emailNotifications}
+                    defaultView={formData.defaultView}
+                    onChange={(key, val) => setFormData({...formData, [key]: val})}
+                />
 
-                    <label className="flex items-center justify-between p-4 rounded-xl bg-zinc-800/50 border border-zinc-800 cursor-pointer hover:bg-zinc-800 transition-colors">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-yellow-500/10 text-yellow-400">
-                                <Bell className="w-5 h-5" />
-                            </div>
-                            <div>
-                                <p className="font-medium text-zinc-200">Notificaciones</p>
-                                <p className="text-xs text-zinc-500">Recibe alertas sobre tus archivos.</p>
-                            </div>
-                        </div>
-                        <div className={`w-12 h-6 rounded-full transition-colors relative ${formData.emailNotifications ? 'bg-primary' : 'bg-zinc-700'}`}>
-                            <input 
-                                type="checkbox" 
-                                className="hidden" 
-                                checked={formData.emailNotifications}
-                                onChange={e => setFormData({...formData, emailNotifications: e.target.checked})}
-                            />
-                            <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${formData.emailNotifications ? 'translate-x-6' : ''}`} />
-                        </div>
-                    </label>
+                <div className="h-px bg-zinc-800" />
 
-                    <div className="pt-2">
-                         <label className="block text-sm font-medium text-zinc-400 mb-3">Vista por defecto</label>
-                         <div className="grid grid-cols-2 gap-4">
-                             <div 
-                                 onClick={() => setFormData({...formData, defaultView: 'grid'})}
-                                 className={`cursor-pointer p-4 rounded-xl border flex items-center gap-3 transition-all ${formData.defaultView === 'grid' ? 'bg-primary/10 border-primary text-primary' : 'bg-zinc-800/50 border-zinc-800 text-zinc-400 hover:bg-zinc-800'}`}
-                             >
-                                 <LayoutGrid className="w-5 h-5" />
-                                 <span className="font-medium">Cuadrícula</span>
-                             </div>
-                             <div 
-                                 onClick={() => setFormData({...formData, defaultView: 'list'})}
-                                 className={`cursor-pointer p-4 rounded-xl border flex items-center gap-3 transition-all ${formData.defaultView === 'list' ? 'bg-primary/10 border-primary text-primary' : 'bg-zinc-800/50 border-zinc-800 text-zinc-400 hover:bg-zinc-800'}`}
-                             >
-                                 <List className="w-5 h-5" />
-                                 <span className="font-medium">Lista</span>
-                             </div>
-                         </div>
-                    </div>
-                </div>
-
-                <div className="h-px bg-zinc-800 my-8" />
-                
-                {formData.plan === 'pro' ? (
-                    <>
-                        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                            <LayoutGrid className="w-5 h-5 text-purple-500" /> Personalización (Pro)
-                        </h3>
-                        
-                        <div className="space-y-6">
-                             {/* Enabled Toggle */}
-                             <label className="flex items-center justify-between p-4 rounded-xl bg-purple-500/10 border border-purple-500/20 cursor-pointer hover:bg-purple-500/20 transition-colors">
-                                <div>
-                                    <p className="font-medium text-zinc-200">Personalización Activada</p>
-                                    <p className="text-xs text-zinc-500">Muestra tu logo y fondo en la página de descarga.</p>
-                                </div>
-                                <div className={`w-12 h-6 rounded-full transition-colors relative ${formData.branding?.enabled ? 'bg-purple-500' : 'bg-zinc-700'}`}>
-                                    <input 
-                                        type="checkbox" 
-                                        className="hidden" 
-                                        checked={formData.branding?.enabled ?? true}
-                                        onChange={e => setFormData({...formData, branding: { ...formData.branding, enabled: e.target.checked }})}
-                                    />
-                                    <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${formData.branding?.enabled ? 'translate-x-6' : ''}`} />
-                                </div>
-                            </label>
-
-                            {/* Logo Upload */}
-                            <div>
-                                <label className="block text-sm font-medium text-zinc-400 mb-2">Logo Personalizado</label>
-                                <div className="flex items-center gap-4">
-                                     <div className="w-16 h-16 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center overflow-hidden relative group">
-                                         {formData.branding?.logo ? (
-                                             <img src={formData.branding.logo} className="w-full h-full object-contain p-2" />
-                                         ) : (
-                                             <File className="w-6 h-6 text-zinc-600" />
-                                         )}
-                                          <label className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
-                                             <Camera className="w-4 h-4 text-white" />
-                                             <input type="file" accept="image/*" className="hidden" 
-                                                 onChange={(e) => {
-                                                     const file = e.target.files?.[0]
-                                                     if (file) {
-                                                         const reader = new FileReader()
-                                                         reader.onloadend = () => setFormData((prev: any) => ({...prev, branding: { ...prev.branding, logo: reader.result as string }}))
-                                                         reader.readAsDataURL(file)
-                                                     }
-                                                 }}
-                                             />
-                                         </label>
-                                     </div>
-                                     <div className="text-xs text-zinc-500">
-                                         <p>Sube tu logo (PNG transparente recomendado).</p>
-                                         <button type="button" onClick={() => setFormData({...formData, branding: { ...formData.branding, logo: '' }})} className="text-red-400 hover:text-red-300 mt-1">Eliminar logo</button>
-                                     </div>
-                                </div>
-                            </div>
-
-                            {/* Background Upload */}
-                            <div>
-                                <label className="block text-sm font-medium text-zinc-400 mb-2">Fondo de Pantalla</label>
-                                <div className="h-32 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center overflow-hidden relative group">
-                                     {formData.branding?.background ? (
-                                         <img src={formData.branding.background} className="w-full h-full object-cover" />
-                                     ) : (
-                                         <div className="text-zinc-600 flex flex-col items-center">
-                                             <ImageIcon className="w-8 h-8 mb-2" />
-                                             <span>Sin fondo personalizado</span>
-                                         </div>
-                                     )}
-                                     <label className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
-                                         <div className="bg-zinc-900/80 px-4 py-2 rounded-lg text-white text-sm flex items-center gap-2">
-                                             <Camera className="w-4 h-4" /> Cambiar Fondo
-                                         </div>
-                                         <input type="file" accept="image/*" className="hidden" 
-                                             onChange={(e) => {
-                                                 const file = e.target.files?.[0]
-                                                 if (file) {
-                                                     const reader = new FileReader()
-                                                     reader.onloadend = () => setFormData((prev: any) => ({...prev, branding: { ...prev.branding, background: reader.result as string }}))
-                                                     reader.readAsDataURL(file)
-                                                 }
-                                             }}
-                                         />
-                                     </label>
-                                </div>
-                                {formData.branding?.background && (
-                                     <button type="button" onClick={() => setFormData({...formData, branding: { ...formData.branding, background: '' }})} className="text-xs text-red-400 hover:text-red-300 mt-2">Eliminar fondo</button>
-                                )}
-                            </div>
-                        </div>
-                    </>
-                ) : (
-                     <>
-                        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                            <LayoutGrid className="w-5 h-5 text-zinc-500" /> Personalización de Marca
-                        </h3>
-                        <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-2xl p-6 relative overflow-hidden group cursor-pointer hover:border-purple-500/40 transition-colors" onClick={() => router.push('/pricing')}>
-                             <div className="relative z-10 flex flex-col items-start gap-4">
-                                 <div>
-                                    <h4 className="text-base font-bold text-white mb-2">Desbloquea Branding Personalizado</h4>
-                                    <p className="text-zinc-400 text-sm">
-                                        Con el Plan Pro, puedes añadir tu propio logo y un fondo personalizado a todas tus páginas de descarga.
-                                    </p>
-                                 </div>
-                                 <button type="button" className="bg-white text-black px-4 py-2 rounded-lg text-sm font-bold hover:bg-zinc-200 transition-colors">
-                                     Mejorar a Pro
-                                 </button>
-                             </div>
-                        </div>
-                     </>
-                )}
+                <BrandingSection 
+                    plan={formData.plan}
+                    branding={formData.branding}
+                    onChange={val => setFormData({...formData, branding: val})}
+                />
                 
                 <div className="pt-4">
                     <button 
@@ -355,22 +165,7 @@ export default function SettingsForm() {
             </form>
         </div>
 
-        {/* Delete Account */}
-        <div className="bg-red-500/5 backdrop-blur-xl border border-red-500/20 rounded-3xl p-8">
-            <h2 className="text-xl font-bold text-red-500 mb-2 flex items-center gap-2">
-                <Trash2 className="w-5 h-5" /> Zona de Peligro
-            </h2>
-            <p className="text-zinc-400 mb-6 text-sm">
-                Una vez que elimines tu cuenta, no hay vuelta atrás. Por favor, asegúrate.
-            </p>
-            <button 
-                disabled
-                onClick={handleDeleteAccount}
-                className="bg-red-500/50 cursor-not-allowed text-white/50 px-6 py-3 rounded-xl font-medium transition-colors"
-            >
-                Eliminar Cuenta (Deshabilitado temporalmente)
-            </button>
-        </div>
+        <DangerZoneSection onDelete={handleDeleteAccount} />
     </div>
   )
 }
