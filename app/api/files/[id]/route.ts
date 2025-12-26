@@ -88,15 +88,30 @@ export async function PUT(
 
     if (expiresAt) {
         const newDate = new Date(expiresAt)
-        const oldDate = new Date(transfer.expiresAt)
         
         // Ensure valid date
         if (!isNaN(newDate.getTime())) {
-            // Cannot extend life beyond original (or maybe we allow it? User said "siempre antes de la fecha de expiración original")
-            // So we strictly enforce correct logic: newDate <= oldDate
-            if (newDate < oldDate && newDate > new Date()) {
-                transfer.expiresAt = newDate.toISOString()
+            const now = new Date()
+            if (newDate <= now) {
+                return NextResponse.json({ error: "La fecha de expiración debe ser futura." }, { status: 400 })
             }
+
+            // Calculate max allowed date based on plan
+            // The file creation date determines the start of the "lifecycle"
+            const createdAt = new Date(transfer.createdAt)
+            const maxDays = currentLimits.maxDays
+            const maxDate = new Date(createdAt.getTime() + maxDays * 24 * 60 * 60 * 1000)
+
+            // Allow extending up to the plan limit
+            if (newDate > maxDate) {
+                 return NextResponse.json({ 
+                     error: `Tu plan ${currentLimits.name} solo permite mantener archivos por ${maxDays} días desde su creación.` 
+                 }, { status: 403 })
+            }
+
+            transfer.expiresAt = newDate.toISOString()
+        } else {
+             return NextResponse.json({ error: "Fecha inválida." }, { status: 400 })
         }
     }
 
