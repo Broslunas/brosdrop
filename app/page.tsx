@@ -129,16 +129,8 @@ export default function Home() {
           </div>
       </section>
 
-      <footer className="w-full border-t border-white/5 py-12">
-          <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between text-zinc-500 text-sm">
-             <p>© 2024 Brosdrop. Todos los derechos reservados.</p>
-             <div className="flex gap-6 mt-4 md:mt-0">
-                 <a href="#" className="hover:text-white transition-colors">Términos</a>
-                 <a href="#" className="hover:text-white transition-colors">Privacidad</a>
-                 <a href="#" className="hover:text-white transition-colors">Contacto</a>
-             </div>
-          </div>
-      </footer>
+
+
 
     </div>
     </main>

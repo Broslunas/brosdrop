@@ -41,7 +41,7 @@ export default function Header() {
                 className="rounded-lg bg-zinc-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 flex items-center gap-2 border border-zinc-700"
               >
                  <LayoutDashboard className="h-4 w-4" />
-                 <span className="hidden sm:inline">Dashboard</span>
+                 <span className="hidden sm:inline">Panel</span>
               </Link>
 
               <button
@@ -49,7 +49,7 @@ export default function Header() {
                 className="rounded-lg bg-zinc-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 flex items-center gap-2 border border-zinc-700"
               >
                 <LogOut className="h-4 w-4" />
-                Sign Out
+                Cerrar Sesión
               </button>
             </div>
           ) : (
@@ -58,7 +58,7 @@ export default function Header() {
               className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-all hover:bg-primary/90 hover:shadow-[0_0_20px_-5px_var(--primary)] flex items-center gap-2"
             >
               <LogIn className="h-4 w-4" />
-              Login
+              Iniciar Sesión
             </button>
           )}
         </nav>

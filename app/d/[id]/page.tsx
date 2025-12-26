@@ -6,6 +6,7 @@ import { GetObjectCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import { s3Client } from "@/lib/s3"
 import DownloadManager from "@/components/DownloadManager"
+import { isValidObjectId } from "mongoose"
 
 import ExpiredTransfer from "@/models/ExpiredTransfer"
 import User from "@/models/User"
@@ -16,6 +17,10 @@ interface Props {
 
 export default async function DownloadPage({ params }: Props) {
   const { id } = await params
+  
+  if (!isValidObjectId(id)) {
+      return notFound()
+  }
   
   await dbConnect()
 
@@ -58,8 +63,8 @@ export default async function DownloadPage({ params }: Props) {
       if (new Date().toISOString() > transfer.expiresAt) {
           return (
             <div className="flex min-h-[50vh] flex-col items-center justify-center text-center">
-                <h1 className="text-2xl font-bold text-red-500">Transfer Expired</h1>
-                <p className="text-zinc-400">This file is no longer available.</p>
+                <h1 className="text-2xl font-bold text-red-500">Transferencia Expirada</h1>
+                <p className="text-zinc-400">Este archivo ya no está disponible.</p>
             </div>
           )
       }
