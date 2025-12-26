@@ -13,6 +13,7 @@ export interface ITransfer {
   downloads: number
   views: number
   passwordHash?: string // Optional password protection
+  customLink?: string // Optional custom link slug
   expiresAt: string
   createdAt: string
   updatedAt: string
@@ -28,6 +29,7 @@ const TransferSchema = new Schema<ITransfer>({
   downloads: { type: Number, default: 0 },
   views: { type: Number, default: 0 },
   passwordHash: { type: String },
+  customLink: { type: String, unique: true, sparse: true, trim: true },
   expiresAt: { type: String, required: true, index: true },
 }, { timestamps: true })
 

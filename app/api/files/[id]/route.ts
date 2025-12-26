@@ -20,7 +20,7 @@ export async function PUT(
     }
 
     const { id } = await params
-    const { name, password, removePassword } = await req.json()
+    const { name, password, removePassword, expiresAt } = await req.json()
 
     await dbConnect()
 
@@ -42,6 +42,20 @@ export async function PUT(
 
     if (name) {
         transfer.originalName = name
+    }
+
+    if (expiresAt) {
+        const newDate = new Date(expiresAt)
+        const oldDate = new Date(transfer.expiresAt)
+        
+        // Ensure valid date
+        if (!isNaN(newDate.getTime())) {
+            // Cannot extend life beyond original (or maybe we allow it? User said "siempre antes de la fecha de expiración original")
+            // So we strictly enforce correct logic: newDate <= oldDate
+            if (newDate < oldDate && newDate > new Date()) {
+                transfer.expiresAt = newDate.toISOString()
+            }
+        }
     }
 
     if (removePassword) {

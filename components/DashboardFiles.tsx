@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react"
 import { ITransfer } from "@/models/Transfer"
-import { Trash2, ExternalLink, Copy, FileIcon, Calendar, Download, HardDrive, Eye, Search, Filter, ArrowUpDown, Check, X, Grid, List as ListIcon, Edit2, Lock, Music, Video, Image as ImageIcon, FileText, Archive, FileCode } from "lucide-react"
+import { Trash2, ExternalLink, Copy, FileIcon, Calendar, Download, HardDrive, Eye, Search, Filter, ArrowUpDown, Check, X, Grid, List as ListIcon, Edit2, Lock, Music, Video, Image as ImageIcon, FileText, Archive, FileCode, Clock } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useModal } from "@/components/ModalProvider"
@@ -72,7 +72,7 @@ export default function DashboardClient({
   
   const [editingFile, setEditingFile] = useState<ITransfer | null>(null)
 
-  const handleSaveEdit = async (id: string, newName: string, password?: string | null) => {
+  const handleSaveEdit = async (id: string, newName: string, password?: string | null, newExpiration?: string) => {
       try {
           const res = await fetch(`/api/files/${id}`, {
               method: 'PUT',
@@ -80,7 +80,8 @@ export default function DashboardClient({
               body: JSON.stringify({ 
                   name: newName, 
                   password: password, 
-                  removePassword: password === null 
+                  removePassword: password === null,
+                  expiresAt: newExpiration
               })
           })
           
@@ -90,7 +91,12 @@ export default function DashboardClient({
               throw new Error(data.error || "Error al actualizar")
           }
           
-          const updated = { ...files.find(f => f._id === id)!, originalName: newName, passwordHash: data.transfer.passwordHash }
+          const updated = { 
+              ...files.find(f => f._id === id)!, 
+              originalName: newName, 
+              passwordHash: data.transfer.passwordHash,
+              expiresAt: data.transfer.expiresAt || newExpiration
+          }
           setFiles(prev => prev.map(f => f._id === id ? updated : f))
           if (onFileUpdated) onFileUpdated(updated)
           
@@ -403,12 +409,34 @@ export default function DashboardClient({
                             <h3 className={`font-medium text-white mb-1 truncate ${tab === 'history' ? 'line-through text-zinc-500' : ''}`} title={file.originalName}>
                                 {file.originalName}
                             </h3>
-                            <div className="flex items-center gap-2 text-sm text-zinc-500">
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-zinc-500">
                                 <span>{formatBytes(file.size)}</span>
                                 {viewMode === 'list' && (
                                     <>
                                         <span className="w-1 h-1 rounded-full bg-zinc-700" />
                                         <span>{new Date(file.createdAt).toLocaleDateString()}</span>
+                                    </>
+                                )}
+                                
+                                {tab === 'active' && file.expiresAt && (
+                                    <>
+                                        <span className="hidden sm:block w-1 h-1 rounded-full bg-zinc-700" />
+                                        <div className="flex items-center gap-1.5 text-xs text-orange-400/80 bg-orange-400/10 px-2 py-0.5 rounded-full border border-orange-400/20 w-fit">
+                                            <Clock className="w-3 h-3" />
+                                            <span>
+                                                {(() => {
+                                                    const diff = new Date(file.expiresAt).getTime() - Date.now()
+                                                    if (diff < 0) return "Expirado"
+                                                    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+                                                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+                                                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+                                                    
+                                                    if (days > 0) return `${days}d restantes`
+                                                    if (hours > 0) return `${hours}h restantes`
+                                                    return `${minutes}m restantes`
+                                                })()}
+                                            </span>
+                                        </div>
                                     </>
                                 )}
                             </div>

@@ -205,6 +205,7 @@ export default function SettingsForm() {
                                 checked={formData.emailNotifications}
                                 onChange={e => setFormData({...formData, emailNotifications: e.target.checked})}
                             />
+                            <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${formData.emailNotifications ? 'translate-x-6' : ''}`} />
                         </div>
                     </label>
 

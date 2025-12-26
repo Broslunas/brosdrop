@@ -3,19 +3,20 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Save, Lock, Edit2, Trash2 } from "lucide-react"
+import { X, Save, Lock, Edit2, Trash2, Clock } from "lucide-react"
 
 interface EditFileModalProps {
   isOpen: boolean
   onClose: () => void
   file: any
-  onSave: (id: string, newName: string, password?: string | null) => Promise<void>
+  onSave: (id: string, newName: string, password?: string | null, newExpiration?: string) => Promise<void>
 }
 
 export default function EditFileModal({ isOpen, onClose, file, onSave }: EditFileModalProps) {
   const [name, setName] = useState(file?.originalName || "")
   const [password, setPassword] = useState("")
   const [hasPassword, setHasPassword] = useState(false) // Whether file currently has one or user wants to add one
+  const [newExpiration, setNewExpiration] = useState("")
   const [isSaving, setIsSaving] = useState(false)
 
   // Reset state when file changes or modal opens
@@ -25,6 +26,12 @@ export default function EditFileModal({ isOpen, onClose, file, onSave }: EditFil
           const isProtected = !!file.passwordHash || !!file.password
           setHasPassword(isProtected)
           setPassword("")
+          // Format ISO to input datetime-local: YYYY-MM-DDThh:mm
+          if (file.expiresAt) {
+              setNewExpiration(new Date(file.expiresAt).toISOString().slice(0, 16))
+          } else {
+              setNewExpiration("")
+          }
       }
   }, [file, isOpen])
 
@@ -38,7 +45,7 @@ export default function EditFileModal({ isOpen, onClose, file, onSave }: EditFil
           if (hasPassword && password) pwd = password
           if (!hasPassword) pwd = null // Indicate removal
           
-          await onSave(file._id, name, pwd)
+          await onSave(file._id, name, pwd, newExpiration)
           onClose()
       } catch (e) {
           console.error(e)
@@ -91,6 +98,35 @@ export default function EditFileModal({ isOpen, onClose, file, onSave }: EditFil
                         onChange={(e) => setName(e.target.value)}
                         className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-primary/50 outline-none"
                     />
+                </div>
+
+                {/* Expiration Date Section */}
+                <div className="p-4 rounded-xl border bg-zinc-800/50 border-zinc-800">
+                    <div className="flex items-center gap-2 mb-2">
+                         <div className="flex items-center gap-2">
+                             <Clock className="w-4 h-4 text-zinc-400" />
+                             <span className="text-sm font-medium text-zinc-300">Fecha de Expiración</span>
+                         </div>
+                    </div>
+                    
+                    <p className="text-xs text-zinc-500 mb-4 ml-6">
+                        Puedes reducir el tiempo de vida del archivo si lo deseas.
+                    </p>
+
+                    <div className="ml-6">
+                         <input 
+                             type="datetime-local"
+                             value={newExpiration}
+                             max={file?.expiresAt ? new Date(file.expiresAt).toISOString().slice(0, 16) : undefined}
+                             onChange={(e) => setNewExpiration(e.target.value)}
+                             className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2 text-white text-sm focus:ring-2 focus:ring-primary/50 outline-none mb-1 text-zinc-400 [&::-webkit-calendar-picker-indicator]:invert"
+                         />
+                         {file?.expiresAt && (
+                             <p className="text-xs text-zinc-500 mt-2">
+                                 Máximo permitido: {new Date(file.expiresAt).toLocaleString()}
+                             </p>
+                         )}
+                    </div>
                 </div>
 
                 {/* Password Section */}
