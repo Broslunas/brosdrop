@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     // Optional: Force login?
     // if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const { name, type, size, expiresInHours, customExpiresAt, password } = await req.json()
+    const { name, type, size, expiresInHours, customExpiresAt, password, customLink } = await req.json()
 
     if (!process.env.R2_BUCKET_NAME) {
         return NextResponse.json({ error: "Server Configuration Error: R2 Bucket not set" }, { status: 500 })
@@ -62,7 +62,44 @@ export async function POST(req: Request) {
         }
     }
 
-    // 3. Password Check
+    // 3. Custom Link Check
+    if (customLink) {
+        if (!isVerified) {
+             return NextResponse.json({ error: "Verifica tu email para usar enlaces personalizados." }, { status: 403 })
+        }
+
+        const slugRegex = /^[a-z0-9-]+$/
+        if (!slugRegex.test(customLink)) {
+            return NextResponse.json({ error: "El enlace personalizado solo puede contener letras minúsculas, números y guiones." }, { status: 400 })
+        }
+
+        // Check Limits
+        if (session?.user?.id) {
+             const activeLinksCount = await Transfer.countDocuments({ 
+                senderId: session.user.id, 
+                customLink: { $exists: true, $ne: null } 
+             })
+             
+             if (activeLinksCount >= (currentLimits.maxCustomLinks || 0)) {
+                 return NextResponse.json({ 
+                     error: `Tu plan ${currentLimits.name} solo permite ${currentLimits.maxCustomLinks} enlaces personalizados.` 
+                 }, { status: 403 })
+             }
+        }
+
+        // Check Uniqueness (Global)
+        const existing = await Transfer.findOne({ customLink })
+        if (existing) {
+             return NextResponse.json({ error: "Este enlace personalizado ya está en uso." }, { status: 409 })
+        }
+        
+        const forbidden = ['dashboard', 'api', 'login', 'register', 'admin', 'privacy', 'terms', 'features']
+        if (forbidden.includes(customLink)) {
+             return NextResponse.json({ error: "Este enlace precindido." }, { status: 400 })
+        }
+    }
+
+    // 4. Password Check
     let passwordHash = undefined
     if (password) {
          if (!isVerified) {
@@ -128,7 +165,8 @@ export async function POST(req: Request) {
       senderId: session?.user?.id,
       senderEmail: session?.user?.email,
       expiresAt: expirationTime.toISOString(),
-      passwordHash
+      passwordHash,
+      customLink
     })
 
     await ExpiredTransfer.create({
@@ -140,7 +178,8 @@ export async function POST(req: Request) {
         senderId: session?.user?.id,
         senderEmail: session?.user?.email,
         expiresAt: expirationTime.toISOString(),
-        passwordHash
+        passwordHash,
+        customLink
     })
 
     return NextResponse.json({

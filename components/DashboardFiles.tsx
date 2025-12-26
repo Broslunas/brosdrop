@@ -72,7 +72,7 @@ export default function DashboardClient({
   
   const [editingFile, setEditingFile] = useState<ITransfer | null>(null)
 
-  const handleSaveEdit = async (id: string, newName: string, password?: string | null, newExpiration?: string) => {
+  const handleSaveEdit = async (id: string, newName: string, password?: string | null, newExpiration?: string, customLink?: string) => {
       try {
           const res = await fetch(`/api/files/${id}`, {
               method: 'PUT',
@@ -81,7 +81,8 @@ export default function DashboardClient({
                   name: newName, 
                   password: password, 
                   removePassword: password === null,
-                  expiresAt: newExpiration
+                  expiresAt: newExpiration,
+                  customLink: customLink
               })
           })
           
@@ -95,7 +96,8 @@ export default function DashboardClient({
               ...files.find(f => f._id === id)!, 
               originalName: newName, 
               passwordHash: data.transfer.passwordHash,
-              expiresAt: data.transfer.expiresAt || newExpiration
+              expiresAt: data.transfer.expiresAt || newExpiration,
+              customLink: data.transfer.customLink
           }
           setFiles(prev => prev.map(f => f._id === id ? updated : f))
           if (onFileUpdated) onFileUpdated(updated)

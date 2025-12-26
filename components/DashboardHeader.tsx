@@ -32,22 +32,12 @@ export default function DashboardHeader() {
     <header className="flex h-16 items-center justify-between border-b border-white/5 bg-zinc-900/50 px-6 backdrop-blur-xl">
       {/* Left side - Breadcrumbs or Back (Optional, keeping it simple or matching image) */}
       <div className="flex items-center gap-4">
-          <button className="text-zinc-400 hover:text-white transition-colors">
-              <ChevronLeft className="h-5 w-5" />
-          </button>
+          
       </div>
 
       {/* Right side - User Profile & Actions */}
       <div className="flex items-center gap-6">
-        {/* Icons */}
-        <div className="flex items-center gap-4 border-r border-white/5 pr-6">
-             <button className="text-zinc-400 hover:text-white transition-colors">
-                <Moon className="h-5 w-5" />
-             </button>
-             <button className="text-zinc-400 hover:text-white transition-colors">
-                <Bell className="h-5 w-5" />
-             </button>
-        </div>
+        
 
         {/* User Info */}
         <div className="flex items-center gap-4">

@@ -23,17 +23,19 @@ export default function CleanupClient({ initialFiles, plan }: { initialFiles: an
     // Derived stats from CLIENT state
     const activeFilesCount = files.length
     const activeProtectedCount = files.filter(f => f.passwordHash).length
+    const activeLinksCount = files.filter(f => f.customLink).length
     const totalStorageBytes = files.reduce((acc, curr) => acc + (curr.size || 0), 0)
 
     const isFilesOver = plan.maxFiles !== Infinity && activeFilesCount > plan.maxFiles
     const isPwdOver = plan.maxPwd !== Infinity && activeProtectedCount > plan.maxPwd
+    const isLinksOver = plan.maxCustomLinks !== undefined && activeLinksCount > plan.maxCustomLinks
     const isStorageOver = plan.maxTotalStorage && totalStorageBytes > plan.maxTotalStorage
 
     const hasShownSuccess = useRef(false)
 
     // Check if user is now compliant
     useEffect(() => {
-        if (!isFilesOver && !isPwdOver && !isStorageOver && !hasShownSuccess.current) {
+        if (!isFilesOver && !isPwdOver && !isLinksOver && !isStorageOver && !hasShownSuccess.current) {
             hasShownSuccess.current = true
             showModal({
                 title: "¡Cuenta Regularizada!",
@@ -44,7 +46,7 @@ export default function CleanupClient({ initialFiles, plan }: { initialFiles: an
                 onConfirm: () => router.push("/dashboard")
             })
         }
-    }, [isFilesOver, isPwdOver, isStorageOver, showModal, router])
+    }, [isFilesOver, isPwdOver, isLinksOver, isStorageOver, showModal, router])
 
     const handleFileDeleted = (id: string) => {
         setFiles(prev => prev.filter(f => f._id !== id))
@@ -75,6 +77,11 @@ export default function CleanupClient({ initialFiles, plan }: { initialFiles: an
                         {plan.maxPwd !== Infinity && (
                             <span className={`px-3 py-1 rounded-full border text-sm font-medium ${isPwdOver ? 'bg-zinc-900 border-red-500/50 text-red-400' : 'bg-green-500/10 border-green-500/20 text-green-400'}`}>
                                 Con Clave: {activeProtectedCount} / {plan.maxPwd}
+                            </span>
+                        )}
+                        {plan.maxCustomLinks !== undefined && (
+                            <span className={`px-3 py-1 rounded-full border text-sm font-medium ${isLinksOver ? 'bg-zinc-900 border-red-500/50 text-red-400' : 'bg-green-500/10 border-green-500/20 text-green-400'}`}>
+                                Enlaces: {activeLinksCount} / {plan.maxCustomLinks}
                             </span>
                         )}
                         {plan.maxTotalStorage && (

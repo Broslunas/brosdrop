@@ -29,6 +29,8 @@ export default async function DashboardLayout({
   const activeFilesCount = await Transfer.countDocuments({ senderId: session.user.id })
   const activeProtectedCount = await Transfer.countDocuments({ senderId: session.user.id, passwordHash: { $exists: true } })
   
+  const activeLinksCount = await Transfer.countDocuments({ senderId: session.user.id, customLink: { $exists: true, $ne: null } })
+  
   // Calculate total storage
   // Note: For large number of files, this aggregation is better than finding all and reducing in JS
   const storageResult = await Transfer.aggregate([
@@ -46,6 +48,9 @@ export default async function DashboardLayout({
   } else if (plan.maxPwd !== Infinity && activeProtectedCount > plan.maxPwd) {
      overLimit = true
      limitMsg = `Has excedido tu límite de archivos protegidos con contraseña (${activeProtectedCount}/${plan.maxPwd}).`
+  } else if (plan.maxCustomLinks !== undefined && activeLinksCount > plan.maxCustomLinks) {
+     overLimit = true
+     limitMsg = `Has excedido tu límite de enlaces personalizados (${activeLinksCount}/${plan.maxCustomLinks}).`
   } else if (plan.maxTotalStorage && totalStorageBytes > plan.maxTotalStorage) {
      overLimit = true
      limitMsg = `Has excedido tu límite de almacenamiento total.`

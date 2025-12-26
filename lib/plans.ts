@@ -3,7 +3,8 @@ export const PLAN_LIMITS = {
         name: "Gratis",
         maxBytes: 200 * 1000 * 1000, // 200MB
         maxFiles: 5, 
-        maxPwd: 1, 
+        maxPwd: 1,
+        maxCustomLinks: 0, 
         maxDays: 7,
         maxTotalStorage: 500 * 1000 * 1000 // 500MB
     },
@@ -11,7 +12,8 @@ export const PLAN_LIMITS = {
         name: "Plus",
         maxBytes: 500 * 1000 * 1000, // 500MB
         maxFiles: 50, 
-        maxPwd: 5, 
+        maxPwd: 5,
+        maxCustomLinks: 5, 
         maxDays: 30,
         maxTotalStorage: 20 * 1000 * 1000 * 1000 // 20GB
     },
@@ -19,7 +21,8 @@ export const PLAN_LIMITS = {
         name: "Pro",
         maxBytes: 5 * 1000 * 1000 * 1000, // 5GB
         maxFiles: 250, 
-        maxPwd: 50, 
+        maxPwd: 50,
+        maxCustomLinks: 25, 
         maxDays: 365,
         maxTotalStorage: 200 * 1000 * 1000 * 1000 // 200GB
     },
@@ -28,6 +31,7 @@ export const PLAN_LIMITS = {
         maxBytes: 10 * 1000 * 1000, // 10MB
         maxFiles: 0, 
         maxPwd: 0, 
+        maxCustomLinks: 0,
         maxDays: 0.02, // 30 mins
         maxTotalStorage: 100 * 1000 * 1000 // 100MB
     }

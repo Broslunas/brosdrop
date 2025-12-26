@@ -20,7 +20,7 @@ export async function PUT(
     }
 
     const { id } = await params
-    const { name, password, removePassword, expiresAt } = await req.json()
+    const { name, password, removePassword, expiresAt, customLink } = await req.json()
 
     await dbConnect()
 
@@ -42,6 +42,48 @@ export async function PUT(
 
     if (name) {
         transfer.originalName = name
+    }
+
+    if (customLink !== undefined) {
+        // If empty string, user wants to remove it
+        if (!customLink) {
+            transfer.customLink = undefined
+        } else {
+            // Validate Slug format (alphanumeric, hyphens)
+            const slugRegex = /^[a-z0-9-]+$/
+            if (!slugRegex.test(customLink)) {
+                return NextResponse.json({ error: "El enlace personalizado solo puede contener letras minúsculas, números y guiones." }, { status: 400 })
+            }
+
+            // Check Limits (Link Count)
+            // Only count if adding a new one (not updating existing one to same or different)
+            if (!transfer.customLink) {
+                 const activeLinksCount = await Transfer.countDocuments({ 
+                    senderId: session.user.id, 
+                    customLink: { $exists: true, $ne: null } 
+                 })
+                 
+                 if (activeLinksCount >= (currentLimits.maxCustomLinks || 0)) {
+                     return NextResponse.json({ 
+                         error: `Tu plan ${currentLimits.name} solo permite ${currentLimits.maxCustomLinks} enlaces personalizados.` 
+                     }, { status: 403 })
+                 }
+            }
+
+            // Check Uniqueness
+            const existing = await Transfer.findOne({ customLink })
+            if (existing && existing._id.toString() !== id) {
+                 return NextResponse.json({ error: "Este enlace personalizado ya está en uso." }, { status: 409 })
+            }
+            
+            // Check collision with system routes (basic check)
+            const forbidden = ['dashboard', 'api', 'login', 'register', 'admin', 'privacy', 'terms', 'features']
+            if (forbidden.includes(customLink)) {
+                 return NextResponse.json({ error: "Este enlace está reservado." }, { status: 400 })
+            }
+
+            transfer.customLink = customLink
+        }
     }
 
     if (expiresAt) {

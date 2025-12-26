@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Upload, X, File, CheckCircle, AlertCircle, Clock, Calendar, Lock, Music, Video, Image as ImageIcon, FileText, Archive, FileCode } from "lucide-react"
+import { Upload, X, File, CheckCircle, AlertCircle, Clock, Calendar, Lock, Music, Video, Image as ImageIcon, FileText, Archive, FileCode, Link as LinkIcon } from "lucide-react"
 
 import { useSession } from "next-auth/react"
 import { useModal } from "@/components/ModalProvider"
@@ -65,6 +65,8 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
   const [customDateValue, setCustomDateValue] = useState('')
   const [password, setPassword] = useState('')
   const [showPasswordInput, setShowPasswordInput] = useState(false)
+  const [customLink, setCustomLink] = useState('')
+  const [showCustomLink, setShowCustomLink] = useState(false)
   
   const generateExpirationOptions = () => {
       const options = [{ label: '1 h', value: 1 }]
@@ -143,7 +145,8 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
                 size: file.size,
                 expiresInHours: session && !useCustomDate ? expirationHours : null,
                 customExpiresAt: session && useCustomDate ? customDateValue : null,
-                password: session && password ? password : null
+                password: session && password ? password : null,
+                customLink: session && customLink ? customLink : null
             }),
             headers: { 'Content-Type': 'application/json' }
         })
@@ -167,7 +170,9 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
         xhr.onload = () => {
             if (xhr.status === 200) {
                 setUploadStatus('success')
-                setDownloadUrl(`${window.location.origin}/d/${id}`)
+                // Use custom link if we have one, otherwise ID
+                const identifier = (session && customLink) ? customLink : id
+                setDownloadUrl(`${window.location.origin}/d/${identifier}`)
             } else {
                 setUploadStatus('error')
             }
@@ -194,6 +199,8 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
     setCustomDateValue('')
     setPassword('')
     setShowPasswordInput(false)
+    setCustomLink('')
+    setShowCustomLink(false)
   }
 
   return (
@@ -327,6 +334,7 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
              
              {/* Password Protection for Verified Users */}
              {isVerified && uploadStatus === 'idle' && (
+                 <>
                  <div className="mb-6">
                     <label className="flex items-center gap-2 text-sm font-medium text-zinc-400 mb-2">
                         <Lock className="w-4 h-4" />
@@ -343,6 +351,28 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
                         className="w-full rounded-xl bg-zinc-800 border border-zinc-700 p-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                     />
                  </div>
+
+                 {/* Custom Link */}
+                 <div className="mb-6">
+                    <label className="flex items-center gap-2 text-sm font-medium text-zinc-400 mb-2">
+                        <LinkIcon className="w-4 h-4" />
+                        Enlace Personalizado
+                    </label>
+                    <div className="flex items-center rounded-xl bg-zinc-800 border border-zinc-700 overflow-hidden focus-within:ring-2 focus-within:ring-primary/50">
+                        <span className="pl-3 pr-1 text-zinc-500 text-sm bg-zinc-800 select-none">brosdrop.com/d/</span>
+                         <input 
+                            type="text"
+                            value={customLink}
+                            onChange={(e) => { 
+                                setCustomLink(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))
+                                setShowCustomLink(!!e.target.value) 
+                            }}
+                            placeholder="tu-enlace"
+                            className="w-full bg-zinc-800 border-none p-3 pl-1 text-sm text-white placeholder-zinc-600 outline-none"
+                        />
+                    </div>
+                 </div>
+                 </>
              )}
              
              {uploadStatus === 'idle' && (

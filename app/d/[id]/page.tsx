@@ -10,6 +10,7 @@ import { isValidObjectId } from "mongoose"
 
 import ExpiredTransfer from "@/models/ExpiredTransfer"
 import User from "@/models/User"
+import { PLAN_LIMITS } from "@/lib/plans"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -18,23 +19,47 @@ interface Props {
 export default async function DownloadPage({ params }: Props) {
   const { id } = await params
   
-  if (!isValidObjectId(id)) {
-      return notFound()
-  }
-  
   await dbConnect()
 
   try {
-      // Increment views and fetch
-      const transfer = await Transfer.findByIdAndUpdate(id, { $inc: { views: 1 } }, { new: true })
+      let transfer;
+      
+      // 1. Try by ID (if valid)
+      if (isValidObjectId(id)) {
+          transfer = await Transfer.findByIdAndUpdate(id, { $inc: { views: 1 } }, { new: true })
+      } 
+      
+      // 2. If not found or invalid ID, try by Custom Link
+      if (!transfer) {
+          transfer = await Transfer.findOneAndUpdate(
+              { customLink: id }, 
+              { $inc: { views: 1 } }, 
+              { new: true }
+          )
+      }
+
+      const transferId = transfer ? transfer._id.toString() : null
 
       if (!transfer) {
           // Check if it exists in the expired history
-          const expiredRecord = await ExpiredTransfer.findOneAndUpdate(
-              { transferId: id }, 
-              { $inc: { views: 1 } },
-              { new: true }
-          )
+          // Try by ID or Custom Link
+          let expiredRecord = null
+          
+          if (isValidObjectId(id)) {
+              expiredRecord = await ExpiredTransfer.findOneAndUpdate(
+                  { transferId: id }, 
+                  { $inc: { views: 1 } },
+                  { new: true }
+              )
+          }
+          
+          if (!expiredRecord) {
+               expiredRecord = await ExpiredTransfer.findOneAndUpdate(
+                  { customLink: id }, 
+                  { $inc: { views: 1 } },
+                  { new: true }
+               )
+          }
           
           if (expiredRecord) {
               return (
@@ -69,6 +94,49 @@ export default async function DownloadPage({ params }: Props) {
           )
       }
 
+      // Check Plan Limits (Enforcement)
+      if (transfer.senderId) {
+          const sender = await User.findById(transfer.senderId).lean() as any
+          if (sender) {
+              const planName = (sender.plan || 'free') as keyof typeof PLAN_LIMITS
+              const plan = PLAN_LIMITS[planName] || PLAN_LIMITS.free
+              
+              // Only check limits if NOT Admin? No, users are users.
+              
+              const activeFilesCount = await Transfer.countDocuments({ senderId: transfer.senderId })
+              const activeProtectedCount = await Transfer.countDocuments({ senderId: transfer.senderId, passwordHash: { $exists: true } })
+              const activeLinksCount = await Transfer.countDocuments({ senderId: transfer.senderId, customLink: { $exists: true, $ne: null } })
+              
+              const storageResult = await Transfer.aggregate([
+                { $match: { senderId: transfer.senderId } },
+                { $group: { _id: null, total: { $sum: "$size" } } }
+              ])
+              const totalBytes = storageResult[0]?.total || 0
+
+              let isOver = false
+              if (plan.maxFiles !== Infinity && activeFilesCount > plan.maxFiles) isOver = true
+              else if (plan.maxPwd !== Infinity && activeProtectedCount > plan.maxPwd) isOver = true
+              else if (plan.maxCustomLinks !== undefined && activeLinksCount > plan.maxCustomLinks) isOver = true
+              else if (plan.maxTotalStorage && totalBytes > plan.maxTotalStorage) isOver = true
+
+              if (isOver) {
+                   return (
+                       <div className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center p-4">
+                           <div className="w-full max-w-md rounded-3xl border border-yellow-500/20 bg-zinc-900/50 p-8 backdrop-blur-xl text-center">
+                               <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-yellow-500/10 text-yellow-500 ring-1 ring-yellow-500/20">
+                                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-10 w-10"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                               </div>
+                               <h1 className="mb-2 text-2xl font-bold text-white">Acceso Temporalmente Restringido</h1>
+                               <p className="text-zinc-400 mb-6">
+                                   El propietario de este archivo ha excedido los límites de su plan. El acceso se restaurará cuando regularice su cuenta.
+                               </p>
+                           </div>
+                       </div>
+                   )
+              }
+          }
+      }
+
       const isProtected = !!transfer.passwordHash
       let downloadUrl: string | undefined = undefined
 
@@ -98,7 +166,7 @@ export default async function DownloadPage({ params }: Props) {
               
               <div className="relative z-10 w-full flex justify-center">
                   <DownloadManager 
-                      id={id}
+                      id={transfer._id.toString()}
                       fileName={transfer.originalName}
                       fileSize={transfer.size}
                       isProtected={isProtected}

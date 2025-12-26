@@ -6,7 +6,7 @@ import dbConnect from "@/lib/db"
 import Transfer from "@/models/Transfer"
 import User from "@/models/User"
 import { PLAN_LIMITS, formatBytes } from "@/lib/plans"
-import { Check, Crown, HardDrive, File, Lock, Clock, Zap, AlertTriangle } from "lucide-react"
+import { Check, Crown, HardDrive, File, Lock, Clock, Zap, AlertTriangle, Link as LinkIcon } from "lucide-react"
 import Link from "next/link"
 
 export const dynamic = 'force-dynamic'
@@ -27,6 +27,7 @@ export default async function LimitsPage() {
   // Fetch Usage Data
   const activeFilesCount = await Transfer.countDocuments({ senderId: session.user.id })
   const activeProtectedCount = await Transfer.countDocuments({ senderId: session.user.id, passwordHash: { $exists: true } })
+  const activeLinksCount = await Transfer.countDocuments({ senderId: session.user.id, customLink: { $exists: true, $ne: null } })
   
   // Calculate Total Storage Used
   const transfers = await Transfer.find({ senderId: session.user.id }).select('size').lean()
@@ -135,6 +136,36 @@ export default async function LimitsPage() {
                   {activeProtectedCount >= (plan.maxPwd as number) && plan.maxPwd !== Infinity && (
                       <p className="text-xs text-orange-400 flex items-center gap-1 mt-2">
                           <AlertTriangle className="w-3 h-3" /> Máximo de seguridad alcanzado.
+                      </p>
+                  )}
+              </div>
+          </div>
+
+          {/* Custom Links */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-pink-500/10 rounded-lg text-pink-400">
+                      <LinkIcon className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-semibold text-white">Enlaces Personalizados</h3>
+              </div>
+              
+              <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                      <span className="text-zinc-400 font-medium">Usados</span>
+                      <span className="text-white font-bold">{activeLinksCount} <span className="text-zinc-500">/ {plan.maxCustomLinks || 0}</span></span>
+                  </div>
+                  {(plan.maxCustomLinks || 0) > 0 && (
+                      <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
+                          <div 
+                              className={`h-full rounded-full transition-all duration-500 ${activeLinksCount >= (plan.maxCustomLinks || 0) ? 'bg-red-500' : 'bg-pink-500'}`} 
+                              style={{ width: `${calcPercent(activeLinksCount, plan.maxCustomLinks || 1)}%` }}
+                          />
+                      </div>
+                  )}
+                  {activeLinksCount >= (plan.maxCustomLinks || 0) && (
+                      <p className="text-xs text-pink-400 flex items-center gap-1 mt-2">
+                          <AlertTriangle className="w-3 h-3" /> Límite de enlaces alcanzado.
                       </p>
                   )}
               </div>

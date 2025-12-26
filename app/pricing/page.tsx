@@ -16,6 +16,7 @@ const plans = [
             "5 archivos activos simultáneos",
             "Caducidad 7 días",
             "1 archivo con contraseña",
+            "1 enlace personalizado",
             "Almacenamiento temporal"
         ],
         missing: [
@@ -38,12 +39,12 @@ const plans = [
             "20 GB almacenamiento total",
             "50 archivos activos simultáneos",
             "5 archivos con contraseña",
+            "5 enlaces personalizados",
             "Caducidad 30 días (Próximamente)",
             "Soporte por email"
         ],
         missing: [
             "Personalización de marca",
-            "URL personalizada",
             "Archivos ilimitados"
         ],
         cta: "Muy Pronto",
@@ -63,9 +64,9 @@ const plans = [
             "200 GB almacenamiento total",
             "250 archivos activos simultáneos",
             "50 archivos con contraseña",
+            "25 enlaces personalizados",
             "Caducidad 1 año (Próximamente)",
-            "Tu Logo y Fondo (Próximamente)",
-            "URL personalizada (Próximamente)"
+            "Tu Logo y Fondo (Próximamente)"
         ],
         missing: [],
         cta: "Muy Pronto",
@@ -278,8 +279,8 @@ export default function PricingPage() {
                                         { name: "Archivos con Clave", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, "1", "5", "50"] },
                                         { name: "Almacenamiento Cloud", vals: ["-", "500 MB", "20 GB", "200 GB"] },
                                         { name: "Branding Personal", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x3" className="w-4 h-4 mx-auto text-zinc-600"/>, <span key="c" title="Próximamente" className="flex justify-center"><Clock className="w-4 h-4 text-zinc-400"/></span>] },
-                                        { name: "URL Personalizada", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x3" className="w-4 h-4 mx-auto text-zinc-600"/>, <span key="c" title="Próximamente" className="flex justify-center"><Clock className="w-4 h-4 text-zinc-400"/></span>] },
                                         { name: "Soporte Prioritario", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-600"/>, <Check key="check" className="w-4 h-4 mx-auto text-blue-400"/>, <Check key="check2" className="w-4 h-4 mx-auto text-primary"/>] },
+                                        { name: "Enlaces Personalizados", vals: ["-", "1", "5", "25"] },
                                     ].map((row, i) => (
                                         <tr key={i} className="group hover:bg-white/[0.02] transition-colors">
                                             <td className="p-6 pl-8 font-medium text-zinc-300 group-hover:text-white transition-colors">{row.name}</td>

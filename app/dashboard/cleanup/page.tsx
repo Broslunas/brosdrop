@@ -21,6 +21,7 @@ export default async function CleanupPage() {
 
   const activeFilesCount = await Transfer.countDocuments({ senderId: session.user.id })
   const activeProtectedCount = await Transfer.countDocuments({ senderId: session.user.id, passwordHash: { $exists: true } })
+  const activeLinksCount = await Transfer.countDocuments({ senderId: session.user.id, customLink: { $exists: true, $ne: null } })
   const storageResult = await Transfer.aggregate([
       { $match: { senderId: session.user.id } },
       { $group: { _id: null, total: { $sum: "$size" } } }
@@ -31,6 +32,7 @@ export default async function CleanupPage() {
 
   if (plan.maxFiles !== Infinity && activeFilesCount > plan.maxFiles) overLimit = true
   else if (plan.maxPwd !== Infinity && activeProtectedCount > plan.maxPwd) overLimit = true
+  else if (plan.maxCustomLinks !== undefined && activeLinksCount > plan.maxCustomLinks) overLimit = true
   else if (plan.maxTotalStorage && totalStorageBytes > plan.maxTotalStorage) overLimit = true
 
   // If NOT over limit, redirect back to dashboard
