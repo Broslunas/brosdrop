@@ -1,29 +1,60 @@
 "use client"
 
+import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { LayoutGrid, Camera, File, Image as ImageIcon } from "lucide-react"
+import { LayoutGrid, Camera, File, Image as ImageIcon, Save, Loader2 } from "lucide-react"
+import { useModal } from "@/components/ModalProvider"
 
 interface BrandingSectionProps {
     plan: string
-    branding: { logo: string, background: string, enabled: boolean }
-    onChange: (branding: any) => void
+    initialBranding: { logo: string, background: string, enabled: boolean }
 }
 
-export default function BrandingSection({ plan, branding, onChange }: BrandingSectionProps) {
+export default function BrandingSection({ plan, initialBranding }: BrandingSectionProps) {
     const router = useRouter()
+    const { showModal } = useModal()
+    const [branding, setBranding] = useState(initialBranding)
+    const [saving, setSaving] = useState(false)
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'logo' | 'background') => {
         const file = e.target.files?.[0]
         if (file) {
             const reader = new FileReader()
-            reader.onloadend = () => onChange({ ...branding, [field]: reader.result as string })
+            reader.onloadend = () => setBranding({ ...branding, [field]: reader.result as string })
             reader.readAsDataURL(file)
+        }
+    }
+
+    const handleSave = async () => {
+        setSaving(true)
+        try {
+            const res = await fetch('/api/user', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ branding })
+            })
+            
+            if (!res.ok) throw new Error("Failed to update")
+            
+            showModal({
+                title: "Personalización guardada",
+                message: "Tu marca ha sido actualizada correctamente.",
+                type: "success"
+            })
+        } catch (error) {
+            showModal({
+                title: "Error",
+                message: "No se pudieron guardar los cambios.",
+                type: "error"
+            })
+        } finally {
+            setSaving(false)
         }
     }
 
     if (plan !== 'pro') {
         return (
-            <>
+            <div className="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl p-8">
                 <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                     <LayoutGrid className="w-5 h-5 text-zinc-500" /> Personalización de Marca
                 </h3>
@@ -40,15 +71,25 @@ export default function BrandingSection({ plan, branding, onChange }: BrandingSe
                             </button>
                         </div>
                 </div>
-            </>
+            </div>
         )
     }
 
     return (
-        <>
-            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <LayoutGrid className="w-5 h-5 text-purple-500" /> Personalización (Pro)
-            </h3>
+        <div className="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl p-8">
+            <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <LayoutGrid className="w-5 h-5 text-purple-500" /> Personalización (Pro)
+                </h3>
+                <button 
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-zinc-700 hover:border-zinc-600"
+                >
+                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    Guardar
+                </button>
+            </div>
             
             <div className="space-y-6">
                     {/* Enabled Toggle */}
@@ -62,7 +103,7 @@ export default function BrandingSection({ plan, branding, onChange }: BrandingSe
                             type="checkbox" 
                             className="hidden" 
                             checked={branding?.enabled ?? true}
-                            onChange={e => onChange({ ...branding, enabled: e.target.checked })}
+                            onChange={e => setBranding({ ...branding, enabled: e.target.checked })}
                         />
                         <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${branding?.enabled ? 'translate-x-6' : ''}`} />
                     </div>
@@ -87,7 +128,7 @@ export default function BrandingSection({ plan, branding, onChange }: BrandingSe
                             </div>
                             <div className="text-xs text-zinc-500">
                                 <p>Sube tu logo (PNG transparente recomendado).</p>
-                                <button type="button" onClick={() => onChange({ ...branding, logo: '' })} className="text-red-400 hover:text-red-300 mt-1">Eliminar logo</button>
+                                <button type="button" onClick={() => setBranding({ ...branding, logo: '' })} className="text-red-400 hover:text-red-300 mt-1">Eliminar logo</button>
                             </div>
                     </div>
                 </div>
@@ -114,10 +155,10 @@ export default function BrandingSection({ plan, branding, onChange }: BrandingSe
                             </label>
                     </div>
                     {branding?.background && (
-                            <button type="button" onClick={() => onChange({ ...branding, background: '' })} className="text-xs text-red-400 hover:text-red-300 mt-2">Eliminar fondo</button>
+                            <button type="button" onClick={() => setBranding({ ...branding, background: '' })} className="text-xs text-red-400 hover:text-red-300 mt-2">Eliminar fondo</button>
                     )}
                 </div>
             </div>
-        </>
+        </div>
     )
 }

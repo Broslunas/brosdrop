@@ -17,7 +17,7 @@ export default function SubscriptionSection({ plan, planExpiresAt }: Subscriptio
     const [renewalMonths, setRenewalMonths] = useState<number>(1)
 
     return (
-        <>
+        <div className="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl p-8">
             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                 <Crown className="w-5 h-5 text-yellow-500" /> Suscripción
             </h3>
@@ -120,6 +120,6 @@ export default function SubscriptionSection({ plan, planExpiresAt }: Subscriptio
                     return `€${price.toFixed(2)}`
                 })() : '€0'}
             />
-        </>
+        </div>
     )
 }
