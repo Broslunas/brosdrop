@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { X, Save, QrCode as QrCodeIcon, Download } from "lucide-react"
 import { useSession } from "next-auth/react"
 import QRCode from "react-qr-code"
+import { PLAN_LIMITS } from "@/lib/plans"
 
 interface QRModalProps {
   isOpen: boolean
@@ -17,7 +18,10 @@ export default function QRModal({ isOpen, onClose, file, onSave }: QRModalProps)
   const { data: session } = useSession()
   // Cast user to any to access plan
   const userPlan = (session?.user as any)?.plan || 'free'
-  const isPro = userPlan === 'pro' || userPlan === 'admin' 
+  const limits = PLAN_LIMITS[userPlan as keyof typeof PLAN_LIMITS] || PLAN_LIMITS.free
+  
+  const canColor = (limits as any).canCustomizeColors
+  const canLogo = (limits as any).canCustomizeLogo
 
   const [qrFg, setQrFg] = useState("#000000")
   const [qrBg, setQrBg] = useState("#ffffff")
@@ -31,24 +35,31 @@ export default function QRModal({ isOpen, onClose, file, onSave }: QRModalProps)
           if (file.qrOptions) {
               setQrFg(file.qrOptions.fgColor || "#000000")
               setQrBg(file.qrOptions.bgColor || "#ffffff")
-              setQrLogo(file.qrOptions.logoUrl || "")
+              // Only load logo if user has permission
+              setQrLogo(canLogo ? (file.qrOptions.logoUrl || "") : "")
           } else {
               setQrFg("#000000")
               setQrBg("#ffffff")
               setQrLogo("")
           }
       }
-  }, [file, isOpen])
+  }, [file, isOpen, userPlan]) // Use userPlan instead of canLogo to keep array size stable
 
   const handleSave = async () => {
-      if (!isPro) return // Should not happen if UI is blocked, but double check
+      if (!canColor && !canLogo) return 
       
       setIsSaving(true)
       try {
+          // If cannot logo, ensure logo is empty or don't send it?
+          // If we send empty string, it clears it.
+          // If we don't send key, API updates partial? No, I decided API puts full object.
+          // So if !canLogo, I should probably send empty string or existing?
+          // If Plus user tries to hack in a logo, UI stops them, API should too.
+          
           await onSave(file._id, {
               fgColor: qrFg,
               bgColor: qrBg,
-              logoUrl: qrLogo
+              logoUrl: canLogo ? qrLogo : "" // Force empty if not allowed
           })
           onClose()
       } catch (e) {
@@ -200,45 +211,49 @@ export default function QRModal({ isOpen, onClose, file, onSave }: QRModalProps)
                  <div className="p-4 rounded-2xl border border-white/5 bg-zinc-900/40 flex flex-col gap-4">
                     <div className="flex justify-between items-center">
                         <div>
-                            <h4 className="text-sm font-bold text-zinc-200">Personalizar <span className="text-xs font-normal text-yellow-500 ml-2 border border-yellow-500/30 bg-yellow-500/10 px-1.5 py-0.5 rounded-full">Pro</span></h4>
+                            <h4 className="text-sm font-bold text-zinc-200">Personalizar <span className="text-xs font-normal text-yellow-500 ml-2 border border-yellow-500/30 bg-yellow-500/10 px-1.5 py-0.5 rounded-full">Plus / Pro</span></h4>
                         </div>
                     </div>
 
-                    {isPro ? (
-                        <div className="grid gap-3">
-                            <div className="grid grid-cols-2 gap-3">
+                    {/* Colors */}
+                     <div>
+                         <label className="text-xs text-zinc-400 mb-2 block flex justify-between">
+                            <span>Colores</span>
+                            {!canColor && <span className="text-primary cursor-pointer hover:underline text-[10px] ml-auto">Mejora a Plus</span>}
+                         </label>
+                         <div className={`grid grid-cols-2 gap-3 ${!canColor ? 'opacity-50 pointer-events-none grayscale' : ''}`}>
                                 <div>
-                                    <label className="text-xs text-zinc-400 mb-1 block">Color QR</label>
                                     <div className="flex items-center gap-2 bg-black/40 p-2 rounded-lg border border-white/10">
                                         <input type="color" value={qrFg} onChange={(e) => setQrFg(e.target.value)} className="w-6 h-6 rounded cursor-pointer bg-transparent border-none" />
                                         <span className="text-xs text-zinc-300 font-mono">{qrFg}</span>
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="text-xs text-zinc-400 mb-1 block">Fondo</label>
                                     <div className="flex items-center gap-2 bg-black/40 p-2 rounded-lg border border-white/10">
                                         <input type="color" value={qrBg} onChange={(e) => setQrBg(e.target.value)} className="w-6 h-6 rounded cursor-pointer bg-transparent border-none" />
                                         <span className="text-xs text-zinc-300 font-mono">{qrBg}</span>
                                     </div>
                                 </div>
-                            </div>
-                            <div>
-                                <label className="text-xs text-zinc-400 mb-1 block">Logo URL (Opcional)</label>
-                                <input 
-                                    type="text" 
-                                    value={qrLogo}
-                                    onChange={(e) => setQrLogo(e.target.value)}
-                                    placeholder="https://mi-empresa.com/logo.png"
-                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-white text-xs focus:ring-1 focus:ring-primary/50 outline-none"
-                                />
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="p-3 rounded-lg bg-primary/5 border border-primary/20 text-center">
-                            <p className="text-xs text-zinc-300 mb-2">Mejora al plan <span className="text-primary font-bold">Pro</span> para personalizar colores y logo.</p>
-                            <button className="text-xs bg-primary text-white px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-colors">Ver Planes</button>
-                        </div>
-                    )}
+                         </div>
+                    </div>
+
+                    {/* Logo */}
+                    <div>
+                         <label className="text-xs text-zinc-400 mb-2 block flex justify-between">
+                            <span>Logo URL</span>
+                            {!canLogo && <span className="text-primary cursor-pointer hover:underline text-[10px] ml-auto">Mejora a Pro</span>}
+                         </label>
+                         <div className={!canLogo ? 'opacity-50 pointer-events-none' : ''}>
+                            <input 
+                                type="text" 
+                                value={qrLogo}
+                                onChange={(e) => setQrLogo(e.target.value)}
+                                placeholder={canLogo ? "https://mi-empresa.com/logo.png" : "Solo disponible en plan Pro"}
+                                disabled={!canLogo}
+                                className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-white text-xs focus:ring-1 focus:ring-primary/50 outline-none placeholder:text-zinc-600 disabled:cursor-not-allowed"
+                            />
+                         </div>
+                    </div>
                 </div>
 
             </div>
@@ -262,7 +277,7 @@ export default function QRModal({ isOpen, onClose, file, onSave }: QRModalProps)
                             <span className="hidden sm:inline">PNG</span>
                         </button>
 
-                         {isPro && (
+                         {(canColor || canLogo) && (
                              <button 
                                 onClick={handleSave}
                                 disabled={isSaving}

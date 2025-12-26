@@ -126,20 +126,37 @@ export async function PUT(
     }
 
     if (qrOptions) {
-        if (!currentLimits.canCustomizeQR) {
+        const canColor = (currentLimits as any).canCustomizeColors
+        const canLogo = (currentLimits as any).canCustomizeLogo
+
+        if (!canColor && !canLogo) {
              return NextResponse.json({ error: "Tu plan actual no permite personalizar el código QR." }, { status: 403 })
         }
         
-        // Basic validation
         if (typeof qrOptions !== 'object') {
              return NextResponse.json({ error: "Datos de QR inválidos." }, { status: 400 })
         }
 
-        transfer.qrOptions = {
+        const newOptions = {
             fgColor: qrOptions.fgColor || '#000000',
             bgColor: qrOptions.bgColor || '#ffffff',
             logoUrl: qrOptions.logoUrl || undefined
         }
+
+        // Enforce Logo Permission
+        if (newOptions.logoUrl && !canLogo) {
+             return NextResponse.json({ error: "Tu plan no permite añadir un logo personalizado." }, { status: 403 })
+        }
+
+        // Enforce Color Permission
+        // We allow sending default colors even if permission missing (idempotent)
+        if (!canColor) {
+             if (newOptions.fgColor !== '#000000' || newOptions.bgColor !== '#ffffff') {
+                  return NextResponse.json({ error: "Tu plan no permite cambiar colores del QR." }, { status: 403 })
+             }
+        }
+
+        transfer.qrOptions = newOptions
     }
 
     await transfer.save()
