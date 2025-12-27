@@ -242,10 +242,10 @@ export default function Home() {
                     Regístrate gratis y desbloquea transferencias de 200MB, enlaces con contraseña y mayor tiempo de expiración.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-                    <Link href="/login" className="px-8 py-4 rounded-xl bg-white text-zinc-950 font-bold hover:bg-zinc-200 transition-colors shadow-lg shadow-white/10 hover:shadow-white/20">
+                    <Link href="/login" className="px-8 py-4 rounded-xl bg-white text-zinc-950 font-bold hover:bg-zinc-200 transition-colors shadow-lg shadow-white/10 hover:shadow-white/20" prefetch={true}>
                         Comenzar Gratis
                     </Link>
-                    <Link href="/pricing" className="px-8 py-4 rounded-xl border border-white/10 bg-zinc-900/50 text-white font-medium hover:bg-zinc-900 transition-colors backdrop-blur-sm">
+                    <Link href="/pricing" className="px-8 py-4 rounded-xl border border-white/10 bg-zinc-900/50 text-white font-medium hover:bg-zinc-900 transition-colors backdrop-blur-sm" prefetch={true}>
                         Ver Planes Pro
                     </Link>
                 </div>

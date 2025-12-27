@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { Github, Twitter } from "lucide-react"
 import { usePathname } from "next/navigation"
 
@@ -15,8 +16,8 @@ export default function Footer() {
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-5">
             {/* Branding Column */}
             <div className="col-span-2 lg:col-span-2 pr-8">
-                <Link href="/" className="flex items-center gap-2 mb-6">
-                    <img src="https://cdn.broslunas.com/favicon.png" alt="Broslunas" className="h-8 w-8" />
+                <Link href="/" className="flex items-center gap-2 mb-6" prefetch={true}>
+                    <Image src="https://cdn.broslunas.com/favicon.png" alt="Broslunas" width={32} height={32} className="h-8 w-8" />
                     <span className="text-xl font-bold text-white">BrosDrop</span>
                 </Link>
                 <p className="text-sm leading-6 mb-6 max-w-sm">
@@ -32,8 +33,8 @@ export default function Footer() {
             <div>
                 <h3 className="text-sm font-semibold text-white mb-6">Producto</h3>
                 <ul className="space-y-4 text-sm">
-                    <li><Link href="/features" className="hover:text-white transition-colors">Características</Link></li>
-                    <li><Link href="/docs/api" className="hover:text-white transition-colors">API</Link></li>
+                    <li><Link href="/features" className="hover:text-white transition-colors" prefetch={true}>Características</Link></li>
+                    <li><Link href="/docs/api" className="hover:text-white transition-colors" prefetch={true}>API</Link></li>
                 </ul>
             </div>
 
@@ -41,9 +42,9 @@ export default function Footer() {
             <div>
                 <h3 className="text-sm font-semibold text-white mb-6">Soporte</h3>
                 <ul className="space-y-4 text-sm">
-                    <li><Link href="/help" className="hover:text-white transition-colors">Ayuda</Link></li>
+                    <li><Link href="/help" className="hover:text-white transition-colors" prefetch={true}>Ayuda</Link></li>
                     <li><Link href="https://broslunas.com/contact" className="hover:text-white transition-colors">Contacto</Link></li>
-                    <li><Link href="/status" className="hover:text-white transition-colors">Estado del Servicio</Link></li>
+                    <li><Link href="/status" className="hover:text-white transition-colors" prefetch={true}>Estado del Servicio</Link></li>
                 </ul>
             </div>
 
@@ -51,10 +52,10 @@ export default function Footer() {
             <div>
                  <h3 className="text-sm font-semibold text-white mb-6">Legal</h3>
                 <ul className="space-y-4 text-sm">
-                    <li><Link href="/terms" className="hover:text-white transition-colors">Términos de Servicio</Link></li>
-                    <li><Link href="/privacy" className="hover:text-white transition-colors">Política de Privacidad</Link></li>
-                    <li><Link href="/cookies" className="hover:text-white transition-colors">Política de Cookies</Link></li>
-                    <li><Link href="/gdpr" className="hover:text-white transition-colors">GDPR</Link></li>
+                    <li><Link href="/terms" className="hover:text-white transition-colors" prefetch={true}>Términos de Servicio</Link></li>
+                    <li><Link href="/privacy" className="hover:text-white transition-colors" prefetch={true}>Política de Privacidad</Link></li>
+                    <li><Link href="/cookies" className="hover:text-white transition-colors" prefetch={true}>Política de Cookies</Link></li>
+                    <li><Link href="/gdpr" className="hover:text-white transition-colors" prefetch={true}>GDPR</Link></li>
                 </ul>
             </div>
         </div>
@@ -69,9 +70,9 @@ export default function Footer() {
             </p>
 
             <div className="flex gap-6 text-xs">
-                <Link href="/terms" className="hover:text-white transition-colors">Términos</Link>
-                <Link href="/privacy" className="hover:text-white transition-colors">Privacidad</Link>
-                <Link href="/cookies" className="hover:text-white transition-colors">Cookies</Link>
+                <Link href="/terms" className="hover:text-white transition-colors" prefetch={true}>Términos</Link>
+                <Link href="/privacy" className="hover:text-white transition-colors" prefetch={true}>Privacidad</Link>
+                <Link href="/cookies" className="hover:text-white transition-colors" prefetch={true}>Cookies</Link>
             </div>
         </div>
       </div>
