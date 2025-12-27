@@ -1,8 +1,7 @@
-
 "use client"
 
 import Link from "next/link"
-import { UploadCloud, Github, Twitter } from "lucide-react"
+import { Github, Twitter } from "lucide-react"
 import { usePathname } from "next/navigation"
 
 export default function Footer() {
@@ -11,78 +10,68 @@ export default function Footer() {
   if (pathname?.startsWith("/dashboard")) return null
 
   return (
-    <footer className="border-t border-white/10 bg-black/40 backdrop-blur-xl mt-auto">
-      <div className="mx-auto max-w-7xl px-6 py-12 md:flex md:items-center md:justify-between lg:px-8">
-        <div className="flex justify-center space-x-6 md:order-2">
-          <Link href="https://github.com/broslunas" className="text-gray-400 hover:text-gray-300">
-            <span className="sr-only">GitHub</span>
-            <Github className="h-6 w-6" aria-hidden="true" />
-          </Link>
-          <Link href="#" className="text-gray-400 hover:text-gray-300">
-            <span className="sr-only">Twitter</span>
-            <Twitter className="h-6 w-6" aria-hidden="true" />
-          </Link>
-        </div>
-        <div className="mt-8 md:order-1 md:mt-0">
-          <p className="text-center text-xs leading-5 text-gray-400">
-            &copy; {new Date().getFullYear()} BrosDrop por <Link href="https://broslunas.com" className="hover:text-primary transition-colors">Broslunas</Link>. Todos los derechos reservados.
-          </p>
-        </div>
-      </div>
-      <div className="mx-auto max-w-7xl px-6 pb-12 lg:px-8">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-            <div>
-                <h3 className="text-sm font-semibold leading-6 text-white">Producto</h3>
-                <ul role="list" className="mt-6 space-y-4">
-                  <li>
-                    <Link href="/features" className="text-sm leading-6 text-gray-400 hover:text-white">
-                        Características
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/help" className="text-sm leading-6 text-gray-400 hover:text-white">
-                        Centro de Ayuda
-                    </Link>
-                  </li>
-                </ul>
-            </div>
-            <div>
-                <h3 className="text-sm font-semibold leading-6 text-white">Legal</h3>
-                <ul role="list" className="mt-6 space-y-4">
-                  <li>
-                    <Link href="/privacy" className="text-sm leading-6 text-gray-400 hover:text-white">
-                        Privacidad
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/terms" className="text-sm leading-6 text-gray-400 hover:text-white">
-                        Términos
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/cookies" className="text-sm leading-6 text-gray-400 hover:text-white">
-                        Política de Cookies
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/gdpr" className="text-sm leading-6 text-gray-400 hover:text-white">
-                        GDPR
-                    </Link>
-                  </li>
-                </ul>
-            </div>
-            <div>
-                 <Link href="/" className="flex items-center gap-2 group mb-4">
-                    <div className="p-2 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                        <UploadCloud className="h-6 w-6 text-primary" />
-                    </div>
-                    <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">
-                        BrosDrop
-                    </span>
+    <footer className="border-t border-white/5 bg-[#0a0a0c] text-zinc-400">
+      <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+        <div className="grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-5">
+            {/* Branding Column */}
+            <div className="col-span-2 lg:col-span-2 pr-8">
+                <Link href="/" className="flex items-center gap-2 mb-6">
+                    <img src="https://cdn.broslunas.com/favicon.png" alt="Broslunas" className="h-8 w-8" />
+                    <span className="text-xl font-bold text-white">BrosDrop</span>
                 </Link>
-                <p className="text-sm text-gray-400">
-                    Servicio premium de intercambio de archivos diseñado para velocidad, seguridad y simplicidad.
+                <p className="text-sm leading-6 mb-6 max-w-sm">
+                    BrosDrop es un servicio de almacenamiento de archivos en la nube con enlaces de descarga instantáneos y encriptados.
                 </p>
+                <div className="flex gap-4">
+                     <Link href="#" className="hover:text-white transition-colors"><Twitter className="w-5 h-5"/></Link>
+                     <Link href="https://github.com/broslunas" className="hover:text-white transition-colors"><Github className="w-5 h-5"/></Link>
+                </div>
+            </div>
+
+            {/* Product Column */}
+            <div>
+                <h3 className="text-sm font-semibold text-white mb-6">Producto</h3>
+                <ul className="space-y-4 text-sm">
+                    <li><Link href="/features" className="hover:text-white transition-colors">Características</Link></li>
+                    <li><Link href="/docs/api" className="hover:text-white transition-colors">API</Link></li>
+                </ul>
+            </div>
+
+            {/* Support Column */}
+            <div>
+                <h3 className="text-sm font-semibold text-white mb-6">Soporte</h3>
+                <ul className="space-y-4 text-sm">
+                    <li><Link href="/help" className="hover:text-white transition-colors">Ayuda</Link></li>
+                    <li><Link href="https://broslunas.com/contact" className="hover:text-white transition-colors">Contacto</Link></li>
+                    <li><Link href="/status" className="hover:text-white transition-colors">Estado del Servicio</Link></li>
+                </ul>
+            </div>
+
+            {/* Legal Column */}
+            <div>
+                 <h3 className="text-sm font-semibold text-white mb-6">Legal</h3>
+                <ul className="space-y-4 text-sm">
+                    <li><Link href="/terms" className="hover:text-white transition-colors">Términos de Servicio</Link></li>
+                    <li><Link href="/privacy" className="hover:text-white transition-colors">Política de Privacidad</Link></li>
+                    <li><Link href="/cookies" className="hover:text-white transition-colors">Política de Cookies</Link></li>
+                    <li><Link href="/gdpr" className="hover:text-white transition-colors">GDPR</Link></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div className="mt-16 border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-xs leading-5">
+                &copy; {new Date().getFullYear()} BrosDrop. Todos los derechos reservados.
+            </p>
+            
+            <p className="text-xs leading-5 text-zinc-500">
+                Creado por <a href="https://broslunas.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors font-medium">Broslunas</a>
+            </p>
+
+            <div className="flex gap-6 text-xs">
+                <Link href="/terms" className="hover:text-white transition-colors">Términos</Link>
+                <Link href="/privacy" className="hover:text-white transition-colors">Privacidad</Link>
+                <Link href="/cookies" className="hover:text-white transition-colors">Cookies</Link>
             </div>
         </div>
       </div>

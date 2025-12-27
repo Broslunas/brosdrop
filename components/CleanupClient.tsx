@@ -66,7 +66,7 @@ export default function CleanupClient({ initialFiles, plan }: { initialFiles: an
                 <div>
                     <h1 className="text-2xl font-bold text-red-500 mb-2">Acción Requerida: Liberar Espacio</h1>
                     <p className="text-zinc-300 mb-4 max-w-3xl">
-                        Has superado los límites de tu plan actual. Para seguir usando Brosdrop y evitar la eliminación automática de tus archivos más antiguos en 24 horas, debes eliminar archivos o quitar protecciones hasta estar dentro de los límites.
+                        Has superado los límites de tu plan actual. Para seguir usando BrosDrop y evitar la eliminación automática de tus archivos más antiguos en 24 horas, debes eliminar archivos o quitar protecciones hasta estar dentro de los límites.
                     </p>
                     <div className="flex flex-wrap gap-4 justify-center md:justify-start">
                         {plan.maxFiles !== Infinity && (

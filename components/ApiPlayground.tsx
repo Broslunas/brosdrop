@@ -468,7 +468,7 @@ export default function ApiPlayground() {
                                      <div>
                                          <p className="text-xs text-emerald-300 font-bold mb-1">¡Subida Completada!</p>
                                          <p className="text-[10px] text-emerald-400/70">
-                                             El archivo <strong>{selectedFile?.name}</strong> se ha subido correctamente a Brosdrop usando la API.
+                                             El archivo <strong>{selectedFile?.name}</strong> se ha subido correctamente a BrosDrop usando la API.
                                          </p>
                                      </div>
                                 </div>

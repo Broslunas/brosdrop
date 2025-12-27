@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useSession, signIn, signOut } from "next-auth/react"
@@ -13,55 +12,57 @@ export default function Header() {
   if (pathname?.startsWith("/dashboard")) return null
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-background/50 backdrop-blur-md">
+    <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-background/5 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="p-2 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-             <UploadCloud className="h-6 w-6 text-primary" />
-          </div>
+           <img src="https://cdn.broslunas.com/favicon.png" alt="Broslunas" className="h-8 w-8" />
           <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">
-            Brosdrop
+            BrosDrop
           </span>
         </Link>
-        <nav className="flex items-center gap-4">
+
+        {/* Desktop Nav Links */}
+        <nav className="hidden md:flex items-center gap-8">
+            <Link href="/features" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">Características</Link>
+            <Link href="/pricing" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">Precios</Link>
+            <Link href="/docs/api" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">API</Link>
+        </nav>
+
+        <div className="flex items-center gap-4">
           {session ? (
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-sm text-zinc-400">
+              <div className="flex items-center gap-2 text-sm text-zinc-400 hidden sm:flex">
                 {session?.user?.image ? (
                    // eslint-disable-next-line @next/next/no-img-element
                    <img src={session.user.image} alt={session.user.name || "User"} className="h-8 w-8 rounded-full ring-2 ring-white/10" />
                 ) : (
                    <User className="h-5 w-5" />
                 )}
-                <span className="hidden sm:inline">{session?.user?.name}</span>
+                <span className="hidden lg:inline">{session?.user?.name}</span>
               </div>
               
               <Link
                 href="/dashboard"
-                className="rounded-lg bg-zinc-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 flex items-center gap-2 border border-zinc-700"
+                className="rounded-lg bg-white/5 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10 flex items-center gap-2 border border-white/5"
               >
                  <LayoutDashboard className="h-4 w-4" />
                  <span className="hidden sm:inline">Panel</span>
               </Link>
-
-              <button
-                onClick={() => signOut()}
-                className="rounded-lg bg-zinc-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 flex items-center gap-2 border border-zinc-700"
-              >
-                <LogOut className="h-4 w-4" />
-                Cerrar Sesión
-              </button>
             </div>
           ) : (
-            <button
-              onClick={() => signIn()}
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-all hover:bg-primary/90 hover:shadow-[0_0_20px_-5px_var(--primary)] flex items-center gap-2"
-            >
-              <LogIn className="h-4 w-4" />
-              Iniciar Sesión
-            </button>
+             <>
+                 <Link href="/login" className="hidden sm:block text-sm font-medium text-white hover:text-zinc-300 transition-colors">
+                    Iniciar Sesión
+                 </Link>
+                <button
+                onClick={() => signIn()}
+                className="rounded-lg bg-white text-zinc-950 px-4 py-2 text-sm font-bold transition-all hover:bg-zinc-200 flex items-center gap-2"
+                >
+                Comenzar Gratis
+                </button>
+            </>
           )}
-        </nav>
+        </div>
       </div>
     </header>
   )

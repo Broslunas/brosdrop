@@ -10,7 +10,14 @@ import ApiPlayground from "@/components/ApiPlayground"
 
 export default function ApiDocsPage() {
     return (
-        <div className="min-h-screen bg-black text-white selection:bg-emerald-500/30">
+        <div className="min-h-screen bg-zinc-950 text-white selection:bg-emerald-500/30 relative overflow-hidden">
+            {/* Background Effects */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none fixed">
+                 <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-[0.03]" />
+                <div className="absolute top-[-10%] right-[-10%] w-[40rem] h-[40rem] bg-indigo-500/10 rounded-full blur-[128px] animate-pulse" />
+                <div className="absolute bottom-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-emerald-500/10 rounded-full blur-[128px] animate-pulse" style={{ animationDelay: '2s' }} />
+            </div>
+
             {/* Header */}
             <div className="relative border-b border-white/10 bg-zinc-900/30 backdrop-blur-xl sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -20,7 +27,7 @@ export default function ApiDocsPage() {
                         </Link>
                         <div className="h-6 w-px bg-white/10" />
                         <h1 className="font-bold text-lg bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-                            Brosdrop API <span className="text-zinc-500 text-xs font-mono ml-2">v1.0</span>
+                            BrosDrop API <span className="text-zinc-500 text-xs font-mono ml-2">v1.0</span>
                         </h1>
                     </div>
                     <div className="flex items-center gap-4">
@@ -61,7 +68,7 @@ export default function ApiDocsPage() {
                         <div className="space-y-4">
                             <h2 className="text-4xl font-bold tracking-tight">Documentación API</h2>
                             <p className="text-xl text-zinc-400 leading-relaxed">
-                                Integra la potencia de Brosdrop en tus aplicaciones. Automatiza subidas, gestiona transferencias y crea flujos de trabajo personalizados.
+                                Integra la potencia de BrosDrop en tus aplicaciones. Automatiza subidas, gestiona transferencias y crea flujos de trabajo personalizados.
                             </p>
                             <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-xs font-medium">
                                 <span className="relative flex h-2 w-2">

@@ -122,12 +122,13 @@ export default function PricingPage() {
     }
 
     return (
-        <div className="min-h-screen bg-black text-white relative overflow-hidden">
+        <div className="min-h-screen bg-zinc-950 text-white relative overflow-hidden">
             {/* Background Effects */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/10 rounded-full blur-[120px]" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 rounded-full blur-[120px]" />
-                <div className="absolute top-[20%] right-[20%] w-[30%] h-[30%] bg-pink-500/5 rounded-full blur-[100px]" />
+                 <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-[0.03]" />
+                <div className="absolute top-[-10%] right-[-10%] w-[40rem] h-[40rem] bg-indigo-500/20 rounded-full blur-[128px] animate-pulse" />
+                <div className="absolute bottom-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-purple-500/20 rounded-full blur-[128px] animate-pulse" style={{ animationDelay: '2s' }} />
+                <div className="absolute top-[20%] left-[20%] w-[30rem] h-[30rem] bg-pink-500/10 rounded-full blur-[96px] animate-pulse" style={{ animationDelay: '4s' }} />
             </div>
 
             <div className="relative max-w-7xl mx-auto py-24 px-4 sm:px-6 lg:px-8">
@@ -334,7 +335,7 @@ export default function PricingPage() {
                 <div className="text-center mt-20 pt-10 border-t border-white/10">
                     <p className="text-zinc-500 text-sm">
                         Todos los precios están en Euros (€). Puedes cancelar en cualquier momento desde tu panel.
-                        ¿Dudas? <Link href="/contact" className="text-white hover:underline decoration-primary underline-offset-4">Contáctanos</Link>.
+                        ¿Dudas? <Link href="https://broslunas.com/contact" className="text-white hover:underline decoration-primary underline-offset-4">Contáctanos</Link>.
                     </p>
                 </div>
             </div>

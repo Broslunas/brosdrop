@@ -28,7 +28,7 @@ export default function VerificationBanner() {
         if (isNewUser && !hasShownModal) {
             setHasShownModal(true)
             showModal({
-                title: "¡Bienvenido a Brosdrop!",
+                title: "¡Bienvenido a BrosDrop!",
                 message: "Te hemos enviado un correo de verificación. Por favor, revisa tu bandeja de entrada (y spam) para activar tu cuenta y disfrutar de 7 días de almacenamiento.",
                 type: "success",
                 confirmText: "Entendido"

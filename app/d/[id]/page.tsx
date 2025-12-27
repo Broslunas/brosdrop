@@ -1,4 +1,3 @@
-
 import { notFound } from "next/navigation"
 import dbConnect from "@/lib/db"
 import Transfer from "@/models/Transfer"
@@ -11,6 +10,8 @@ import { isValidObjectId } from "mongoose"
 import ExpiredTransfer from "@/models/ExpiredTransfer"
 import User from "@/models/User"
 import { PLAN_LIMITS } from "@/lib/plans"
+import Link from "next/link"
+import { AlertCircle, Clock, ShieldAlert, AlertTriangle, ArrowLeft } from "lucide-react"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -38,11 +39,8 @@ export default async function DownloadPage({ params }: Props) {
           )
       }
 
-      const transferId = transfer ? transfer._id.toString() : null
-
       if (!transfer) {
           // Check if it exists in the expired history
-          // Try by ID or Custom Link
           let expiredRecord = null
           
           if (isValidObjectId(id)) {
@@ -63,19 +61,28 @@ export default async function DownloadPage({ params }: Props) {
           
           if (expiredRecord) {
               return (
-                <div className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center p-4">
-                    <div className="w-full max-w-md rounded-3xl border border-red-500/20 bg-zinc-900/50 p-8 backdrop-blur-xl text-center">
-                        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-500/10 text-red-500 ring-1 ring-red-500/20">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-10 w-10"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="m9.5 17 5-5"/><path d="m9.5 12 5 5"/></svg>
-                        </div>
-                        <h1 className="mb-2 text-2xl font-bold text-white">Archivo no disponible</h1>
-                        <p className="text-zinc-400 mb-6">
-                            Este archivo ha caducado o ha sido eliminado por el propietario.
-                        </p>
-                        
-                        <div className="rounded-2xl bg-black/20 p-4 border border-white/5 mb-6">
-                            <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Nombre del archivo original</p>
-                            <p className="text-zinc-300 font-medium truncate">{expiredRecord.originalName}</p>
+                <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-[#0a0a0c] relative overflow-hidden">
+                    <div className="absolute top-[-20%] left-[-10%] w-[50rem] h-[50rem] bg-indigo-500/10 rounded-full blur-[128px] pointer-events-none" />
+                    
+                    <div className="w-full max-w-md relative z-10">
+                         <div className="rounded-3xl border border-white/5 bg-zinc-900/50 p-8 backdrop-blur-xl text-center shadow-2xl">
+                            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-500/10 text-red-500 ring-1 ring-red-500/20">
+                                <Clock className="w-10 h-10" />
+                            </div>
+                            <h1 className="mb-2 text-2xl font-bold text-white">Enlace Expirado</h1>
+                            <p className="text-zinc-400 mb-8 leading-relaxed">
+                                Este archivo ya no está disponible porque ha superado su tiempo de vida o ha sido eliminado.
+                            </p>
+                            
+                            <div className="rounded-2xl bg-white/5 p-4 border border-white/5 mb-8 text-left">
+                                <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1 font-semibold">Archivo Original</p>
+                                <p className="text-zinc-300 font-medium truncate">{expiredRecord.originalName}</p>
+                            </div>
+                            
+                            <Link href="/" className="inline-flex items-center gap-2 text-sm font-medium text-white hover:text-zinc-300 transition-colors">
+                                <ArrowLeft className="w-4 h-4" />
+                                Ir al inicio
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -87,9 +94,14 @@ export default async function DownloadPage({ params }: Props) {
 
       if (new Date().toISOString() > transfer.expiresAt) {
           return (
-            <div className="flex min-h-[50vh] flex-col items-center justify-center text-center">
-                <h1 className="text-2xl font-bold text-red-500">Transferencia Expirada</h1>
-                <p className="text-zinc-400">Este archivo ya no está disponible.</p>
+            <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-[#0a0a0c] relative overflow-hidden">
+                 <div className="w-full max-w-md rounded-3xl border border-white/5 bg-zinc-900/50 p-12 backdrop-blur-xl text-center shadow-2xl">
+                    <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-500/10 text-red-500">
+                         <Clock className="w-8 h-8" />
+                    </div>
+                    <h1 className="text-2xl font-bold text-white mb-2">Transferencia Caducada</h1>
+                    <p className="text-zinc-400">Este archivo ha expirado recientemente y ya no se puede descargar.</p>
+                 </div>
             </div>
           )
       }
@@ -97,14 +109,14 @@ export default async function DownloadPage({ params }: Props) {
       // Check Blocked Status (Admin Action)
       if (transfer.blocked) {
            return (
-             <div className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center p-4">
+             <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-[#0a0a0c]">
                  <div className="w-full max-w-md rounded-3xl border border-red-500/20 bg-zinc-900/50 p-8 backdrop-blur-xl text-center">
                      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-500/10 text-red-500 ring-1 ring-red-500/20">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-10 w-10"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                         <ShieldAlert className="w-10 h-10" />
                      </div>
                      <h1 className="mb-2 text-2xl font-bold text-white">Archivo Bloqueado</h1>
                      <p className="text-zinc-400 mb-6">
-                         Este archivo ha sido bloqueado temporalmente por los administradores de la plataforma.
+                         Este archivo ha sido bloqueado temporalmente por los administradores por violar nuestros términos de servicio.
                      </p>
                      {transfer.blockedMessage && (
                        <div className="p-4 bg-red-500/10 rounded-xl border border-red-500/20 text-sm text-red-200">
@@ -122,8 +134,6 @@ export default async function DownloadPage({ params }: Props) {
           if (sender) {
               const planName = (sender.plan || 'free') as keyof typeof PLAN_LIMITS
               const plan = PLAN_LIMITS[planName] || PLAN_LIMITS.free
-              
-              // Only check limits if NOT Admin? No, users are users.
               
               const activeFilesCount = await Transfer.countDocuments({ senderId: transfer.senderId })
               const activeProtectedCount = await Transfer.countDocuments({ senderId: transfer.senderId, passwordHash: { $exists: true } })
@@ -143,14 +153,14 @@ export default async function DownloadPage({ params }: Props) {
 
               if (isOver) {
                    return (
-                       <div className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center p-4">
+                       <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-[#0a0a0c]">
                            <div className="w-full max-w-md rounded-3xl border border-yellow-500/20 bg-zinc-900/50 p-8 backdrop-blur-xl text-center">
                                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-yellow-500/10 text-yellow-500 ring-1 ring-yellow-500/20">
-                                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-10 w-10"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                   <AlertTriangle className="w-10 h-10" />
                                </div>
-                               <h1 className="mb-2 text-2xl font-bold text-white">Acceso Temporalmente Restringido</h1>
-                               <p className="text-zinc-400 mb-6">
-                                   El propietario de este archivo ha excedido los límites de su plan. El acceso se restaurará cuando regularice su cuenta.
+                               <h1 className="mb-2 text-2xl font-bold text-white">Acceso Limitado</h1>
+                               <p className="text-zinc-400 mb-6 font-light">
+                                   El propietario de este archivo ha excedido los límites de su plan. El acceso se restaurará pronto.
                                </p>
                            </div>
                        </div>
@@ -162,9 +172,14 @@ export default async function DownloadPage({ params }: Props) {
       // Check Max Downloads (Feature 5)
       if (transfer.maxDownloads !== null && transfer.maxDownloads !== undefined && transfer.downloads >= transfer.maxDownloads) {
           return (
-            <div className="flex min-h-[50vh] flex-col items-center justify-center text-center">
-                <h1 className="text-2xl font-bold text-orange-500">Límite de Descargas Alcanzado</h1>
-                <p className="text-zinc-400">Este archivo ha alcanzado su límite máximo de descargas.</p>
+            <div className="flex min-h-screen flex-col items-center justify-center p-4 bg-[#0a0a0c]">
+                 <div className="w-full max-w-md rounded-3xl border border-white/5 bg-zinc-900/50 p-12 backdrop-blur-xl text-center shadow-2xl">
+                    <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-orange-500/10 text-orange-500">
+                         <AlertCircle className="w-8 h-8" />
+                    </div>
+                    <h1 className="text-xl font-bold text-white mb-2">Límite Alcanzado</h1>
+                    <p className="text-zinc-400">Este archivo ha alcanzado su límite máximo de descargas permitido por el emisor.</p>
+                 </div>
             </div>
           )
       }
@@ -191,20 +206,38 @@ export default async function DownloadPage({ params }: Props) {
 
       return (
           <div 
-             className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center p-4 bg-cover bg-center relative"
-             style={branding?.background ? { backgroundImage: `url(${branding.background})` } : undefined}
+             className="flex min-h-screen flex-col items-center justify-center p-4 relative overflow-hidden bg-[#0a0a0c]"
+             style={branding?.background ? { backgroundImage: `url(${branding.background})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
           >
-             {branding?.background && <div className="absolute inset-0 bg-black/60 pointer-events-none" />}
+             {/* Dynamic Background (only if no custom branding) */}
+             {!branding?.background && (
+                 <>
+                    <div className="absolute top-[-10%] right-[-10%] w-[40rem] h-[40rem] bg-indigo-500/10 rounded-full blur-[128px] opacity-10 pointer-events-none animate-pulse" />
+                    <div className="absolute bottom-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-purple-500/10 rounded-full blur-[128px] opacity-10 pointer-events-none animate-pulse" style={{ animationDelay: '2s' }} />
+                    <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-[0.03] pointer-events-none" />
+                 </>
+             )}
+
+             {branding?.background && <div className="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-none" />}
               
-              <div className="relative z-10 w-full flex justify-center">
-                  <DownloadManager 
-                      id={transfer._id.toString()}
-                      fileName={transfer.originalName}
-                      fileSize={transfer.size}
-                      isProtected={isProtected}
-                      initialDownloadUrl={downloadUrl}
-                      branding={branding}
-                  />
+              <div className="relative z-10 w-full flex justify-center py-12">
+                  <div className="w-full max-w-lg">
+                      <DownloadManager 
+                          id={transfer._id.toString()}
+                          fileName={transfer.originalName}
+                          fileSize={transfer.size}
+                          isProtected={isProtected}
+                          initialDownloadUrl={downloadUrl}
+                          branding={branding}
+                      />
+                      
+                      {/* Quiet branding if not custom */}
+                      {!branding && (
+                           <p className="mt-8 text-center text-xs text-zinc-600">
+                               Impulsado por <span className="text-zinc-500 font-semibold">BrosDrop</span>
+                           </p>
+                      )}
+                  </div>
               </div>
           </div>
       )

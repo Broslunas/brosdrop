@@ -47,7 +47,7 @@ export default function Sidebar() {
                     exit={{ opacity: 0 }}
                     className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 whitespace-nowrap"
                 >
-                    Brosdrop
+                    BrosDrop
                 </motion.span>
             )}
          </AnimatePresence>
