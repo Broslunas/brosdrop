@@ -1,9 +1,10 @@
 "use client"
 
+import { Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { ShieldAlert } from "lucide-react"
 
-export default function BlockedPage() {
+function BlockedContent() {
     const searchParams = useSearchParams()
     const message = searchParams.get('message') || "Tu cuenta ha sido bloqueada temporalmente por los administradores."
 
@@ -34,5 +35,13 @@ export default function BlockedPage() {
                 </a>
             </div>
         </div>
+    )
+}
+
+export default function BlockedPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-black" />}>
+            <BlockedContent />
+        </Suspense>
     )
 }
