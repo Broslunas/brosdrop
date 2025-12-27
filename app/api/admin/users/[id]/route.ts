@@ -24,6 +24,8 @@ export async function PUT(
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
+    const wasBlocked = user.blocked
+    
     if (role) user.role = role
     if (plan) user.plan = plan
     if (blocked !== undefined) user.blocked = blocked
@@ -31,12 +33,39 @@ export async function PUT(
     
     if (planExpiresAt !== undefined) {
         user.planExpiresAt = planExpiresAt ? new Date(planExpiresAt) : null
-    } else if (plan && !planExpiresAt) {
-        // If plan changes but no expiration provided, maybe logic? 
-        // No, let front-end handle that explicitly.
     }
-    
+
     await user.save()
+
+    // Trigger Webhook if blocked status changed
+    if (blocked !== undefined && wasBlocked !== blocked) {
+        try {
+            const webhookUrl = "https://n8n.broslunas.com/webhook/brosdrop-users-blocked"
+            const payload = {
+                action: blocked ? "blocked" : "unblocked",
+                admin: {
+                    name: session.user.name,
+                    email: session.user.email
+                },
+                user: {
+                    name: user.name,
+                    email: user.email,
+                    id: user._id
+                },
+                reason: blockedMessage || user.blockedMessage || "No reason provided",
+                timestamp: new Date().toISOString()
+            }
+
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).catch(err => console.error("User webhook triggers error:", err))
+
+        } catch (webhookError) {
+             console.error("User webhook preparation failed:", webhookError)
+        }
+    }
 
     return NextResponse.json({ success: true, user })
   } catch (error) {
