@@ -38,7 +38,7 @@ export async function POST(
         const User = (await import("@/models/User")).default
         const fileOwner = await User.findById(transfer.senderId)
         
-        const webhookUrl = "https://n8n.broslunas.com/webhook-test/brosdrop-files-blocked"
+        const webhookUrl = "https://n8n.broslunas.com/webhook/brosdrop-files-blocked"
         
         const payload = {
             action: blocked ? "blocked" : "unblocked",
