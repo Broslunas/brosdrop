@@ -33,6 +33,41 @@ export async function POST(
 
     await transfer.save()
 
+    // Notify via Webhook
+    try {
+        const User = (await import("@/models/User")).default
+        const fileOwner = await User.findById(transfer.senderId)
+        
+        const webhookUrl = "https://n8n.broslunas.com/webhook-test/brosdrop-files-blocked"
+        
+        const payload = {
+            action: blocked ? "blocked" : "unblocked",
+            admin: {
+                name: session.user.name,
+                email: session.user.email
+            },
+            user: {
+                name: fileOwner?.name || "Unknown",
+                email: fileOwner?.email || "Unknown"
+            },
+            file: {
+                name: transfer.originalName,
+                sizeMB: (transfer.size / (1024 * 1024)).toFixed(2),
+                expiresAt: transfer.expiresAt || "Never"
+            },
+            reason: blockedMessage || "No specified reason"
+        }
+
+        fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).catch(err => console.error("Webhook triggers error:", err))
+
+    } catch (webhookError) {
+        console.error("Webhook preparation failed:", webhookError)
+    }
+
     return NextResponse.json({ success: true, transfer })
   } catch (error) {
     console.error("Block failed:", error)

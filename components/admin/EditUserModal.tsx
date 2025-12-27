@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, Calendar, Crown, Shield, User, Save, User as UserIcon } from "lucide-react"
+import { toast } from "sonner"
 
 interface EditUserModalProps {
     isOpen: boolean
@@ -31,6 +32,12 @@ export default function EditUserModal({ isOpen, onClose, user, onUpdate }: EditU
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+        
+        if (blocked && !blockedMessage.trim()) {
+            toast.error("Debes indicar un motivo para bloquear al usuario")
+            return
+        }
+
         setLoading(true)
         try {
             await onUpdate(user._id, {

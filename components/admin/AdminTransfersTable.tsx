@@ -16,7 +16,8 @@ import {
     Lock,
     Unlock,
     AlertTriangle,
-    Eye
+    Eye,
+    X
 } from "lucide-react"
 import { formatBytes } from "@/lib/plans"
 import { toast } from "sonner"
@@ -57,6 +58,10 @@ export default function AdminTransfersTable() {
 
     const { showModal } = useModal()
     const [editingFile, setEditingFile] = useState<Transfer | null>(null)
+    
+    // Blocking Modal State
+    const [blockingFile, setBlockingFile] = useState<{id: string, name: string, currentStatus: boolean} | null>(null)
+    const [blockReason, setBlockReason] = useState("")
 
     // Close menu when clicking outside
     useEffect(() => {
@@ -136,25 +141,45 @@ export default function AdminTransfersTable() {
     }
 
     const handleBlockToggle = async (id: string, currentStatus: boolean, name: string) => {
-        // Confirm action
-        const isBlocking = !currentStatus
-        
-        // If blocking, ask for reason optional? For now simple toggle
-        try {
+        if (currentStatus) {
+            // Unblocking - direct action (no reason needed)
+             await performBlockAction(id, false, name)
+        } else {
+            // Blocking - open modal to ask for reason
+            setBlockingFile({ id, name, currentStatus })
+            setBlockReason("")
+        }
+    }
+
+    const performBlockAction = async (id: string, shouldBlock: boolean, name: string, reason?: string) => {
+         try {
             const res = await fetch(`/api/admin/transfers/${id}/block`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ blocked: isBlocking })
+                body: JSON.stringify({ 
+                    blocked: shouldBlock,
+                    blockedMessage: reason 
+                })
             })
              if (res.ok) {
-                 toast.success(isBlocking ? `Archivo "${name}" bloqueado` : `Archivo "${name}" desbloqueado`)
+                 toast.success(shouldBlock ? `Archivo "${name}" bloqueado` : `Archivo "${name}" desbloqueado`)
                  fetchTransfers()
+                 setBlockingFile(null)
              } else {
                  toast.error("Error al cambiar estado")
              }
         } catch (e) {
             toast.error("Error de conexión")
         }
+    }
+
+    const handleConfirmBlock = () => {
+        if (!blockingFile) return
+        if (!blockReason.trim()) {
+            toast.error("Debes indicar un motivo")
+            return
+        }
+        performBlockAction(blockingFile.id, true, blockingFile.name, blockReason)
     }
 
     const handleDelete = (id: string, name: string) => {
@@ -369,6 +394,71 @@ export default function AdminTransfersTable() {
             )}
 
             {/* Reuse EditFileModal but make sure it works for admin */}
+            {/* Blocking Reason Modal */}
+            <AnimatePresence>
+                {blockingFile && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setBlockingFile(null)}
+                            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                        />
+                        <motion.div 
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="relative w-full max-w-md bg-zinc-900 border border-red-500/20 rounded-2xl shadow-xl overflow-hidden"
+                        >
+                            <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                                    <Shield className="w-5 h-5 text-red-500" />
+                                    Bloquear Archivo
+                                </h2>
+                                <button onClick={() => setBlockingFile(null)} className="p-2 hover:bg-white/10 rounded-lg text-zinc-400 hover:text-white transition-colors">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            
+                            <div className="p-6 space-y-4">
+                                <p className="text-zinc-300">
+                                    Estás a punto de bloquear el archivo <span className="font-semibold text-white">"{blockingFile.name}"</span>.
+                                    <br/>
+                                    <span className="text-sm text-zinc-500">Este motivo será enviado por webhook.</span>
+                                </p>
+                                
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-white">Motivo del bloqueo <span className="text-red-500">*</span></label>
+                                    <textarea
+                                        value={blockReason}
+                                        onChange={(e) => setBlockReason(e.target.value)}
+                                        placeholder="Escribe la razón del bloqueo..."
+                                        className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-red-500/50 resize-none h-24"
+                                        autoFocus
+                                    />
+                                </div>
+
+                                <div className="flex justify-end gap-3 pt-2">
+                                    <button
+                                        onClick={() => setBlockingFile(null)}
+                                        className="px-4 py-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition-colors text-sm font-medium"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        onClick={handleConfirmBlock}
+                                        className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors text-sm font-medium"
+                                    >
+                                        Confirmar Bloqueo
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
             {editingFile && (
                 <EditFileModal 
                     isOpen={!!editingFile}
