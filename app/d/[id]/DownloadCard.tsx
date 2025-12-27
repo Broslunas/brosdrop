@@ -62,8 +62,8 @@ export default function DownloadClient({ id, fileName, fileSize, downloadUrl, br
                         <Download className="h-10 w-10" />
                     </div>
                 )}
-                <h2 className="mb-2 text-2xl font-bold text-white">Ready to download</h2>
-                <p className="text-zinc-400">Your file is ready.</p>
+                <h2 className="mb-2 text-2xl font-bold text-white">Listo para descargar</h2>
+                <p className="text-zinc-400">Tu archivo está listo para descargar.</p>
             </div>
 
 
@@ -88,7 +88,7 @@ export default function DownloadClient({ id, fileName, fileSize, downloadUrl, br
                 onClick={handleDownload}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-4 font-bold text-white shadow-lg shadow-primary/20 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all"
             >
-                Download File
+                Descargar archivo
             </a>
         </motion.div>
     )

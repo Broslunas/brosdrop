@@ -26,6 +26,7 @@ export default function Header() {
             <Link href="/features" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">Características</Link>
             <Link href="/pricing" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">Precios</Link>
             <Link href="/docs/api" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">API</Link>
+            <Link href="/help" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">Ayuda</Link>
         </nav>
 
         <div className="flex items-center gap-4">
