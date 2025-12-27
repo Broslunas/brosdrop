@@ -76,10 +76,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Get file documents from database
-    const FileModel = (await import('@/models/File')).default;
-    const files = await FileModel.find({
+    const Transfer = (await import('@/models/Transfer')).default;
+    const files = await Transfer.find({
       _id: { $in: fileIds },
-      userId: session.user.id,
+      senderId: session.user.id,
     });
 
     if (files.length === 0) {
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
         // Get file from R2
         const command = new GetObjectCommand({
           Bucket: process.env.R2_BUCKET_NAME!,
-          Key: file.key,
+          Key: file.fileKey,
         });
 
         const s3Response = await s3Client.send(command);
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
 
         const form = new FormData();
         form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-        form.append('file', new Blob([fileBuffer], { type: file.mimeType }));
+        form.append('file', new Blob([Buffer.from(fileBuffer)], { type: file.mimeType }));
 
         const uploadResponse = await fetch(
           'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
