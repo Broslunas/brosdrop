@@ -1,17 +1,23 @@
 import { motion } from "framer-motion"
 import { CheckCircle, Copy } from "lucide-react"
 import { useModal } from "@/components/ModalProvider"
+import { useSession } from "next-auth/react"
+import CloudIntegration from "@/components/CloudIntegration"
 
 interface UploadSuccessProps {
     downloadUrls: string[]
+    uploadedFileIds?: string[] // IDs of uploaded files for cloud export
     onReset: () => void
 }
 
 export default function UploadSuccess({
     downloadUrls,
+    uploadedFileIds = [],
     onReset
 }: UploadSuccessProps) {
     const { showModal } = useModal()
+    const { data: session } = useSession()
+    const planName = (session?.user as any)?.planName || 'free'
 
     const handleCopyLink = (url: string) => {
         navigator.clipboard.writeText(url)
@@ -34,7 +40,7 @@ export default function UploadSuccess({
     const singleUrl = downloadUrls.length === 1 ? downloadUrls[0] : null
 
     return (
-        <div className="text-center py-4">
+        <div className="text-center py-4 space-y-6">
              <motion.div 
                 initial={{ scale: 0 }} 
                 animate={{ scale: 1 }}
@@ -84,6 +90,29 @@ export default function UploadSuccess({
                      )}
                  </div>
              </div>
+
+             {/* Cloud Export Integration for Plus/Pro users */}
+             {session && uploadedFileIds.length > 0 && (planName === 'plus' || planName === 'pro') && (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="pt-6 border-t border-white/10"
+                >
+                    <CloudIntegration
+                        planName={planName}
+                        mode="export"
+                        uploadedFileIds={uploadedFileIds}
+                        onExportComplete={() => {
+                            showModal({
+                                title: "Exportación Completada",
+                                message: "Tus archivos han sido exportados exitosamente a la nube.",
+                                type: "success"
+                            })
+                        }}
+                    />
+                </motion.div>
+             )}
         </div>
     )
 }

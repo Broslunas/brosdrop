@@ -1,11 +1,16 @@
 "use client"
 
 import DropZone from "@/components/DropZone"
+import CloudIntegration from "@/components/CloudIntegration"
 import { Shield, Zap, Globe, Share2, Lock, Smartphone, ArrowRight, Check } from "lucide-react"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import { useSession } from "next-auth/react"
 
 export default function Home() {
+  const { data: session } = useSession()
+  const planName = (session?.user as any)?.planName || 'guest'
+  
   const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
@@ -65,7 +70,7 @@ export default function Home() {
             {/* Main Action - Floating Glass Card */}
             <motion.div 
                 variants={fadeInUp}
-                className="w-full max-w-2xl mx-auto mt-12 perspective-1000"
+                className="w-full max-w-2xl mx-auto mt-12 perspective-1000 space-y-6"
             >
                 <div className="relative group mx-auto transform transition-transform hover:scale-[1.01] duration-500">
                     <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-[2.5rem] blur opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200" />
@@ -75,6 +80,23 @@ export default function Home() {
                         </div>
                     </div>
                 </div>
+
+                {/* Cloud Integration for authenticated users */}
+                {session && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    <CloudIntegration
+                      planName={planName}
+                      mode="import"
+                      onImportFiles={(files) => {
+                        console.log('Archivos importados desde la nube:', files.length)
+                      }}
+                    />
+                  </motion.div>
+                )}
             </motion.div>
           </motion.div>
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useMemo } from "react"
+import { useState, useRef, useMemo, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Upload, AlertCircle } from "lucide-react"
 import { toast } from "sonner"
@@ -18,9 +18,11 @@ interface DropZoneProps {
     maxSizeLabel?: string
     planName?: string
     maxDays?: number
+    externalFiles?: File[]
+    onExternalFilesProcessed?: () => void
 }
 
-export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: DropZoneProps) {
+export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays, externalFiles, onExternalFilesProcessed }: DropZoneProps) {
   const { data: session } = useSession()
   const { showModal } = useModal()
   const [files, setFiles] = useState<File[]>([])
@@ -71,6 +73,19 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
       return true
   }
 
+  // Handle external files from cloud import
+  useEffect(() => {
+    if (externalFiles && externalFiles.length > 0) {
+      console.log('📥 Recibiendo archivos externos:', externalFiles.length)
+      if (validateFiles(externalFiles)) {
+        setFiles(prev => [...prev, ...externalFiles])
+        toast.success(`${externalFiles.length} archivo(s) añadido(s) desde la nube`)
+      }
+      onExternalFilesProcessed?.()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [externalFiles])
+
   const [isDragging, setIsDragging] = useState(false)
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'zipping' | 'uploading' | 'success' | 'error'>('idle')
   const [progress, setProgress] = useState(0)
@@ -113,6 +128,7 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
   }
 
   const [downloadUrls, setDownloadUrls] = useState<string[]>([])
+  const [uploadedFileIds, setUploadedFileIds] = useState<string[]>([]) // Track file IDs for cloud export
 
   // Helper to upload a single file
   const uploadFile = async (file: File, index: number, total: number) => {
@@ -146,7 +162,7 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
         const { url, id, expiresAt } = await res.json()
 
         // 2. Upload to R2
-        return new Promise<string>((resolve, reject) => {
+        return new Promise<{ link: string, fileId: string }>((resolve, reject) => {
             const xhr = new XMLHttpRequest()
             xhr.open('PUT', url, true)
             xhr.setRequestHeader('Content-Type', file.type)
@@ -164,14 +180,8 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
                 if (xhr.status === 200) {
                     const identifier = (session && customLink && total === 1) ? customLink : id
                     const finalLink = `${window.location.origin}/d/${identifier}`
-                    resolve(finalLink)
-
-                    // Email logic could go here for individual files, but spamming is bad.
-                    // Maybe collect all and send one email at the end? 
-                    // Current logic inside uploadFile implies per-file hook if we copy-paste.
-                    // Let's skip email hook inside this helper and do it once at end if possible, 
-                    // OR just do it per file for now (simplest, though spammy for 10 files).
-                    // Actually, let's just trigger it here to ensure it works per file.
+                    
+                    // Email logic
                     if (recipientEmail) {
                         const recipients = recipientEmail.split(',').map(e => e.trim()).filter(e => e)
                         if (recipients.length > 0) {
@@ -193,6 +203,7 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
                         }
                     }
 
+                    resolve({ link: finalLink, fileId: id })
                 } else {
                     reject(new Error(`Upload failed for ${file.name}`))
                 }
@@ -209,6 +220,7 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
     setUploadStatus(files.length > 1 && zipFiles ? 'zipping' : 'uploading')
     setProgress(0)
     setDownloadUrls([])
+    setUploadedFileIds([])
 
     try {
         if (files.length > 1 && zipFiles) {
@@ -225,22 +237,26 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
             setUploadStatus('uploading')
             setProgress(0)
             
-            const link = await uploadFile(fileToUpload, 0, 1)
-            setDownloadUrls([link])
+            const result = await uploadFile(fileToUpload, 0, 1)
+            setDownloadUrls([result.link])
+            setUploadedFileIds([result.fileId])
             setUploadStatus('success')
             toast.success("Archivo ZIP subido correctamente")
 
         } else {
             // SEPARATE FILES MODE (or single file)
             const links: string[] = []
+            const fileIds: string[] = []
             // If separate files mode with > 1 file, custom link should probably be ignored or handled 
             // (already handled in uploadFile logic to only use it if total === 1)
             
             for (let i = 0; i < files.length; i++) {
-                const link = await uploadFile(files[i], i, files.length)
-                links.push(link)
+                const result = await uploadFile(files[i], i, files.length)
+                links.push(result.link)
+                fileIds.push(result.fileId)
             }
             setDownloadUrls(links)
+            setUploadedFileIds(fileIds)
             setUploadStatus('success')
             toast.success("Archivos subidos correctamente")
         }
@@ -361,6 +377,7 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays }: 
                   <div className="rounded-3xl border border-zinc-800 bg-zinc-900/80 p-6 backdrop-blur-xl">
                      <UploadSuccess 
                         downloadUrls={downloadUrls}
+                        uploadedFileIds={uploadedFileIds}
                         onReset={reset}
                      />
                  </div>
