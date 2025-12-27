@@ -6,7 +6,10 @@ export const PLAN_LIMITS = {
         maxPwd: 1,
         maxCustomLinks: 0, 
         maxDays: 7,
-        maxTotalStorage: 500 * 1000 * 1000 // 500MB
+        maxTotalStorage: 500 * 1000 * 1000, // 500MB
+        hasApiAccess: false,
+        apiUploadsPerDay: 0,
+        apiRequestsPerHour: 0
     },
     plus: { 
         name: "Plus",
@@ -17,7 +20,10 @@ export const PLAN_LIMITS = {
         maxDays: 30,
         maxTotalStorage: 20 * 1000 * 1000 * 1000, // 20GB
         canCustomizeColors: true,
-        canCustomizeLogo: false
+        canCustomizeLogo: false,
+        hasApiAccess: true,
+        apiUploadsPerDay: 15,
+        apiRequestsPerHour: 100
     },
     pro: { 
         name: "Pro",
@@ -28,7 +34,10 @@ export const PLAN_LIMITS = {
         maxDays: 365,
         maxTotalStorage: 200 * 1000 * 1000 * 1000, // 200GB
         canCustomizeColors: true,
-        canCustomizeLogo: true
+        canCustomizeLogo: true,
+        hasApiAccess: true,
+        apiUploadsPerDay: 50,
+        apiRequestsPerHour: 500
     },
     guest: { 
         name: "Invitado",
@@ -37,7 +46,10 @@ export const PLAN_LIMITS = {
         maxPwd: 0, 
         maxCustomLinks: 0,
         maxDays: 0.02, // 30 mins
-        maxTotalStorage: 100 * 1000 * 1000 // 100MB
+        maxTotalStorage: 100 * 1000 * 1000, // 100MB
+        hasApiAccess: false,
+        apiUploadsPerDay: 0,
+        apiRequestsPerHour: 0
     }
 }
 

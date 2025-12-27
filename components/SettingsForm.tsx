@@ -9,6 +9,7 @@ import ProfileSection from "./settings/ProfileSection"
 import SubscriptionSection from "./settings/SubscriptionSection"
 import PreferencesSection from "./settings/PreferencesSection"
 import BrandingSection from "./settings/BrandingSection"
+import DeveloperSection from "./settings/DeveloperSection"
 import DangerZoneSection from "./settings/DangerZoneSection"
 
 export default function SettingsForm() {
@@ -90,6 +91,8 @@ export default function SettingsForm() {
             plan={userData.plan}
             initialBranding={userData.branding}
         />
+
+        <DeveloperSection plan={userData.plan} />
 
         <DangerZoneSection onDelete={handleDeleteAccount} />
     </div>

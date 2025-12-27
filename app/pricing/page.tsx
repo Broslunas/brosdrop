@@ -45,6 +45,7 @@ const plans = [
             "Personalización QR (Colores)",
             "Caducidad 30 días",
             "Gestión Multi-archivo (Zip/Separado)",
+            "Acceso API (50 uploads/día)",
             "Soporte por email"
         ],
         missing: [
@@ -72,6 +73,7 @@ const plans = [
             "Personalización QR (Colores + Logo)",
             "Caducidad 1 año",
             "Gestión Multi-archivo (Zip/Separado)",
+            "Acceso API (500 uploads/día)",
             "Tu Logo y Fondo"
         ],
         missing: [],
@@ -308,6 +310,7 @@ export default function PricingPage() {
                                         { name: "Archivos con Clave", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, "1", "5", "50"] },
                                         { name: "Enlaces Personalizados", vals: ["-", "1", "5", "25"] },
                                         { name: "Personalización QR", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-600"/>, "Colores", "Colores + Logo"] },
+                                        { name: "Acceso API Pública", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-600"/>, <Check key="check" className="w-4 h-4 mx-auto text-blue-400"/>, <Check key="check2" className="w-4 h-4 mx-auto text-primary"/>] },
                                         { name: "Soporte Prioritario", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-600"/>, <Check key="check" className="w-4 h-4 mx-auto text-blue-400"/>, <Check key="check2" className="w-4 h-4 mx-auto text-primary"/>] },
                                         { name: "Branding Personal", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x3" className="w-4 h-4 mx-auto text-zinc-600"/>, <Check key="check" className="w-4 h-4 mx-auto text-blue-400"/>] },
                                         { name: "Multi-archivos (Zip/Separado)", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-600"/>, <Check key="check" className="w-4 h-4 mx-auto text-blue-400"/>, <Check key="check2" className="w-4 h-4 mx-auto text-primary"/>] },

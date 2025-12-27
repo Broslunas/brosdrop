@@ -19,7 +19,8 @@ const UserSchema = new Schema({
   },
   planExpiresAt: { type: Date },
   blocked: { type: Boolean, default: false },
-  blockedMessage: { type: String }
+  blockedMessage: { type: String },
+  apiKey: { type: String, unique: true, sparse: true }
 }, { timestamps: true })
 
 // Force model recompilation in development to handle schema changes
