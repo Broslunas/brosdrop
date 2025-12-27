@@ -1,7 +1,7 @@
 1. Vista Previa de Archivos
 Prioridad: 🔥 ALTA
-Valor: Los usuarios pueden ver archivos antes de descargar
-Vista previa de imágenes, PDFs, videos, audio
+Valor: descargar
+Vista previaLos usuarios pueden ver archivos antes de  de imágenes, PDFs, videos, audio
 Visor de documentos (Word, Excel, PowerPoint) usando Google Docs Viewer
 Visor de código con syntax highlighting
 Gallery view para múltiples imágenes
@@ -29,13 +29,6 @@ Notificación cuando alguien descarga tu archivo
 Contador de descargas en tiempo real
 WebSockets o Server-Sent Events
 Notificaciones push (con permiso)
-
-5. Integración con la Nube
-Prioridad: 🟡 MEDIA
-Valor: Conveniencia para usuarios power
-Importar desde Google Drive, Dropbox, OneDrive
-Exportar a servicios de nube
-Sincronización bidireccional
 
 🎨 Mejoras de UX/UI
 
