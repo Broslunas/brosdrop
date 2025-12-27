@@ -12,9 +12,10 @@ import {
   ChevronLeft, 
   ChevronRight,
   Menu,
-  PieChart
+  PieChart,
+  ShieldAlert
 } from "lucide-react"
-import { signOut } from "next-auth/react"
+import { signOut, useSession } from "next-auth/react"
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -26,6 +27,11 @@ export default function Sidebar() {
     { name: "Límites", href: "/dashboard/limits", icon: PieChart },
     { name: "Configuración", href: "/dashboard/settings", icon: Settings },
   ]
+
+  const { data: session } = useSession()
+  if (session?.user?.role === 'admin') {
+      navItems.push({ name: "Admin", href: "/dashboard/admin", icon: ShieldAlert })
+  }
 
   return (
     <motion.aside 

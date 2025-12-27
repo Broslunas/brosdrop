@@ -1,5 +1,6 @@
 import DashboardHeader from "@/components/DashboardHeader"
 import VerificationBanner from "@/components/VerificationBanner"
+import BlockedFileBanner from "@/components/BlockedFileBanner"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/authOptions"
 import { redirect } from "next/navigation"
@@ -32,12 +33,13 @@ export default async function DashboardLayout({
   const activeLinksCount = await Transfer.countDocuments({ senderId: session.user.id, customLink: { $exists: true, $ne: null } })
   
   // Calculate total storage
-  // Note: For large number of files, this aggregation is better than finding all and reducing in JS
   const storageResult = await Transfer.aggregate([
       { $match: { senderId: session.user.id } },
       { $group: { _id: null, total: { $sum: "$size" } } }
   ])
   const totalStorageBytes = storageResult[0]?.total || 0
+
+  const blockedCount = await Transfer.countDocuments({ senderId: session.user.id, blocked: true })
 
   let overLimit = false
   let limitMsg = ""
@@ -63,6 +65,7 @@ export default async function DashboardLayout({
          <div className="flex flex-col flex-1 w-full h-full overflow-hidden">
             <DashboardHeader />
             <VerificationBanner />
+            <BlockedFileBanner count={blockedCount} />
             <main className="flex-1 overflow-y-auto p-6 md:p-8">
             <div className="mx-auto max-w-7xl">
                 {children}

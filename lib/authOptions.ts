@@ -37,6 +37,8 @@ export const authOptions: NextAuthOptions = {
         session.user.createdAt = user.createdAt
         // @ts-ignore
         session.user.plan = user.plan
+        // @ts-ignore
+        session.user.role = user.role || 'user'
 
         // Check Expiration
         // @ts-ignore
@@ -62,9 +64,24 @@ export const authOptions: NextAuthOptions = {
                  })()
              }
         }
+
+        // Pass blocked status to session for client-side handling
+        // @ts-ignore
+        session.user.blocked = user.blocked
+        // @ts-ignore
+        session.user.blockedMessage = user.blockedMessage
       }
       return session
     },
+    async signIn({ user }) {
+        // @ts-ignore
+        if (user.blocked) {
+             // Return false to deny sign in, or a URL to redirect to
+             // We can redirect to a specific error page
+             return `/auth/blocked?message=${encodeURIComponent((user as any).blockedMessage || "Tu cuenta ha sido bloqueada.")}`
+        }
+        return true
+    }
   },
   events: {
     async createUser({ user }) {

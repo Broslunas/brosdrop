@@ -10,6 +10,7 @@ const UserSchema = new Schema({
   emailNotifications: { type: Boolean, default: true },
   plan: { type: String, default: 'free', enum: ['free', 'plus', 'pro'] },
   defaultView: { type: String, default: 'grid', enum: ['grid', 'list'] },
+  role: { type: String, default: 'user', enum: ['user', 'admin'] },
   verificationToken: { type: String },
   branding: {
     logo: { type: String },
@@ -17,6 +18,8 @@ const UserSchema = new Schema({
     enabled: { type: Boolean, default: true }
   },
   planExpiresAt: { type: Date },
+  blocked: { type: Boolean, default: false },
+  blockedMessage: { type: String }
 }, { timestamps: true })
 
 // Force model recompilation in development to handle schema changes

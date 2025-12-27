@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react"
 import { ITransfer } from "@/models/Transfer"
-import { Trash2, ExternalLink, Copy, FileIcon, Calendar, Download, HardDrive, Eye, Search, Filter, ArrowUpDown, Check, X, Grid, List as ListIcon, Edit2, Lock, Music, Video, Image as ImageIcon, FileText, Archive, FileCode, Clock, QrCode } from "lucide-react"
+import { Trash2, ExternalLink, Copy, FileIcon, Calendar, Download, HardDrive, Eye, Search, Filter, ArrowUpDown, Check, X, Grid, List as ListIcon, Edit2, Lock, Music, Video, Image as ImageIcon, FileText, Archive, FileCode, Clock, QrCode, AlertTriangle } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useModal } from "@/components/ModalProvider"
@@ -399,12 +399,13 @@ export default function DashboardClient({
 
                         {/* Icon */}
                         <div className={`${viewMode === 'list' ? 'shrink-0' : 'mb-4 flex justify-between items-start'}`}>
-                            <div className={`relative p-3 rounded-xl ${tab === 'history' ? 'bg-zinc-800 text-zinc-500' : getFileIconColor(file.originalName)}`}>
+                            <div className={`relative p-3 rounded-xl ${tab === 'history' ? 'bg-zinc-800 text-zinc-500' : (file.blocked ? 'bg-red-500/10 text-red-400' : getFileIconColor(file.originalName))}`}>
                                 {(() => {
+                                    if (file.blocked) return <AlertTriangle className="w-6 h-6" />
                                     const Icon = getFileIcon(file.originalName)
                                     return <Icon className="w-6 h-6" />
                                 })()}
-                                {file.passwordHash && (
+                                {file.passwordHash && !file.blocked && (
                                     <div className="absolute -top-2 -right-2 bg-zinc-900 rounded-full p-1 border border-zinc-800 shadow-sm" title="Protegido con contraseña">
                                         <Lock className="w-3 h-3 text-orange-400" />
                                     </div>
@@ -426,7 +427,21 @@ export default function DashboardClient({
                                     </>
                                 )}
                                 
-                                {tab === 'active' && file.expiresAt && (
+                                {tab === 'active' && file.blocked && (
+                                    <div className="w-full mt-2">
+                                        <div className="flex items-center gap-1.5 text-xs text-red-400 font-bold uppercase tracking-wider mb-1">
+                                            <AlertTriangle className="w-3 h-3" />
+                                            <span>Bloqueado</span>
+                                        </div>
+                                        {file.blockedMessage && (
+                                            <p className="text-[10px] text-red-400/80 bg-red-500/5 p-1.5 rounded border border-red-500/10 line-clamp-2">
+                                                {file.blockedMessage}
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+                                
+                                {tab === 'active' && file.expiresAt && !file.blocked && (
                                     <>
                                         <span className="hidden sm:block w-1 h-1 rounded-full bg-zinc-700" />
                                         <div className="flex items-center gap-1.5 text-xs text-orange-400/80 bg-orange-400/10 px-2 py-0.5 rounded-full border border-orange-400/20 w-fit">
@@ -468,18 +483,22 @@ export default function DashboardClient({
                              <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
                                 <button 
                                     onClick={() => copyLink(file._id)}
-                                    className="p-2 hover:bg-white/10 rounded-lg text-zinc-500 hover:text-white transition-colors"
+                                    disabled={file.blocked}
+                                    className={`p-2 rounded-lg transition-colors ${file.blocked ? 'text-zinc-700 cursor-not-allowed' : 'hover:bg-white/10 text-zinc-500 hover:text-white'}`}
+                                    title={file.blocked ? "Acción no disponible" : "Copiar enlace"}
                                 >
                                     <Copy className="w-4 h-4" />
                                 </button>
                                 {tab === 'active' && (
                                     <button 
                                         onClick={() => {
+                                            if (file.blocked) return
                                             setActiveModalMode('edit')
                                             setEditingFile(file)
                                         }}
-                                        className="p-2 hover:bg-white/10 rounded-lg text-zinc-500 hover:text-white transition-colors"
-                                        title="Editar"
+                                        disabled={file.blocked}
+                                        className={`p-2 rounded-lg transition-colors ${file.blocked ? 'text-zinc-700 cursor-not-allowed' : 'hover:bg-white/10 text-zinc-500 hover:text-white'}`}
+                                        title={file.blocked ? "Acción no disponible" : "Editar"}
                                     >
                                         <Edit2 className="w-4 h-4" />
                                     </button>
@@ -487,11 +506,13 @@ export default function DashboardClient({
                                 {tab === 'active' && (
                                      <button 
                                         onClick={() => {
+                                            if (file.blocked) return
                                             setActiveModalMode('qr')
                                             setEditingFile(file)
                                         }}
-                                        className="p-2 hover:bg-white/10 rounded-lg text-zinc-500 hover:text-white transition-colors"
-                                        title="Código QR"
+                                        disabled={file.blocked}
+                                        className={`p-2 rounded-lg transition-colors ${file.blocked ? 'text-zinc-700 cursor-not-allowed' : 'hover:bg-white/10 text-zinc-500 hover:text-white'}`}
+                                        title={file.blocked ? "Acción no disponible" : "Código QR"}
                                     >
                                         <QrCode className="w-4 h-4" />
                                     </button>
@@ -499,6 +520,7 @@ export default function DashboardClient({
                                 <button 
                                     onClick={() => handleDelete(file._id, tab === 'history')}
                                     className="p-2 hover:bg-red-500/10 rounded-lg text-zinc-500 hover:text-red-400 transition-colors"
+                                    title="Eliminar"
                                 >
                                     <Trash2 className="w-4 h-4" />
                                 </button>

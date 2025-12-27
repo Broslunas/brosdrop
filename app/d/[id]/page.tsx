@@ -94,6 +94,28 @@ export default async function DownloadPage({ params }: Props) {
           )
       }
 
+      // Check Blocked Status (Admin Action)
+      if (transfer.blocked) {
+           return (
+             <div className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center p-4">
+                 <div className="w-full max-w-md rounded-3xl border border-red-500/20 bg-zinc-900/50 p-8 backdrop-blur-xl text-center">
+                     <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-500/10 text-red-500 ring-1 ring-red-500/20">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-10 w-10"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                     </div>
+                     <h1 className="mb-2 text-2xl font-bold text-white">Archivo Bloqueado</h1>
+                     <p className="text-zinc-400 mb-6">
+                         Este archivo ha sido bloqueado temporalmente por los administradores de la plataforma.
+                     </p>
+                     {transfer.blockedMessage && (
+                       <div className="p-4 bg-red-500/10 rounded-xl border border-red-500/20 text-sm text-red-200">
+                           {transfer.blockedMessage}
+                       </div>
+                     )}
+                 </div>
+             </div>
+           )
+      }
+
       // Check Plan Limits (Enforcement)
       if (transfer.senderId) {
           const sender = await User.findById(transfer.senderId).lean() as any

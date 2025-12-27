@@ -41,6 +41,8 @@ export default async function Dashboard() {
     senderId: t.senderId,
     downloads: t.downloads,
     expiresAt: t.expiresAt,
+    blocked: t.blocked,
+    blockedMessage: t.blockedMessage,
   }))
 
   const activeIds = new Set(serializedTransfers.map(t => t._id))

@@ -9,7 +9,7 @@ export interface ITransfer {
   size: number
   mimeType: string
   senderEmail?: string
-  senderId?: string
+  senderId?: any // string | ObjectId | User object when populated
   downloads: number
   maxDownloads?: number | null
   views: number
@@ -23,6 +23,8 @@ export interface ITransfer {
   }
   createdAt: string
   updatedAt: string
+  blocked?: boolean
+  blockedMessage?: string // Optional admin message
 }
 
 const TransferSchema = new Schema<ITransfer>({
@@ -31,7 +33,7 @@ const TransferSchema = new Schema<ITransfer>({
   size: { type: Number, required: true },
   mimeType: { type: String, required: true },
   senderEmail: { type: String }, // Optional if logged in
-  senderId: { type: String }, // Link to NextAuth user ID
+  senderId: { type: String, ref: 'User' }, // String ID but we keep ref hint locally
   downloads: { type: Number, default: 0 },
   maxDownloads: { type: Number, default: null },
   views: { type: Number, default: 0 },
@@ -42,7 +44,9 @@ const TransferSchema = new Schema<ITransfer>({
     fgColor: { type: String, default: '#000000' },
     bgColor: { type: String, default: '#ffffff' },
     logoUrl: { type: String }
-  }
+  },
+  blocked: { type: Boolean, default: false },
+  blockedMessage: { type: String }
 }, { timestamps: true })
 
 // Force model recompilation in development to handle schema changes
