@@ -6,7 +6,7 @@ import dbConnect from "@/lib/db"
 import Transfer from "@/models/Transfer"
 import User from "@/models/User"
 import { PLAN_LIMITS, formatBytes } from "@/lib/plans"
-import { Check, Crown, HardDrive, File, Lock, Clock, Zap, AlertTriangle, Link as LinkIcon } from "lucide-react"
+import { Check, Crown, HardDrive, File, Lock, Clock, Zap, AlertTriangle, Link as LinkIcon, Server, UploadCloud } from "lucide-react"
 import Link from "next/link"
 
 export const dynamic = 'force-dynamic'
@@ -203,7 +203,109 @@ export default async function LimitsPage() {
                   )}
               </div>
           </div>
+          
+          {/* API Usage */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-indigo-500/10 rounded-lg text-indigo-400">
+                      <Server className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-semibold text-white">Uso de API (1h)</h3>
+              </div>
+              
+              <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                      <span className="text-zinc-400 font-medium">Peticiones</span>
+                      <span className="text-white font-bold">
+                        {(() => {
+                            const now = Date.now()
+                            const windowStart = user.apiUsage?.windowStart ? new Date(user.apiUsage.windowStart).getTime() : now
+                            const isExpired = now - windowStart > 3600 * 1000
+                            const count = isExpired ? 0 : (user.apiUsage?.requestsCount || 0)
+                            return count
+                        })()} <span className="text-zinc-500">/ {plan.apiRequestsPerHour || 0}</span>
+                      </span>
+                  </div>
+                  {(plan.apiRequestsPerHour || 0) > 0 ? (
+                    <>
+                       <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
+                          <div 
+                              className={`h-full rounded-full transition-all duration-500 bg-indigo-500`} 
+                              style={{ 
+                                  width: `${(() => {
+                                      const now = Date.now()
+                                      const windowStart = user.apiUsage?.windowStart ? new Date(user.apiUsage.windowStart).getTime() : now
+                                      const isExpired = now - windowStart > 3600 * 1000
+                                      const count = isExpired ? 0 : (user.apiUsage?.requestsCount || 0)
+                                      return calcPercent(count, plan.apiRequestsPerHour || 1)
+                                  })()}%` 
+                              }}
+                          />
+                      </div>
+                      <p className="text-xs text-zinc-500 mt-1">
+                          Límite de peticiones por hora.
+                      </p>
+                    </>
+                  ) : (
+                      <p className="text-xs text-yellow-500/80 mt-1">
+                          Tu plan no tiene acceso a la API.
+                      </p>
+                  )}
+              </div>
+          </div>
 
+
+
+          {/* API Uploads */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-cyan-500/10 rounded-lg text-cyan-400">
+                      <UploadCloud className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-semibold text-white">Subidas API (24h)</h3>
+              </div>
+              
+              <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                      <span className="text-zinc-400 font-medium">Subidas</span>
+                      <span className="text-white font-bold">
+                        {(() => {
+                            const now = Date.now()
+                            const windowStart = user.apiUsage?.uploadsWindowStart ? new Date(user.apiUsage.uploadsWindowStart).getTime() : now
+                            const isExpired = now - windowStart > 24 * 3600 * 1000
+                            const count = isExpired ? 0 : (user.apiUsage?.uploadsCount || 0)
+                            return count
+                        })()} <span className="text-zinc-500">/ {plan.apiUploadsPerDay || 0}</span>
+                      </span>
+                  </div>
+                  {(plan.apiUploadsPerDay || 0) > 0 ? (
+                    <>
+                       <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
+                          <div 
+                              className={`h-full rounded-full transition-all duration-500 bg-cyan-500`} 
+                              style={{ 
+                                  width: `${(() => {
+                                      const now = Date.now()
+                                      const windowStart = user.apiUsage?.uploadsWindowStart ? new Date(user.apiUsage.uploadsWindowStart).getTime() : now
+                                      const isExpired = now - windowStart > 24 * 3600 * 1000
+                                      const count = isExpired ? 0 : (user.apiUsage?.uploadsCount || 0)
+                                      return calcPercent(count, plan.apiUploadsPerDay || 1)
+                                  })()}%` 
+                              }}
+                          />
+                      </div>
+                      <p className="text-xs text-zinc-500 mt-1">
+                          Límite de subidas diarias por API.
+                      </p>
+                    </>
+                  ) : (
+                      <p className="text-xs text-yellow-500/80 mt-1">
+                          Tu plan no tiene acceso a subir por API.
+                      </p>
+                  )}
+              </div>
+          </div>
+          
           {/* Max File Size */}
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
               <div className="flex items-center gap-3 mb-4">

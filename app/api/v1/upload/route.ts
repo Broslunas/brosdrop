@@ -13,7 +13,7 @@ import { formatBytes } from "@/lib/plans"
 export async function POST(req: Request) {
     try {
         await dbConnect()
-        const { error, user, plan: limits, status } = await validateApiKey(req)
+        const { error, user, plan: limits, status } = await validateApiKey(req, true)
 
         if (error) {
             return NextResponse.json({ error }, { status })

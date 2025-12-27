@@ -3,10 +3,7 @@ import { NextResponse } from "next/server"
 import User from "@/models/User"
 import { PLAN_LIMITS } from "@/lib/plans"
 
-// Simple in-memory rate limiting (Note: In production with multiple instances, use Redis)
-const requestCounts: Record<string, { count: number, resetTime: number }> = {}
-
-export async function validateApiKey(req: Request) {
+export async function validateApiKey(req: Request, isUpload = false) {
     const apiKey = req.headers.get("x-api-key")
 
     if (!apiKey) {
@@ -27,22 +24,55 @@ export async function validateApiKey(req: Request) {
         return { error: "Tu plan actual no incluye acceso a la API. Actualiza a Plus o Pro.", status: 403, user: null, plan: null }
     }
 
-    // Rate Limiting Logic
+    // Rate Limiting Logic (Persistent)
     const now = Date.now()
-    const rateLimitKey = user._id.toString()
+    let usage = user.apiUsage || { 
+        requestsCount: 0, 
+        windowStart: now, 
+        uploadsCount: 0, 
+        uploadsWindowStart: now 
+    }
     
-    if (!requestCounts[rateLimitKey] || now > requestCounts[rateLimitKey].resetTime) {
-        requestCounts[rateLimitKey] = {
-            count: 0,
-            resetTime: now + 3600 * 1000 // 1 hour
+    // Ensure all fields exist (migration for existing users/records)
+    if (!usage.uploadsCount) usage.uploadsCount = 0
+    if (!usage.uploadsWindowStart) usage.uploadsWindowStart = now
+    if (!usage.requestsCount) usage.requestsCount = 0
+    if (!usage.windowStart) usage.windowStart = now
+
+    if (isUpload) {
+        // Daily Upload Limit
+        const dailyWindow = 24 * 3600 * 1000 // 24 hours
+        
+        if (now - new Date(usage.uploadsWindowStart).getTime() > dailyWindow) {
+            usage.uploadsCount = 0
+            usage.uploadsWindowStart = new Date(now)
         }
-    }
 
-    if (requestCounts[rateLimitKey].count >= (limits.apiRequestsPerHour || 0)) {
-        return { error: "Rate limit exceeded", status: 429, user: null, plan: null }
-    }
+        if (usage.uploadsCount >= (limits.apiUploadsPerDay || 0)) {
+            return { error: "Daily upload limit exceeded", status: 429, user: null, plan: null }
+        }
 
-    requestCounts[rateLimitKey].count++
+        usage.uploadsCount++
+    } else {
+        // Hourly Request Limit
+        const hourlyWindow = 3600 * 1000 // 1 hour
+        
+        if (now - new Date(usage.windowStart).getTime() > hourlyWindow) {
+            usage.requestsCount = 0
+            usage.windowStart = new Date(now)
+        }
+
+        if (usage.requestsCount >= (limits.apiRequestsPerHour || 0)) {
+            return { error: "Rate limit exceeded", status: 429, user: null, plan: null }
+        }
+    
+        usage.requestsCount++
+    }
+    
+    await User.updateOne(
+        { _id: user._id },
+        { $set: { apiUsage: usage } }
+    )
 
     return { error: null, user, plan: limits }
 }

@@ -20,7 +20,13 @@ const UserSchema = new Schema({
   planExpiresAt: { type: Date },
   blocked: { type: Boolean, default: false },
   blockedMessage: { type: String },
-  apiKey: { type: String, unique: true, sparse: true }
+    apiKey: { type: String, unique: true, sparse: true },
+  apiUsage: {
+    requestsCount: { type: Number, default: 0 },
+    windowStart: { type: Date, default: Date.now },
+    uploadsCount: { type: Number, default: 0 },
+    uploadsWindowStart: { type: Date, default: Date.now }
+  }
 }, { timestamps: true })
 
 // Force model recompilation in development to handle schema changes
