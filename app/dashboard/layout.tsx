@@ -1,5 +1,5 @@
-import DashboardHeader from "@/components/DashboardHeader"
-import VerificationBanner from "@/components/VerificationBanner"
+import DashboardHeader from "@/components/layout/DashboardHeader"
+import VerificationBanner from "@/components/layout/VerificationBanner"
 import BlockedFileBanner from "@/components/BlockedFileBanner"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/authOptions"
@@ -9,7 +9,7 @@ import User from "@/models/User"
 import Transfer from "@/models/Transfer"
 import { PLAN_LIMITS } from "@/lib/plans"
 import LimitEnforcer from "@/components/LimitEnforcer"
-import SidebarWrapper from "@/components/SidebarWrapper"
+import SidebarWrapper from "@/components/layout/SidebarWrapper"
 
 export default async function DashboardLayout({
   children,

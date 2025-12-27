@@ -4,7 +4,7 @@ import Transfer from "@/models/Transfer"
 import { GetObjectCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import { s3Client } from "@/lib/s3"
-import DownloadManager from "@/components/DownloadManager"
+import DownloadManager from "@/components/layout/DownloadManager"
 import { isValidObjectId } from "mongoose"
 
 import ExpiredTransfer from "@/models/ExpiredTransfer"
