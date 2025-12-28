@@ -37,7 +37,7 @@ export default function SettingsForm() {
             }
         })
         .finally(() => setLoading(false))
-  }, [session])
+  }, [session?.user?.email])
 
   const handleDeleteAccount = () => {
     showModal({

@@ -202,8 +202,26 @@ export async function DELETE(
       return NextResponse.json({ error: "File not found" }, { status: 404 })
     }
 
-    if (transfer.senderId !== session.user.id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    // Authorization Check
+    if (transfer.senderId) {
+        // If file belongs to a user, enforce session and ownership
+        if (!session || !session.user) {
+             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        }
+        if (transfer.senderId !== session.user.id) {
+             return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+        }
+    } else {
+        // If file is guest (no senderId), allow delete ONLY if clearly recent (e.g. failed upload cleanup)
+        // Only allow if created < 10 mins ago
+        const createdAt = new Date(transfer.createdAt)
+        const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000)
+        
+        if (createdAt < tenMinsAgo) {
+             // If trying to delete an old guest file without admin rights, forbid
+             // (Assuming we don't have guest sessions)
+             return NextResponse.json({ error: "Forbidden: Cannot delete old guest files" }, { status: 403 })
+        }
     }
 
     // Delete from R2

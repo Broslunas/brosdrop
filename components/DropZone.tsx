@@ -136,7 +136,7 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays, ex
         // To keep it simple, we just show 0-100% for the current file or global progress
         // Let's do global progress: (index / total) * 100 + (current_file_progress / total)
 
-        // 1. Get Signed URL
+        // 1. Get Signed URL & Token
         const res = await fetch('/api/upload', {
             method: 'POST',
             body: JSON.stringify({
@@ -146,10 +146,6 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays, ex
                 expiresInHours: session && !useCustomDate ? expirationHours : null,
                 customExpiresAt: session && useCustomDate ? customDateValue : null,
                 password: session && password ? password : null,
-                // Only use custom link for the first file if separate, or disable for multiple?
-                // Logic: If multiple files separate, we probably shouldn't use the SAME custom link. 
-                // Either disable custom link if zipFiles=false & count>1, or append index.
-                // For now, let's just ignore custom link for subsequent files or append suffix.
                 customLink: (session && customLink && total === 1) ? customLink : null, 
                 maxDownloads: oneTimeDownload, 
                 recipientEmail: recipientEmail || null 
@@ -159,7 +155,7 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays, ex
 
         if (!res.ok) throw new Error(`Failed to start upload for ${file.name}`)
         
-        const { url, id, expiresAt } = await res.json()
+        const { url, token, fileKey } = await res.json()
 
         // 2. Upload to R2
         return new Promise<{ link: string, fileId: string }>((resolve, reject) => {
@@ -170,46 +166,62 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays, ex
             xhr.upload.onprogress = (e) => {
                 if (e.lengthComputable) {
                     const filePercent = (e.loaded / e.total) * 100
-                    // Global progress calculation
                     const globalPercent = ((index * 100) + filePercent) / total
                     setProgress(Math.round(globalPercent))
                 }
             }
 
-            xhr.onload = () => {
+            xhr.onload = async () => {
                 if (xhr.status === 200) {
-                    const identifier = (session && customLink && total === 1) ? customLink : id
-                    const finalLink = `${window.location.origin}/d/${identifier}`
-                    
-                    // Email logic
-                    if (recipientEmail) {
-                        const recipients = recipientEmail.split(',').map(e => e.trim()).filter(e => e)
-                        if (recipients.length > 0) {
-                             const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL || 'https://n8n.broslunas.com/webhook/brosdrop-send-via-email'
-                             fetch(webhookUrl, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    recipients,
-                                    downloadUrl: finalLink,
-                                    fileName: file.name,
-                                    fileSize: (file.size / 1024 / 1024).toFixed(2) + ' MB',
-                                    senderEmail: session?.user?.email || 'guest',
-                                    expiresAt,
-                                    hasPassword: !!password,
-                                    password: password || null
-                                })
-                            }).catch(err => console.error("Failed to trigger email webhook", err))
-                        }
-                    }
+                    try {
+                        // 3. Finalize Upload (Create DB Record)
+                        const completeRes = await fetch('/api/upload/complete', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ token })
+                        })
 
-                    resolve({ link: finalLink, fileId: id })
+                        if (!completeRes.ok) {
+                            throw new Error('Failed to finalize upload')
+                        }
+
+                        const { id, link } = await completeRes.json()
+
+                        // Email logic
+                        if (recipientEmail) {
+                            const recipients = recipientEmail.split(',').map(e => e.trim()).filter(e => e)
+                            if (recipients.length > 0) {
+                                // Re-parse basic info for email (safe estimate)
+                                const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL || 'https://n8n.broslunas.com/webhook/brosdrop-send-via-email'
+                                fetch(webhookUrl, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        recipients,
+                                        downloadUrl: link, // Use final link
+                                        fileName: file.name,
+                                        fileSize: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+                                        senderEmail: session?.user?.email || 'guest',
+                                        expiresAt: null, // We might not have this easily available without decoding token, can skip or pass from step 1 if needed.
+                                        hasPassword: !!password,
+                                        password: password || null
+                                    })
+                                }).catch(err => console.error("Failed to trigger email webhook", err))
+                            }
+                        }
+
+                        resolve({ link, fileId: id })
+                    } catch (err) {
+                        reject(new Error(`Failed to finalize upload for ${file.name}`))
+                    }
                 } else {
                     reject(new Error(`Upload failed for ${file.name}`))
                 }
             }
 
-            xhr.onerror = () => reject(new Error(`Network error for ${file.name}`))
+            xhr.onerror = () => {
+                reject(new Error(`Network error for ${file.name}`))
+            }
             xhr.send(file)
         })
   }

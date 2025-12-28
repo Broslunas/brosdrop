@@ -1,11 +1,3 @@
-1. Vista Previa de Archivos
-Prioridad: 🔥 ALTA
-Valor: descargar
-Vista previaLos usuarios pueden ver archivos antes de  de imágenes, PDFs, videos, audio
-Visor de documentos (Word, Excel, PowerPoint) usando Google Docs Viewer
-Visor de código con syntax highlighting
-Gallery view para múltiples imágenes
-
 2. Arrastrar y Soltar en Cualquier Parte
 Prioridad: 🔥 ALTA  
 Valor: UX premium, como Dropbox
@@ -52,14 +44,6 @@ Ctrl/Cmd + K: Command palette
 Esc: Cerrar modals
 /: Buscar archivos
 
-8. Progressive Web App (PWA)
-Prioridad: 🟡 MEDIA
-Valor: App-like experience
-Installable en móviles y desktop
-Funcionalidad offline básica
-Share target (compartir desde otras apps)
-Ya tienes manifest.ts, solo falta configurar service worker
-
 9. Onboarding Interactivo
 Prioridad: 🟢 BAJA (pero alto ROI)
 Tour guiado para nuevos usuarios
@@ -88,6 +72,7 @@ Log de actividad de la cuenta
 Dispositivos/sesiones activas
 Alertas de login sospechoso
 Opción de cerrar todas las sesiones
+
 📊 Analytics y Monitoreo
 
 13. Dashboard de Estadísticas Mejorado
@@ -133,6 +118,7 @@ GraphQL además de REST
 SDKs oficiales (Node.js, Python, Go)
 Webhooks para eventos
 Rate limiting visible en headers
+
 💼 Features para Equipos (B2B)
 
 19. Organizaciones/Equipos
@@ -167,12 +153,6 @@ Diferentes estilos de QR
 Colores personalizados
 Frames decorativos
 
-23. Shortlinks Memorables
-Prioridad: 🟡 MEDIA
-En lugar de /d/abc123, generar /d/sunset-mountain-42
-Palabras aleatorias fáciles de recordar
-Opción de elegir palabras (Pro users)
-
 24. Compresión Automática Inteligente
 Prioridad: 🔥 ALTA (ahorra bandwidth)
 Comprimir imágenes automáticamente (WebP, AVIF)
@@ -186,6 +166,7 @@ Auto-generar descripciones de archivos
 Auto-categorización
 Detección de contenido sensible
 Traducción automática de nombres
+
 🛠️ Mejoras Técnicas
 
 26. Chunked Upload con Resumabilidad
@@ -195,19 +176,6 @@ Reanudar si se interrumpe
 Mejor para archivos grandes
 Progress bar más preciso
 
-27. CDN para Downloads
-Prioridad: 🟡 MEDIA
-Ya usas Cloudflare R2, pero:
-Cache Layer adicional
-Edge delivery
-Geo-routing inteligente
-
-28. Testing Automatizado
-Prioridad: 🟡 MEDIA
-Unit tests (Jest/Vitest)
-E2E tests (Playwright)
-Visual regression testing
-CI/CD pipeline mejorado
 📱 Mobile App
 
 29. App Nativa (React Native/Flutter)

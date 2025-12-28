@@ -3,6 +3,7 @@
 import { useSession, signOut } from "next-auth/react"
 import { useState, useEffect } from "react"
 import { LogOut, User, Bell, ChevronLeft, Moon, Crown, Zap, Check } from "lucide-react"
+import Image from "next/image"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useModal } from "@/components/ModalProvider"
 
@@ -74,14 +75,14 @@ export default function DashboardHeader() {
             })
             .catch(err => console.error("Failed to load avatar", err))
     }
-  }, [session])
+  }, [session?.user?.email])
 
   // Update avatar if session changes (e.g. initial load) and strict equality check to avoid overwrite if we have better data
   useEffect(() => {
      if (session?.user?.image && !avatar) {
          setAvatar(session.user.image)
      }
-  }, [session, avatar])
+  }, [session?.user?.image, avatar])
 
   return (
     <header className="flex h-16 items-center justify-between border-b border-white/5 bg-zinc-900/50 px-6 backdrop-blur-xl">
@@ -119,11 +120,13 @@ export default function DashboardHeader() {
            </div>
            
            {avatar ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img 
+                <Image 
                     src={avatar} 
                     alt="Profile" 
-                    className="h-10 w-10 rounded-full border border-white/10 object-cover" 
+                    width={40}
+                    height={40}
+                    className="h-10 w-10 rounded-full border border-white/10 object-cover"
+                    referrerPolicy="no-referrer"
                 />
            ) : (
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-800 text-zinc-400">

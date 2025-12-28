@@ -48,6 +48,7 @@ export default function Header() {
                      width={32}
                      height={32}
                      className="h-8 w-8 rounded-full ring-2 ring-white/10"
+                     referrerPolicy="no-referrer"
                    />
                 ) : (
                    <User className="h-5 w-5" />

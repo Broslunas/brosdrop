@@ -10,7 +10,7 @@ import dbConnect from "@/lib/db"
 import Transfer from "@/models/Transfer"
 import User from "@/models/User"
 import { PLAN_LIMITS, formatBytes } from "@/lib/plans"
-import { randomUUID } from "crypto"
+import { randomUUID, createHmac } from "crypto"
 import bcrypt from "bcryptjs"
 
 export async function POST(req: Request) {
@@ -148,33 +148,8 @@ export async function POST(req: Request) {
 
     const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 })
 
-    console.log("Create Transfer Data:", {
-      fileKey,
-      originalName: name,
-      size,
-      mimeType: type,
-      senderId: session?.user?.id,
-      senderEmail: session?.user?.email,
-      expiresAt: expirationTime.toISOString(),
-      hashedPassword: passwordHash ? 'Yes' : 'No'
-    })
-
-    // Save metadata
-    const transfer = await Transfer.create({
-      fileKey,
-      originalName: name,
-      size,
-      mimeType: type,
-      senderId: session?.user?.id,
-      senderEmail: session?.user?.email,
-      expiresAt: expirationTime.toISOString(),
-      passwordHash,
-      customLink: customLink || undefined,
-      maxDownloads: maxDownloads ? parseInt(maxDownloads) : undefined
-    })
-
-    await ExpiredTransfer.create({
-        transferId: transfer._id,
+    // Generate Signed Token for Completion Step
+    const payload = {
         fileKey,
         originalName: name,
         size,
@@ -183,14 +158,25 @@ export async function POST(req: Request) {
         senderEmail: session?.user?.email,
         expiresAt: expirationTime.toISOString(),
         passwordHash,
-        customLink
-    })
+        customLink: customLink || undefined,
+        maxDownloads: maxDownloads ? parseInt(maxDownloads) : undefined
+    }
+
+    const payloadStr = JSON.stringify(payload)
+    const secret = process.env.NEXTAUTH_SECRET || 'fallback_secret_not_secure'
+    const signature = createHmac('sha256', secret)
+        .update(payloadStr)
+        .digest('hex')
+    
+    const token = Buffer.from(payloadStr).toString('base64') + '.' + signature
+
+    // Note: We DO NOT create the database record here anymore.
+    // It will be created in /api/upload/complete after client confirms upload.
 
     return NextResponse.json({
       url: signedUrl,
-      id: transfer._id,
-      key: fileKey,
-      expiresAt: expirationTime.toISOString()
+      fileKey, // Client might need this for verification or tracking
+      token
     })
 
   } catch (error) {

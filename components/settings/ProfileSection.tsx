@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useSession } from "next-auth/react"
 import { User, Camera, Save, Loader2 } from "lucide-react"
+import Image from "next/image"
 import { useModal } from "@/components/ModalProvider"
 
 interface ProfileSectionProps {
@@ -77,7 +78,14 @@ export default function ProfileSection({ initialName, initialImage }: ProfileSec
                     <div className="relative group">
                         <div className="w-24 h-24 rounded-full overflow-hidden bg-zinc-800 border-2 border-zinc-700 group-hover:border-primary transition-colors">
                             {image ? (
-                                <img src={image} alt="Profile" className="w-full h-full object-cover" />
+                                <Image 
+                                    src={image} 
+                                    alt="Profile" 
+                                    width={96}
+                                    height={96}
+                                    className="w-full h-full object-cover"
+                                    referrerPolicy="no-referrer"
+                                />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-zinc-500">
                                     <User className="w-10 h-10" />
