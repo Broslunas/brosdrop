@@ -17,28 +17,28 @@ export default function SubscriptionSection({ plan, planExpiresAt }: Subscriptio
     const [renewalMonths, setRenewalMonths] = useState<number>(1)
 
     return (
-        <div className="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl p-8">
-            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+        <div className="glass-card border border-border rounded-3xl p-8">
+            <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                 <Crown className="w-5 h-5 text-yellow-500" /> Suscripción
             </h3>
             
-            <div className="bg-zinc-800/30 border border-zinc-800 rounded-2xl p-6 relative overflow-hidden">
+            <div className="bg-muted/30 border border-border rounded-2xl p-6 relative overflow-hidden">
                 {plan !== 'free' && (
                     <div className={`absolute top-0 left-0 w-1 h-full ${plan === 'pro' ? 'bg-gradient-to-b from-orange-400 to-pink-500' : 'bg-blue-500'}`} />
                 )}
                 
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
-                            <p className="text-zinc-400 text-sm mb-1 uppercase tracking-wider font-semibold">Plan Actual</p>
+                            <p className="text-muted-foreground text-sm mb-1 uppercase tracking-wider font-semibold">Plan Actual</p>
                             <div className="flex items-center gap-3 mb-2">
-                            <span className={`text-3xl font-bold capitalize ${plan === 'pro' ? 'text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500' : plan === 'plus' ? 'text-blue-400' : 'text-white'}`}>
+                            <span className={`text-3xl font-bold capitalize ${plan === 'pro' ? 'text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500' : plan === 'plus' ? 'text-blue-500 dark:text-blue-400' : 'text-foreground'}`}>
                                 {plan}
                             </span>
-                            {plan === 'free' && <span className="bg-zinc-800 text-zinc-400 px-2 py-1 rounded text-xs border border-zinc-700">Gratuito</span>}
+                            {plan === 'free' && <span className="bg-muted text-muted-foreground px-2 py-1 rounded text-xs border border-border">Gratuito</span>}
                             </div>
                             
                             {planExpiresAt && (
-                                <div className="flex items-center gap-2 text-zinc-400 text-sm">
+                                <div className="flex items-center gap-2 text-muted-foreground text-sm">
                                     <Calendar className="w-4 h-4" />
                                     <span>Caduca el {new Date(planExpiresAt).toLocaleDateString()}</span>
                                 </div>
@@ -50,7 +50,7 @@ export default function SubscriptionSection({ plan, planExpiresAt }: Subscriptio
                             <button 
                                 type="button" 
                                 onClick={() => router.push('/pricing')}
-                                className="bg-primary hover:bg-primary/90 text-white px-4 py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
+                                className="gradient-primary hover:opacity-90 text-white px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 shadow-lg hover-lift"
                             >
                                 <Zap className="w-4 h-4 text-yellow-300" />
                                 Mejorar a Premium
@@ -58,17 +58,17 @@ export default function SubscriptionSection({ plan, planExpiresAt }: Subscriptio
                         ) : (
                             <>
                                 <div className="space-y-2">
-                                    <p className="text-xs text-zinc-500 font-medium ml-1">Periodo de Renovación</p>
-                                    <div className="grid grid-cols-4 gap-1 p-1 bg-black/20 rounded-xl">
+                                    <p className="text-xs text-muted-foreground font-medium ml-1">Periodo de Renovación</p>
+                                    <div className="grid grid-cols-4 gap-1 p-1 bg-muted/50 rounded-xl">
                                         {[1, 3, 6, 12].map(m => (
                                             <button 
                                                 key={m}
                                                 type="button"
                                                 onClick={() => setRenewalMonths(m)}
-                                                className={`aspect-square md:aspect-auto md:h-9 flex flex-col md:flex-row items-center justify-center gap-1 rounded-lg text-xs font-bold transition-all ${renewalMonths === m ? 'bg-zinc-700 text-white shadow-lg ring-1 ring-white/10' : 'text-zinc-500 hover:bg-white/5 hover:text-zinc-300'}`}
+                                                className={`aspect-square md:aspect-auto md:h-9 flex flex-col md:flex-row items-center justify-center gap-1 rounded-lg text-xs font-bold transition-all ${renewalMonths === m ? 'bg-primary text-white shadow-lg' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
                                             >
                                                 <span>{m}M</span>
-                                                {m === 12 && <span className="text-[9px] text-green-400 bg-green-500/10 px-1 rounded">-20%</span>}
+                                                {m === 12 && <span className="text-[9px] text-green-600 dark:text-green-400 bg-green-500/10 px-1 rounded">-20%</span>}
                                             </button>
                                         ))}
                                     </div>
@@ -77,13 +77,13 @@ export default function SubscriptionSection({ plan, planExpiresAt }: Subscriptio
                                 <button 
                                     type="button" 
                                     onClick={() => setShowRenewalModal(true)}
-                                    className="bg-white text-black hover:bg-zinc-200 px-4 py-3 rounded-xl font-bold transition-all flex items-center justify-between group"
+                                    className="bg-foreground text-background hover:opacity-90 px-4 py-3 rounded-xl font-bold transition-all flex items-center justify-between group hover-lift"
                                 >
                                     <div className="flex items-center gap-2">
                                         <CreditCard className="w-4 h-4" />
                                         <span>Renovar</span>
                                     </div>
-                                    <span className="bg-black/5 px-2 py-0.5 rounded text-sm group-hover:bg-black/10 transition-colors">
+                                    <span className="bg-background/10 px-2 py-0.5 rounded text-sm group-hover:bg-background/20 transition-colors">
                                         {plan !== 'free' && (() => {
                                             const prices = (PRICING as any)[plan]
                                             if (!prices) return '€0'
@@ -96,7 +96,7 @@ export default function SubscriptionSection({ plan, planExpiresAt }: Subscriptio
                                 <button 
                                     type="button" 
                                     onClick={() => router.push('/pricing')}
-                                    className="text-xs text-zinc-500 hover:text-zinc-300 underline underline-offset-2 text-center"
+                                    className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 text-center transition-colors"
                                 >
                                     Comparar planes
                                 </button>

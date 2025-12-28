@@ -7,6 +7,7 @@ import Image from "next/image"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useModal } from "@/components/ModalProvider"
 import { useSidebar } from "./SidebarContext"
+import ThemeToggle from "@/components/ThemeToggle"
 
 export default function DashboardHeader() {
   const { data: session } = useSession()
@@ -88,28 +89,29 @@ export default function DashboardHeader() {
   }, [session?.user?.image, avatar])
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-white/5 bg-zinc-900/50 px-6 backdrop-blur-xl">
+    <header className="flex h-16 items-center justify-between border-b border-zinc-200 dark:border-white/5 bg-white/50 dark:bg-zinc-900/50 px-6 backdrop-blur-xl">
       {/* Left side - Mobile Toggle & Title */}
       <div className="flex items-center gap-4">
           <button 
             onClick={toggleMobileSidebar}
-            className="md:hidden p-2 -ml-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+            className="md:hidden p-2 -ml-2 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg transition-colors"
           >
             <Menu className="w-6 h-6" />
           </button>
           
-          <span className="md:hidden text-lg font-bold text-white">BrosDrop</span>
+          <span className="md:hidden text-lg font-bold text-zinc-900 dark:text-white">BrosDrop</span>
       </div>
 
       {/* Right side - User Profile & Actions */}
       <div className="flex items-center gap-6">
-        
+        <ThemeToggle />
 
         {/* User Info */}
         <div className="flex items-center gap-4">
+           {/* ... existing code ... */}
            <div className="hidden text-right sm:block">
               <div className="flex items-center justify-end gap-2">
-                  <p className="text-sm font-medium text-white">{session?.user?.name || "Usuario"}</p>
+                  <p className="text-sm font-medium text-zinc-900 dark:text-white">{session?.user?.name || "Usuario"}</p>
                   {plan === 'pro' && (
                       <span className="flex items-center gap-1 bg-gradient-to-r from-orange-500/10 to-pink-500/10 border border-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider">
                           Pro <Crown className="w-3 h-3" />
@@ -121,7 +123,7 @@ export default function DashboardHeader() {
                       </span>
                   )}
                   {plan === 'free' && (
-                      <span className="bg-zinc-800 text-zinc-500 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border border-white/5">
+                      <span className="bg-zinc-100 dark:bg-zinc-800 text-zinc-500 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border border-zinc-200 dark:border-white/5">
                           Free
                       </span>
                   )}
@@ -131,22 +133,22 @@ export default function DashboardHeader() {
            
            {avatar ? (
                 <Image 
-                    src={avatar} 
+                    src={avatar as string} 
                     alt="Profile" 
                     width={40}
                     height={40}
-                    className="h-10 w-10 rounded-full border border-white/10 object-cover"
+                    className="h-10 w-10 rounded-full border border-zinc-200 dark:border-white/10 object-cover"
                     referrerPolicy="no-referrer"
                 />
            ) : (
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-800 text-zinc-400">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400">
                     <User className="h-5 w-5" />
                 </div>
            )}
 
            <button 
                 onClick={() => signOut()}
-                className="ml-2 rounded-lg p-2 text-zinc-400 hover:bg-white/5 hover:text-red-400 transition-colors"
+                className="ml-2 rounded-lg p-2 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                 title="Cerrar Sesión"
            >
                <LogOut className="h-5 w-5" />

@@ -111,23 +111,23 @@ export default function AdminUsersTable() {
     
     const PlanBadge = ({ plan }: { plan: string }) => {
         switch(plan) {
-            case 'pro': return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 text-xs font-medium border border-purple-500/20"><Crown className="w-3 h-3" /> Pro</span>
-            case 'plus': return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 text-xs font-medium border border-blue-500/20">Plus</span>
-            default: return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 text-xs font-medium border border-white/5">Free</span>
+            case 'pro': return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 text-xs font-medium border border-purple-500/20"><Crown className="w-3 h-3" /> Pro</span>
+            case 'plus': return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-medium border border-blue-500/20">Plus</span>
+            default: return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-xs font-medium border border-border">Free</span>
         }
     }
 
     return (
         <div className="space-y-4">
-             <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-zinc-900/50 p-4 rounded-2xl border border-white/5 backdrop-blur-sm">
+             <div className="flex flex-col md:flex-row items-center justify-between gap-4 glass-card p-4 rounded-2xl border border-border">
                 <div className="flex-1 w-full max-w-md relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <input 
                         type="text"
                         placeholder="Buscar usuarios..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full bg-zinc-900 border border-zinc-700 rounded-xl pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        className="w-full bg-card border border-input rounded-xl pl-10 pr-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                     />
                 </div>
                 
@@ -135,7 +135,7 @@ export default function AdminUsersTable() {
                     <select 
                         value={roleFilter}
                         onChange={(e) => setRoleFilter(e.target.value)}
-                        className="bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        className="bg-card border border-input rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                     >
                         <option value="all">Todos los Roles</option>
                         <option value="user">Usuario</option>
@@ -145,20 +145,20 @@ export default function AdminUsersTable() {
                     <select 
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        className="bg-card border border-input rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                     >
                         <option value="all">Todos los Estados</option>
                         <option value="active">Activo</option>
                         <option value="blocked">Bloqueado</option>
                     </select>
                 </div>
-                {loading && <div className="text-sm text-zinc-500 animate-pulse">Cargando...</div>}
+                {loading && <div className="text-sm text-muted-foreground animate-pulse">Cargando...</div>}
             </div>
 
-            <div className="rounded-2xl border border-white/5 bg-zinc-900/30 overflow-x-auto">
+            <div className="rounded-2xl border border-border bg-card/30 overflow-x-auto">
                 <table className="w-full text-left text-sm">
                     <thead>
-                        <tr className="bg-white/5 border-b border-white/5 text-zinc-400">
+                        <tr className="bg-muted/50 border-b border-border text-muted-foreground">
                             <th className="p-4 font-medium">Usuario</th>
                             <th className="p-4 font-medium hidden md:table-cell">Rol</th>
                             <th className="p-4 font-medium">Plan</th>
@@ -218,7 +218,7 @@ export default function AdminUsersTable() {
                                      <div className="text-right">
                                          <button
                                             onClick={() => setEditingUser(user)}
-                                            className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+                                            className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                                             title="Editar usuario"
                                          >
                                             <Edit2 className="w-4 h-4" />
@@ -237,17 +237,17 @@ export default function AdminUsersTable() {
                     <button 
                         onClick={() => setPage(p => Math.max(1, p - 1))}
                         disabled={page === 1}
-                        className="p-2 rounded-lg bg-zinc-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-700"
+                        className="p-2 rounded-lg bg-primary text-white disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-all"
                     >
                         <ChevronLeft className="w-5 h-5" />
                     </button>
-                    <span className="text-sm text-zinc-400">
+                    <span className="text-sm text-muted-foreground">
                         Página {page} de {totalPages}
                     </span>
                     <button 
                         onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                         disabled={page === totalPages}
-                        className="p-2 rounded-lg bg-zinc-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-700"
+                        className="p-2 rounded-lg bg-primary text-white disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-all"
                     >
                         <ChevronRight className="w-5 h-5" />
                     </button>

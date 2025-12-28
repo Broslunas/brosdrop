@@ -29,8 +29,8 @@ export default function UploadPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-8 max-w-4xl mx-auto w-full px-4">
       <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Subir Archivo</h1>
-        <p className="text-zinc-400">Comparte archivos de forma segura. Tu límite actual es de {sizeLabel} por archivo.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">Subir Archivo</h1>
+        <p className="text-zinc-500 dark:text-zinc-400">Comparte archivos de forma segura. Tu límite actual es de {sizeLabel} por archivo.</p>
       </div>
       
       <div className="w-full space-y-8">

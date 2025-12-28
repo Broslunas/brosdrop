@@ -24,16 +24,15 @@ const getFileIconColor = (filename: string) => {
   const ext = filename.split('.').pop()?.toLowerCase()
   if (!ext) return 'bg-primary/10 text-primary'
 
-  if (['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac', 'wma'].includes(ext)) return 'bg-green-500/10 text-green-400'
-  if (['mp4', 'mov', 'avi', 'mkv', 'webm', 'flv', 'wmv'].includes(ext)) return 'bg-purple-500/10 text-purple-400'
-  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico'].includes(ext)) return 'bg-pink-500/10 text-pink-400'
-  if (['zip', 'rar', '7z', 'tar', 'gz', 'bz2'].includes(ext)) return 'bg-orange-500/10 text-orange-400'
-  if (['js', 'ts', 'tsx', 'jsx', 'py', 'html', 'css', 'json', 'xml', 'java', 'cpp', 'c', 'php', 'rb', 'go'].includes(ext)) return 'bg-cyan-500/10 text-cyan-400'
-  if (['pdf', 'doc', 'docx', 'txt', 'md', 'rtf', 'odt'].includes(ext)) return 'bg-red-500/10 text-red-400'
+  if (['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac', 'wma'].includes(ext)) return 'bg-green-500/10 text-green-600 dark:text-green-400'
+  if (['mp4', 'mov', 'avi', 'mkv', 'webm', 'flv', 'wmv'].includes(ext)) return 'bg-purple-500/10 text-purple-600 dark:text-purple-400'
+  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico'].includes(ext)) return 'bg-pink-500/10 text-pink-600 dark:text-pink-400'
+  if (['zip', 'rar', '7z', 'tar', 'gz', 'bz2'].includes(ext)) return 'bg-orange-500/10 text-orange-600 dark:text-orange-400'
+  if (['js', 'ts', 'tsx', 'jsx', 'py', 'html', 'css', 'json', 'xml', 'java', 'cpp', 'c', 'php', 'rb', 'go'].includes(ext)) return 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400'
+  if (['pdf', 'doc', 'docx', 'txt', 'md', 'rtf', 'odt'].includes(ext)) return 'bg-red-500/10 text-red-600 dark:text-red-400'
   
   return 'bg-primary/10 text-primary'
 }
-
 
 interface UploadFormProps {
     files: File[]
@@ -48,7 +47,7 @@ interface UploadFormProps {
     setCustomDateValue: (s: string) => void
     password: string
     setPassword: (s: string) => void
-    setShowPasswordInput: (b: boolean) => void // Dejar por compatibilidad, aunque puede ser inferido
+    setShowPasswordInput: (b: boolean) => void
     customLink: string
     setCustomLink: (s: string) => void
     setShowCustomLink: (b: boolean) => void
@@ -57,7 +56,7 @@ interface UploadFormProps {
     recipientEmail: string
     setRecipientEmail: (s: string) => void
     showEmailInput: boolean
-    showEmailInput: boolean
+
     setShowEmailInput: (b: boolean) => void
     isPublic: boolean
     setIsPublic: (b: boolean) => void
@@ -128,24 +127,24 @@ export default function UploadForm({
     <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="rounded-3xl border border-zinc-800 bg-zinc-900/80 p-6 backdrop-blur-xl"
+        className="rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/80 p-6 backdrop-blur-xl"
     >
         <div className="mb-6">
             <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-zinc-400 text-sm font-medium">
+                    <h4 className="text-zinc-500 dark:text-zinc-400 text-sm font-medium">
                     {files.length} archivo{files.length !== 1 && 's'} seleccionado{files.length !== 1 && 's'} ({(totalSize / 1024 / 1024).toFixed(2)} MB)
                     </h4>
                     <div className="flex gap-2">
                             <button
                             onClick={() => fileInputRef.current?.click()} 
-                            className="p-2 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+                            className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
                             title="Agregar más archivos"
                             >
                                 <Plus className="w-5 h-5" />
                             </button>
                             <button 
                             onClick={(e) => { e.stopPropagation(); onCancelAll(); }}
-                            className="p-2 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-red-400 transition-colors"
+                            className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                             title="Cancelar todo"
                             >
                             <X className="h-5 w-5" />
@@ -155,7 +154,7 @@ export default function UploadForm({
 
             <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
                 {files.map((file, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-zinc-800/50 border border-white/5">
+                    <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/5">
                             <div className="flex items-center gap-3 overflow-hidden">
                             <div className={`rounded-lg p-2 ${getFileIconColor(file.name)}`}>
                                 {(() => {
@@ -164,13 +163,13 @@ export default function UploadForm({
                                 })()}
                             </div>
                             <div className="flex flex-col overflow-hidden">
-                                    <span className="truncate text-sm font-medium text-zinc-200">{file.name}</span>
+                                    <span className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-200">{file.name}</span>
                                     <span className="text-xs text-zinc-500">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
                             </div>
                             </div>
                             <button 
                                 onClick={() => onRemoveFile(i)}
-                                className="p-1.5 text-zinc-500 hover:text-red-400 transition-colors"
+                                className="p-1.5 text-zinc-400 hover:text-red-500 dark:text-zinc-500 dark:hover:text-red-400 transition-colors"
                             >
                                 <Trash2 className="w-4 h-4" />
                             </button>
@@ -192,17 +191,17 @@ export default function UploadForm({
             <div className="space-y-6">
                  {/* Multi-file toggle for Pro/Plus */}
                  {files.length > 1 && isProOrPlus && (
-                     <div className="p-1 rounded-xl bg-zinc-800 border border-zinc-700 flex">
+                     <div className="p-1 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex">
                          <button
                             onClick={() => setZipFiles(true)}
-                            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${zipFiles ? 'bg-zinc-700 text-white shadow' : 'text-zinc-400 hover:text-zinc-200'}`}
+                            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${zipFiles ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'}`}
                          >
                              <Archive className="w-4 h-4" />
                              Comprimir ZIP
                          </button>
                          <button
                             onClick={() => setZipFiles(false)}
-                            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${!zipFiles ? 'bg-zinc-700 text-white shadow' : 'text-zinc-400 hover:text-zinc-200'}`}
+                            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${!zipFiles ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'}`}
                          >
                              <Layers className="w-4 h-4" />
                              Por Separado
@@ -212,7 +211,7 @@ export default function UploadForm({
 
             {/* Expiration */}
                 <div className="">
-                <label className="flex items-center justify-between text-sm font-medium text-zinc-400 mb-2">
+                <label className="flex items-center justify-between text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">
                     <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4" />
                         Caducidad del enlace
@@ -228,8 +227,8 @@ export default function UploadForm({
                                 className={`
                                     py-2 px-1 rounded-lg text-xs font-medium transition-all
                                     ${expirationHours === option.value 
-                                        ? 'bg-white text-zinc-900 shadow-lg' 
-                                        : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200'
+                                        ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-lg' 
+                                        : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-200'
                                     }
                                 `}
                             >
@@ -238,7 +237,7 @@ export default function UploadForm({
                         ))}
                         <button
                             onClick={() => setUseCustomDate(true)}
-                            className="py-2 px-1 rounded-lg text-xs font-medium bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200 transition-all flex items-center justify-center"
+                            className="py-2 px-1 rounded-lg text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-200 transition-all flex items-center justify-center"
                             title="Personalizar Fecha"
                         >
                             <Calendar className="w-4 h-4" />
@@ -252,11 +251,11 @@ export default function UploadForm({
                             onChange={(e) => setCustomDateValue(e.target.value)}
                             min={new Date().toISOString().slice(0, 16)}
                             max={new Date(Date.now() + maxDays * 24 * 60 * 60 * 1000).toISOString().slice(0, 16)}
-                            className="w-full rounded-xl bg-zinc-800 border border-zinc-700 p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                            className="w-full rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 p-3 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                         />
                         <button 
                             onClick={() => { setUseCustomDate(false); setCustomDateValue('') }}
-                            className="absolute right-3 top-3 text-xs text-zinc-500 hover:text-zinc-300"
+                            className="absolute right-3 top-3 text-xs text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
                         >
                             Cancelar
                         </button>
@@ -268,7 +267,7 @@ export default function UploadForm({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Password */}
                 <div>
-                    <label className="flex items-center gap-2 text-sm font-medium text-zinc-400 mb-2">
+                    <label className="flex items-center gap-2 text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">
                         <Lock className="w-4 h-4" />
                         Contraseña
                     </label>
@@ -280,18 +279,18 @@ export default function UploadForm({
                             setShowPasswordInput(!!e.target.value) 
                         }}
                         placeholder="Opcional"
-                        className="w-full rounded-xl bg-zinc-800 border border-zinc-700 p-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                        className="w-full rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 p-3 text-sm text-zinc-900 dark:text-white placeholder-zinc-500 dark:placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                     />
                 </div>
 
                     {/* Custom Link */}
                     <div>
-                    <label className="flex items-center gap-2 text-sm font-medium text-zinc-400 mb-2">
+                    <label className="flex items-center gap-2 text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">
                         <LinkIcon className="w-4 h-4" />
                         Link Personalizado
                     </label>
-                    <div className="flex items-center rounded-xl bg-zinc-800 border border-zinc-700 overflow-hidden focus-within:ring-2 focus-within:ring-primary/50">
-                        <span className="pl-3 pr-1 text-zinc-500 text-sm bg-zinc-800 select-none">/d/</span>
+                    <div className="flex items-center rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 overflow-hidden focus-within:ring-2 focus-within:ring-primary/50">
+                        <span className="pl-3 pr-1 text-zinc-500 text-sm bg-zinc-100 dark:bg-zinc-800 select-none">/d/</span>
                             <input 
                             type="text"
                             value={customLink}
@@ -300,17 +299,17 @@ export default function UploadForm({
                                 setShowCustomLink(!!e.target.value) 
                             }}
                             placeholder="ej. fotos"
-                            className="w-full bg-zinc-800 border-none p-3 pl-1 text-sm text-white placeholder-zinc-600 outline-none"
+                            className="w-full bg-zinc-100 dark:bg-zinc-800 border-none p-3 pl-1 text-sm text-zinc-900 dark:text-white placeholder-zinc-500 dark:placeholder-zinc-600 outline-none"
                         />
                     </div>
                     </div>
             </div>
 
             {/* New Features: Max Downloads & Email */}
-            <div className="p-4 rounded-xl bg-zinc-800/40 border border-white/5 space-y-4">
+            <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-white/5 space-y-4">
                     {/* Max Downloads (Feature 5 update) */}
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-sm text-zinc-300">
+                        <div className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
                             <Flame className={`w-4 h-4 ${oneTimeDownload ? 'text-orange-500' : 'text-zinc-500'}`} />
                             <span>Límite de Descargas</span>
                         </div>
@@ -319,7 +318,7 @@ export default function UploadForm({
                                 type="number"
                                 min="0"
                                 placeholder="∞"
-                                className="w-16 bg-zinc-900 border border-zinc-700 rounded-lg p-1 text-center text-sm text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                className="w-16 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg p-1 text-center text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
                                 onChange={(e) => {
                                     const val = parseInt(e.target.value)
                                     setOneTimeDownload(val > 0 ? val : null)
@@ -334,7 +333,7 @@ export default function UploadForm({
                         className="flex items-center justify-between cursor-pointer"
                         onClick={() => setShowEmailInput(!showEmailInput)}
                         >
-                            <div className="flex items-center gap-2 text-sm text-zinc-300">
+                            <div className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
                                 <Mail className={`w-4 h-4 ${recipientEmail ? 'text-blue-500' : 'text-zinc-500'}`} />
                                 <span>Enviar por Email</span>
                             </div>
@@ -351,15 +350,15 @@ export default function UploadForm({
                                 value={recipientEmail}
                                 onChange={(e) => setRecipientEmail(e.target.value)}
                                 placeholder="ej. correo1@ejemplo.com, correo2@ejemplo.com"
-                                className="w-full rounded-xl bg-zinc-900 border border-zinc-700 p-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                                className="w-full rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 p-2 text-sm text-zinc-900 dark:text-white placeholder-zinc-500 dark:placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
                                 />
                             </motion.div>
                         )}
                     </div>
             </div>
             {/* Visibility Toggle */}
-            <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                <div className="flex items-center gap-2 text-sm text-zinc-300">
+            <div className="flex items-center justify-between pt-2 border-t border-zinc-200 dark:border-white/5">
+                <div className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
                     <Globe className={`w-4 h-4 ${isPublic ? 'text-primary' : 'text-zinc-500'}`} />
                     <span>Mostrar en mi Perfil Público</span>
                 </div>
@@ -367,7 +366,7 @@ export default function UploadForm({
                     onClick={() => setIsPublic(!isPublic)}
                     className={`
                         relative inline-flex h-6 w-11 items-center rounded-full transition-colors
-                        ${isPublic ? 'bg-primary' : 'bg-zinc-700'}
+                        ${isPublic ? 'bg-primary' : 'bg-zinc-300 dark:bg-zinc-700'}
                     `}
                 >
                     <span className={`

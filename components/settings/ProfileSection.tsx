@@ -61,15 +61,15 @@ export default function ProfileSection({ initialName, initialImage, initialUserN
     }
 
     return (
-        <div className="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl p-8">
+        <div className="glass-card border border-border rounded-3xl p-8">
             <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
                     <User className="w-5 h-5" /> Perfil
                 </h2>
                 <button 
                     onClick={handleSave}
                     disabled={saving}
-                    className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-zinc-700 hover:border-zinc-600"
+                    className="flex items-center gap-2 bg-primary hover:opacity-90 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover-lift"
                 >
                     {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                     Guardar
@@ -80,7 +80,7 @@ export default function ProfileSection({ initialName, initialImage, initialUserN
                 {/* Profile Picture */}
                 <div className="flex items-center gap-6">
                     <div className="relative group">
-                        <div className="w-24 h-24 rounded-full overflow-hidden bg-zinc-800 border-2 border-zinc-700 group-hover:border-primary transition-colors">
+                        <div className="w-24 h-24 rounded-full overflow-hidden bg-muted border-2 border-border group-hover:border-primary transition-colors">
                             {image ? (
                                 <Image 
                                     src={image} 
@@ -91,57 +91,57 @@ export default function ProfileSection({ initialName, initialImage, initialUserN
                                     referrerPolicy="no-referrer"
                                 />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center text-zinc-500">
+                                <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                                     <User className="w-10 h-10" />
                                 </div>
                             )}
                         </div>
-                        <label className="absolute bottom-0 right-0 p-2 bg-primary text-white rounded-full cursor-pointer hover:bg-primary/90 transition-colors shadow-lg">
+                        <label className="absolute bottom-0 right-0 p-2 bg-primary text-white rounded-full cursor-pointer hover:opacity-90 transition-all shadow-lg hover-lift">
                             <Camera className="w-4 h-4" />
                             <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
                         </label>
                     </div>
                     <div>
-                        <p className="text-zinc-200 font-medium mb-1">Foto de Perfil</p>
-                        <p className="text-sm text-zinc-500">Haz clic en el icono de cámara para cambiar tu foto.</p>
+                        <p className="text-foreground font-medium mb-1">Foto de Perfil</p>
+                        <p className="text-sm text-muted-foreground">Haz clic en el icono de cámara para cambiar tu foto.</p>
                     </div>
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-2">
                     {/* Name */}
                     <div>
-                        <label className="block text-sm font-medium text-zinc-400 mb-2">Nombre</label>
+                        <label className="block text-sm font-medium text-muted-foreground mb-2">Nombre</label>
                         <input 
                             type="text" 
                             value={name}
                             onChange={e => setName(e.target.value)}
-                            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                            className="w-full bg-card border border-input rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                             placeholder="Tu nombre"
                         />
                     </div>
 
                     {/* UserNameID */}
                     <div>
-                        <label className="block text-sm font-medium text-zinc-400 mb-2">ID de Usuario (URL Pública)</label>
+                        <label className="block text-sm font-medium text-muted-foreground mb-2">ID de Usuario (URL Pública)</label>
                         <div className="relative">
-                            <span className="absolute left-4 top-3.5 text-zinc-500">brosdrop.com/user/</span>
+                            <span className="absolute left-4 top-3.5 text-muted-foreground text-sm">brosdrop.com/user/</span>
                             <input 
                                 type="text" 
                                 value={userNameID}
                                 onChange={e => setUserNameID(e.target.value.replace(/[^a-zA-Z0-9-_]/g, ''))}
-                                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl pl-[165px] pr-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                className="w-full bg-card border border-input rounded-xl pl-[165px] pr-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                                 placeholder="tu-id-unico"
                             />
                         </div>
-                        <p className="text-xs text-zinc-500 mt-1">Solo letras, números, guiones y guiones bajos.</p>
+                        <p className="text-xs text-muted-foreground mt-1">Solo letras, números, guiones y guiones bajos.</p>
                     </div>
                 </div>
 
                 {/* Public Profile Toggle */}
-                 <div className="flex items-center justify-between p-4 bg-zinc-800/50 rounded-xl border border-zinc-800">
+                 <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl border border-border">
                     <div>
-                        <h3 className="text-white font-medium mb-1">Perfil Público</h3>
-                        <p className="text-sm text-zinc-500">Permitir que cualquiera vea tus archivos públicos en tu URL personalizada.</p>
+                        <h3 className="text-foreground font-medium mb-1">Perfil Público</h3>
+                        <p className="text-sm text-muted-foreground">Permitir que cualquiera vea tus archivos públicos en tu URL personalizada.</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                         <input 
@@ -150,7 +150,7 @@ export default function ProfileSection({ initialName, initialImage, initialUserN
                             onChange={e => setIsPublicProfile(e.target.checked)}
                             className="sr-only peer" 
                         />
-                        <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                        <div className="w-11 h-6 bg-input peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/50 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                     </label>
                 </div>
             </div>

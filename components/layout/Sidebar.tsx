@@ -52,7 +52,7 @@ export default function Sidebar() {
 
       <motion.aside 
         className={`
-            fixed md:relative z-50 h-screen flex-col border-r border-white/5 bg-zinc-900/95 md:bg-zinc-900/50 backdrop-blur-xl transition-all duration-300
+            fixed top-0 left-0 md:relative z-[100] h-screen flex-col border-r border-zinc-200 dark:border-white/5 bg-white/95 dark:bg-zinc-900/95 md:bg-white/50 md:dark:bg-zinc-900/50 backdrop-blur-xl transition-all duration-300
             ${isMobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
         `}
         style={{ width: isCollapsed ? 80 : 240 }}
@@ -65,7 +65,7 @@ export default function Sidebar() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 whitespace-nowrap"
+                    className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-400 dark:from-white dark:to-white/60 whitespace-nowrap"
                 >
                     BrosDrop
                 </motion.span>
@@ -75,7 +75,7 @@ export default function Sidebar() {
          {/* Desktop Collapse Trigger */}
          <button 
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden md:block rounded-lg p-2 text-zinc-400 hover:bg-white/5 hover:text-white transition-colors"
+            className="hidden md:block rounded-lg p-2 text-zinc-500 hover:text-primary hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white transition-colors"
          >
             {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
          </button>
@@ -83,7 +83,7 @@ export default function Sidebar() {
          {/* Mobile Close Trigger */}
          <button 
             onClick={closeMobileSidebar}
-            className="md:hidden rounded-lg p-2 text-zinc-400 hover:bg-white/5 hover:text-white transition-colors"
+            className="md:hidden rounded-lg p-2 text-zinc-500 hover:bg-zinc-100 hover:text-primary dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white transition-colors"
          >
             <ChevronLeft className="h-5 w-5" />
          </button>
@@ -102,7 +102,7 @@ export default function Sidebar() {
                         flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200
                         ${isActive 
                             ? "bg-primary text-white shadow-lg shadow-primary/20" 
-                            : "text-zinc-400 hover:bg-white/5 hover:text-white"
+                            : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white"
                         }
                     `}
                 >

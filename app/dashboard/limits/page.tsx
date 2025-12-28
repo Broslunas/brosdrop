@@ -42,24 +42,24 @@ export default async function LimitsPage() {
   }
 
   return (
-    <div className="w-full max-w-5xl mx-auto py-8">
+    <div className="w-full max-w-5xl mx-auto py-8 px-4">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Límites y Consumo</h1>
-        <p className="text-zinc-400">Consulta el estado de tu cuenta y el uso de tus recursos.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">Límites y Consumo</h1>
+        <p className="text-muted-foreground">Consulta el estado de tu cuenta y el uso de tus recursos.</p>
       </div>
 
       {/* Plan Summary Card */}
-      <div className="bg-zinc-900/50 border border-zinc-800 rounded-3xl p-8 mb-8 relative overflow-hidden">
+      <div className="glass-card rounded-3xl p-8 mb-8 relative overflow-hidden border border-border">
          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
              <div>
                  <div className="flex items-center gap-3 mb-2">
-                     <span className="text-sm font-medium text-zinc-400 uppercase tracking-wider">Plan Actual</span>
-                     {planName !== 'free' && <span className="bg-primary/20 text-primary text-xs px-2 py-0.5 rounded-full font-bold border border-primary/20">ACTIVO</span>}
+                     <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Plan Actual</span>
+                     {planName !== 'free' && <span className="bg-primary/10 text-primary text-xs px-3 py-1 rounded-full font-bold border border-primary/20">ACTIVO</span>}
                  </div>
-                 <h2 className="text-4xl font-black text-white capitalize flex items-center gap-2">
+                 <h2 className="text-4xl font-black text-foreground capitalize flex items-center gap-2">
                      {plan.name} {planName === 'plus' || planName === 'pro' ? <Crown className="w-8 h-8 text-yellow-500 fill-yellow-500/20" /> : null}
                  </h2>
-                 <p className="text-zinc-400 mt-2 max-w-xl">
+                 <p className="text-muted-foreground mt-2 max-w-xl">
                     {planName === 'free' 
                         ? "Estás en el plan básico. Actualiza para desbloquear más poder." 
                         : "Tienes acceso a características premium. ¡Gracias por tu apoyo!"}
@@ -67,44 +67,44 @@ export default async function LimitsPage() {
              </div>
              
              {planName === 'free' && (
-                 <Link href="/pricing" className="bg-white text-black hover:bg-zinc-200 px-6 py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl flex items-center gap-2">
-                     <Zap className="w-4 h-4 fill-black" />
+                 <Link href="/pricing" className="gradient-primary text-white hover:opacity-90 px-6 py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-xl hover-lift flex items-center gap-2">
+                     <Zap className="w-4 h-4 fill-white" />
                      Mejorar Plan
                  </Link>
              )}
          </div>
 
          {/* Decoration */}
-         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] rounded-full pointer-events-none" />
+         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 dark:bg-primary/10 blur-[100px] rounded-full pointer-events-none" />
       </div>
 
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
           {/* Active Files */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <div className="bg-card border border-border rounded-2xl p-6 hover-lift transition-all">
               <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
+                  <div className="p-2.5 bg-blue-500/10 rounded-xl text-blue-600 dark:text-blue-400">
                       <File className="w-5 h-5" />
                   </div>
-                  <h3 className="font-semibold text-white">Archivos Activos</h3>
+                  <h3 className="font-semibold text-card-foreground">Archivos Activos</h3>
               </div>
               
               <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                      <span className="text-zinc-400 font-medium">Usados</span>
-                      <span className="text-white font-bold">{activeFilesCount} <span className="text-zinc-500">/ {plan.maxFiles === Infinity ? '∞' : plan.maxFiles}</span></span>
+                      <span className="text-muted-foreground font-medium">Usados</span>
+                      <span className="text-card-foreground font-bold">{activeFilesCount} <span className="text-muted-foreground">/ {plan.maxFiles === Infinity ? '∞' : plan.maxFiles}</span></span>
                   </div>
                   {plan.maxFiles !== Infinity && (
-                      <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
+                      <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                           <div 
-                              className={`h-full rounded-full transition-all duration-500 ${activeFilesCount >= plan.maxFiles ? 'bg-red-500' : 'bg-blue-500'}`} 
+                              className={`h-full rounded-full transition-all duration-500 ${activeFilesCount >= plan.maxFiles ? 'bg-destructive' : 'bg-blue-500'}`} 
                               style={{ width: `${calcPercent(activeFilesCount, plan.maxFiles)}%` }}
                           />
                       </div>
                   )}
                   {activeFilesCount >= (plan.maxFiles as number) && plan.maxFiles !== Infinity && (
-                      <p className="text-xs text-red-400 flex items-center gap-1 mt-2">
+                      <p className="text-xs text-destructive flex items-center gap-1 mt-2">
                           <AlertTriangle className="w-3 h-3" /> Límite alcanzado. Elimina archivos.
                       </p>
                   )}
@@ -112,29 +112,29 @@ export default async function LimitsPage() {
           </div>
 
           {/* Protected Files */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <div className="bg-card border border-border rounded-2xl p-6 hover-lift transition-all">
               <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-yellow-500/10 rounded-lg text-yellow-400">
+                  <div className="p-2.5 bg-yellow-500/10 rounded-xl text-yellow-600 dark:text-yellow-400">
                       <Lock className="w-5 h-5" />
                   </div>
-                  <h3 className="font-semibold text-white">Archivos Protegidos</h3>
+                  <h3 className="font-semibold text-card-foreground">Archivos Protegidos</h3>
               </div>
               
               <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                      <span className="text-zinc-400 font-medium">Usados</span>
-                      <span className="text-white font-bold">{activeProtectedCount} <span className="text-zinc-500">/ {plan.maxPwd === Infinity ? '∞' : plan.maxPwd}</span></span>
+                      <span className="text-muted-foreground font-medium">Usados</span>
+                      <span className="text-card-foreground font-bold">{activeProtectedCount} <span className="text-muted-foreground">/ {plan.maxPwd === Infinity ? '∞' : plan.maxPwd}</span></span>
                   </div>
                   {plan.maxPwd !== Infinity && (
-                      <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
+                      <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                           <div 
-                              className={`h-full rounded-full transition-all duration-500 ${activeProtectedCount >= plan.maxPwd ? 'bg-red-500' : 'bg-yellow-500'}`} 
+                              className={`h-full rounded-full transition-all duration-500 ${activeProtectedCount >= plan.maxPwd ? 'bg-destructive' : 'bg-yellow-500'}`} 
                               style={{ width: `${calcPercent(activeProtectedCount, plan.maxPwd)}%` }}
                           />
                       </div>
                   )}
                   {activeProtectedCount >= (plan.maxPwd as number) && plan.maxPwd !== Infinity && (
-                      <p className="text-xs text-orange-400 flex items-center gap-1 mt-2">
+                      <p className="text-xs text-warning flex items-center gap-1 mt-2">
                           <AlertTriangle className="w-3 h-3" /> Máximo de seguridad alcanzado.
                       </p>
                   )}
@@ -142,29 +142,29 @@ export default async function LimitsPage() {
           </div>
 
           {/* Custom Links */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <div className="bg-card border border-border rounded-2xl p-6 hover-lift transition-all">
               <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-pink-500/10 rounded-lg text-pink-400">
+                  <div className="p-2.5 bg-pink-500/10 rounded-xl text-pink-600 dark:text-pink-400">
                       <LinkIcon className="w-5 h-5" />
                   </div>
-                  <h3 className="font-semibold text-white">Enlaces Personalizados</h3>
+                  <h3 className="font-semibold text-card-foreground">Enlaces Personalizados</h3>
               </div>
               
               <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                      <span className="text-zinc-400 font-medium">Usados</span>
-                      <span className="text-white font-bold">{activeLinksCount} <span className="text-zinc-500">/ {plan.maxCustomLinks || 0}</span></span>
+                      <span className="text-muted-foreground font-medium">Usados</span>
+                      <span className="text-card-foreground font-bold">{activeLinksCount} <span className="text-muted-foreground">/ {plan.maxCustomLinks || 0}</span></span>
                   </div>
                   {(plan.maxCustomLinks || 0) > 0 && (
-                      <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
+                      <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                           <div 
-                              className={`h-full rounded-full transition-all duration-500 ${activeLinksCount >= (plan.maxCustomLinks || 0) ? 'bg-red-500' : 'bg-pink-500'}`} 
+                              className={`h-full rounded-full transition-all duration-500 ${activeLinksCount >= (plan.maxCustomLinks || 0) ? 'bg-destructive' : 'bg-pink-500'}`} 
                               style={{ width: `${calcPercent(activeLinksCount, plan.maxCustomLinks || 1)}%` }}
                           />
                       </div>
                   )}
                   {activeLinksCount >= (plan.maxCustomLinks || 0) && (
-                      <p className="text-xs text-pink-400 flex items-center gap-1 mt-2">
+                      <p className="text-xs text-pink-600 dark:text-pink-400 flex items-center gap-1 mt-2">
                           <AlertTriangle className="w-3 h-3" /> Límite de enlaces alcanzado.
                       </p>
                   )}
@@ -172,32 +172,32 @@ export default async function LimitsPage() {
           </div>
 
           {/* Total Storage */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <div className="bg-card border border-border rounded-2xl p-6 hover-lift transition-all">
               <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">
+                  <div className="p-2.5 bg-purple-500/10 rounded-xl text-purple-600 dark:text-purple-400">
                       <HardDrive className="w-5 h-5" />
                   </div>
-                  <h3 className="font-semibold text-white">Almacenamiento Total</h3>
+                  <h3 className="font-semibold text-card-foreground">Almacenamiento Total</h3>
               </div>
               
               <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                      <span className="text-zinc-400 font-medium">Usados</span>
-                      <span className="text-white font-bold">{formatBytes(totalStorageBytes)} <span className="text-zinc-500">/ {plan.maxTotalStorage ? formatBytes(plan.maxTotalStorage) : '∞'}</span></span>
+                      <span className="text-muted-foreground font-medium">Usados</span>
+                      <span className="text-card-foreground font-bold">{formatBytes(totalStorageBytes)} <span className="text-muted-foreground">/ {plan.maxTotalStorage ? formatBytes(plan.maxTotalStorage) : '∞'}</span></span>
                   </div>
                    {plan.maxTotalStorage && (
-                      <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
+                      <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                           <div 
-                              className={`h-full rounded-full transition-all duration-500 ${totalStorageBytes >= plan.maxTotalStorage ? 'bg-red-500' : 'bg-purple-500'}`} 
+                              className={`h-full rounded-full transition-all duration-500 ${totalStorageBytes >= plan.maxTotalStorage ? 'bg-destructive' : 'bg-purple-500'}`} 
                               style={{ width: `${calcPercent(totalStorageBytes, plan.maxTotalStorage)}%` }}
                           />
                       </div>
                   )}
-                  <p className="text-xs text-zinc-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                       Espacio total ocupado por tus archivos activos.
                   </p>
                   {plan.maxTotalStorage && totalStorageBytes >= plan.maxTotalStorage && (
-                      <p className="text-xs text-red-400 flex items-center gap-1 mt-1">
+                      <p className="text-xs text-destructive flex items-center gap-1 mt-1">
                           <AlertTriangle className="w-3 h-3" /> Almacenamiento lleno.
                       </p>
                   )}
@@ -205,30 +205,30 @@ export default async function LimitsPage() {
           </div>
           
           {/* API Usage */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <div className="bg-card border border-border rounded-2xl p-6 hover-lift transition-all">
               <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-indigo-500/10 rounded-lg text-indigo-400">
+                  <div className="p-2.5 bg-indigo-500/10 rounded-xl text-indigo-600 dark:text-indigo-400">
                       <Server className="w-5 h-5" />
                   </div>
-                  <h3 className="font-semibold text-white">Uso de API (1h)</h3>
+                  <h3 className="font-semibold text-card-foreground">Uso de API (1h)</h3>
               </div>
               
               <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                      <span className="text-zinc-400 font-medium">Peticiones</span>
-                      <span className="text-white font-bold">
+                      <span className="text-muted-foreground font-medium">Peticiones</span>
+                      <span className="text-card-foreground font-bold">
                         {(() => {
                             const now = Date.now()
                             const windowStart = user.apiUsage?.windowStart ? new Date(user.apiUsage.windowStart).getTime() : now
                             const isExpired = now - windowStart > 3600 * 1000
                             const count = isExpired ? 0 : (user.apiUsage?.requestsCount || 0)
                             return count
-                        })()} <span className="text-zinc-500">/ {plan.apiRequestsPerHour || 0}</span>
+                        })()} <span className="text-muted-foreground">/ {plan.apiRequestsPerHour || 0}</span>
                       </span>
                   </div>
                   {(plan.apiRequestsPerHour || 0) > 0 ? (
                     <>
-                       <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
+                       <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                           <div 
                               className={`h-full rounded-full transition-all duration-500 bg-indigo-500`} 
                               style={{ 
@@ -242,12 +242,12 @@ export default async function LimitsPage() {
                               }}
                           />
                       </div>
-                      <p className="text-xs text-zinc-500 mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                           Límite de peticiones por hora.
                       </p>
                     </>
                   ) : (
-                      <p className="text-xs text-yellow-500/80 mt-1">
+                      <p className="text-xs text-warning mt-1">
                           Tu plan no tiene acceso a la API.
                       </p>
                   )}
@@ -257,30 +257,30 @@ export default async function LimitsPage() {
 
 
           {/* API Uploads */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <div className="bg-card border border-border rounded-2xl p-6 hover-lift transition-all">
               <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-cyan-500/10 rounded-lg text-cyan-400">
+                  <div className="p-2.5 bg-cyan-500/10 rounded-xl text-cyan-600 dark:text-cyan-400">
                       <UploadCloud className="w-5 h-5" />
                   </div>
-                  <h3 className="font-semibold text-white">Subidas API (24h)</h3>
+                  <h3 className="font-semibold text-card-foreground">Subidas API (24h)</h3>
               </div>
               
               <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                      <span className="text-zinc-400 font-medium">Subidas</span>
-                      <span className="text-white font-bold">
+                      <span className="text-muted-foreground font-medium">Subidas</span>
+                      <span className="text-card-foreground font-bold">
                         {(() => {
                             const now = Date.now()
                             const windowStart = user.apiUsage?.uploadsWindowStart ? new Date(user.apiUsage.uploadsWindowStart).getTime() : now
                             const isExpired = now - windowStart > 24 * 3600 * 1000
                             const count = isExpired ? 0 : (user.apiUsage?.uploadsCount || 0)
                             return count
-                        })()} <span className="text-zinc-500">/ {plan.apiUploadsPerDay || 0}</span>
+                        })()} <span className="text-muted-foreground">/ {plan.apiUploadsPerDay || 0}</span>
                       </span>
                   </div>
                   {(plan.apiUploadsPerDay || 0) > 0 ? (
                     <>
-                       <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
+                       <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                           <div 
                               className={`h-full rounded-full transition-all duration-500 bg-cyan-500`} 
                               style={{ 
@@ -294,12 +294,12 @@ export default async function LimitsPage() {
                               }}
                           />
                       </div>
-                      <p className="text-xs text-zinc-500 mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                           Límite de subidas diarias por API.
                       </p>
                     </>
                   ) : (
-                      <p className="text-xs text-yellow-500/80 mt-1">
+                      <p className="text-xs text-warning mt-1">
                           Tu plan no tiene acceso a subir por API.
                       </p>
                   )}
@@ -307,45 +307,45 @@ export default async function LimitsPage() {
           </div>
           
           {/* Max File Size */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <div className="bg-card border border-border rounded-2xl p-6 hover-lift transition-all">
               <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-green-500/10 rounded-lg text-green-400">
+                  <div className="p-2.5 bg-green-500/10 rounded-xl text-green-600 dark:text-green-400">
                       <div className="relative">
                         <File className="w-5 h-5" />
-                        <span className="absolute -bottom-1 -right-1 bg-green-900 rounded-full w-3 h-3 flex items-center justify-center text-[8px] font-bold">+</span>
+                        <span className="absolute -bottom-1 -right-1 bg-green-600 dark:bg-green-900 rounded-full w-3 h-3 flex items-center justify-center text-[8px] font-bold text-white">+</span>
                       </div>
                   </div>
-                  <h3 className="font-semibold text-white">Tamaño por Archivo</h3>
+                  <h3 className="font-semibold text-card-foreground">Tamaño por Archivo</h3>
               </div>
-              <div className="text-2xl font-bold text-white mb-1">
+              <div className="text-2xl font-bold text-card-foreground mb-1">
                  {formatBytes(plan.maxBytes)}
               </div>
-              <p className="text-xs text-zinc-500">Tamaño máximo para una sola subida.</p>
+              <p className="text-xs text-muted-foreground">Tamaño máximo para una sola subida.</p>
           </div>
 
            {/* Expiration */}
-           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+           <div className="bg-card border border-border rounded-2xl p-6 hover-lift transition-all">
               <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-teal-500/10 rounded-lg text-teal-400">
+                  <div className="p-2.5 bg-teal-500/10 rounded-xl text-teal-600 dark:text-teal-400">
                       <Clock className="w-5 h-5" />
                   </div>
-                  <h3 className="font-semibold text-white">Tiempo de Vida</h3>
+                  <h3 className="font-semibold text-card-foreground">Tiempo de Vida</h3>
               </div>
-              <div className="text-2xl font-bold text-white mb-1">
+              <div className="text-2xl font-bold text-card-foreground mb-1">
                  {plan.maxDays} Días
               </div>
-              <p className="text-xs text-zinc-500">Tiempo antes de que un archivo expire automáticamente.</p>
+              <p className="text-xs text-muted-foreground">Tiempo antes de que un archivo expire automáticamente.</p>
           </div>
 
       </div>
 
-      <div className="mt-8 p-6 rounded-2xl bg-gradient-to-r from-zinc-800 to-zinc-900 border border-white/5 flex items-center justify-between">
+      <div className="mt-8 p-6 rounded-2xl glass-card border border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-              <h4 className="font-bold text-white text-lg">¿Necesitas más espacio?</h4>
-              <p className="text-zinc-400 text-sm mt-1">Nuestros planes Pro ofrecen almacenamiento ilimitado y características avanzadas.</p>
+              <h4 className="font-bold text-foreground text-lg">¿Necesitas más espacio?</h4>
+              <p className="text-muted-foreground text-sm mt-1">Nuestros planes Pro ofrecen almacenamiento ilimitado y características avanzadas.</p>
           </div>
-          <Link href="/pricing" className="text-sm font-bold text-white underline hover:text-primary transition-colors">
-              Ver Planes &rarr;
+          <Link href="/pricing" className="gradient-primary text-white px-6 py-3 rounded-xl font-bold hover:opacity-90 transition-all hover-lift whitespace-nowrap">
+              Ver Planes →
           </Link>
       </div>
 

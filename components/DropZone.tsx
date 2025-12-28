@@ -326,7 +326,7 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays, ex
               transition-all duration-300 ease-in-out
               ${isDragging 
                 ? 'border-primary bg-primary/5 scale-[1.02]' 
-                : 'border-zinc-700 hover:border-zinc-600 bg-zinc-900/50 hover:bg-zinc-900'
+                : 'border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600 bg-white dark:bg-zinc-900/50 hover:bg-zinc-50 dark:hover:bg-zinc-900'
               }
             `}
             onDragOver={handleDragOver}
@@ -337,14 +337,14 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays, ex
              <div className="flex flex-col items-center justify-center p-8 md:p-16 text-center">
                 <div className={`
                     mb-6 rounded-2xl p-4 transition-colors duration-300
-                    ${isDragging ? 'bg-primary/20 text-primary' : 'bg-zinc-800 text-zinc-400 group-hover:bg-zinc-700 group-hover:text-zinc-200'}
+                    ${isDragging ? 'bg-primary/20 text-primary' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700 group-hover:text-zinc-900 dark:group-hover:text-zinc-200'}
                 `}>
                     <Upload className="h-10 w-10" />
                 </div>
-                <h3 className="mb-2 text-xl font-bold tracking-tight">
+                <h3 className="mb-2 text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
                     Subir Archivos
                 </h3>
-                <p className="text-sm text-zinc-400 max-w-[260px]">
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-[260px]">
                     Arrastra tus archivos aquí o haz clic para explorar. Máximo {MAX_SIZE_LABEL}.
                 </p>
              </div>
@@ -399,13 +399,13 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays, ex
              )}
              
              {(uploadStatus === 'uploading' || uploadStatus === 'zipping') && (
-                 <div className="rounded-3xl border border-zinc-800 bg-zinc-900/80 p-6 backdrop-blur-xl">
+                 <div className="rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/80 p-6 backdrop-blur-xl">
                     <UploadProgress status={uploadStatus} progress={progress} />
                  </div>
              )}
              
              {uploadStatus === 'success' && (
-                  <div className="rounded-3xl border border-zinc-800 bg-zinc-900/80 p-6 backdrop-blur-xl">
+                  <div className="rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/80 p-6 backdrop-blur-xl">
                      <UploadSuccess 
                         downloadUrls={downloadUrls}
                         uploadedFileIds={uploadedFileIds}
@@ -415,13 +415,13 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays, ex
              )}
              
              {uploadStatus === 'error' && (
-                  <div className="rounded-3xl border border-zinc-800 bg-zinc-900/80 p-6 backdrop-blur-xl text-center py-4">
+                  <div className="rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/80 p-6 backdrop-blur-xl text-center py-4">
                      <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-red-500">
                          <AlertCircle className="h-6 w-6" />
                      </div>
                      <h4 className="text-lg font-bold text-red-500">Error al subir</h4>
-                     <p className="text-sm text-zinc-500 mb-4">Algo salió mal durante la subida.</p>
-                     <button onClick={reset} className="w-full rounded-xl bg-zinc-800 py-3 text-sm font-medium hover:bg-zinc-700 transition-colors">
+                     <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4">Algo salió mal durante la subida.</p>
+                     <button onClick={reset} className="w-full rounded-xl bg-zinc-100 dark:bg-zinc-800 py-3 text-sm font-medium hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white transition-colors">
                          Intentar de nuevo
                      </button>
                   </div>

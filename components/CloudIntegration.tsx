@@ -256,21 +256,21 @@ export default function CloudIntegration({
         className="relative group"
       >
         <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-3xl blur opacity-50" />
-        <div className="relative p-6 rounded-3xl bg-zinc-900/80 backdrop-blur-xl border border-white/10">
+        <div className="relative p-6 rounded-3xl bg-white dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200 dark:border-white/10">
           <div className="flex items-start gap-4">
             <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/10">
-              <Cloud className="w-6 h-6 text-blue-400" />
+              <Cloud className="w-6 h-6 text-blue-500 dark:text-blue-400" />
             </div>
             <div className="flex-1">
-              <h3 className="font-bold text-white text-lg mb-1">Integración con la Nube</h3>
-              <p className="text-sm text-zinc-400 mb-4">
+              <h3 className="font-bold text-zinc-900 dark:text-white text-lg mb-1">Integración con la Nube</h3>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4">
                 {mode === 'import' 
                   ? 'Importa archivos directamente desde Google Drive o Dropbox' 
                   : 'Exporta tus archivos a servicios de nube'}
               </p>
               <div className="flex items-center gap-2 p-3 rounded-xl bg-yellow-500/5 border border-yellow-500/20">
-                <AlertCircle className="w-4 h-4 text-yellow-500 flex-shrink-0" />
-                <p className="text-sm text-yellow-200">
+                <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-500 flex-shrink-0" />
+                <p className="text-sm text-yellow-700 dark:text-yellow-200">
                   Actualiza a <strong>Plus</strong> o <strong>Pro</strong> para usar esta función
                 </p>
               </div>
@@ -289,14 +289,14 @@ export default function CloudIntegration({
         className="relative group"
       >
         <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-3xl blur opacity-30 group-hover:opacity-50 transition duration-500" />
-        <div className="relative p-6 rounded-3xl bg-zinc-900/80 backdrop-blur-xl border border-white/10 hover:border-white/20 transition-all duration-300">
+        <div className="relative p-6 rounded-3xl bg-white dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 transition-all duration-300">
           <div className="flex items-start gap-4 mb-6">
             <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/10">
-              <Cloud className="w-6 h-6 text-blue-400" />
+              <Cloud className="w-6 h-6 text-blue-500 dark:text-blue-400" />
             </div>
             <div className="flex-1">
-              <h3 className="font-bold text-white text-lg">Integración con la Nube</h3>
-              <p className="text-sm text-zinc-400 mt-1">
+              <h3 className="font-bold text-zinc-900 dark:text-white text-lg">Integración con la Nube</h3>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
                 {mode === 'import' 
                   ? 'Importa archivos desde tus servicios de nube' 
                   : 'Exporta tus archivos a tus servicios de nube'}
@@ -339,8 +339,8 @@ export default function CloudIntegration({
                     disabled:opacity-50 disabled:cursor-not-allowed
                     border-2 group/card
                     ${isConnected 
-                      ? 'bg-gradient-to-br from-zinc-800/80 to-zinc-900/80 border-white/20 hover:border-white/30' 
-                      : 'bg-zinc-800/50 border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800/70'
+                      ? 'bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-800/80 dark:to-zinc-900/80 border-zinc-200 dark:border-white/20 hover:border-zinc-300 dark:hover:border-white/30' 
+                      : 'bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800/70'
                     }
                   `}
                 >
@@ -349,7 +349,7 @@ export default function CloudIntegration({
                       p-3 rounded-xl transition-all duration-300
                       ${isConnected 
                         ? 'bg-gradient-to-br from-blue-500/20 to-purple-500/20' 
-                        : 'bg-zinc-700/50 group-hover/card:bg-zinc-700'
+                        : 'bg-zinc-200 dark:bg-zinc-700/50 group-hover/card:bg-zinc-300 dark:group-hover/card:bg-zinc-700'
                       }
                     `}>
                       {(() => {
@@ -359,15 +359,15 @@ export default function CloudIntegration({
                     </div>
                     
                     <div className="flex-1 text-left">
-                      <div className="font-semibold text-white mb-1">{config.name}</div>
+                      <div className="font-semibold text-zinc-900 dark:text-white mb-1">{config.name}</div>
                       
                       {isWorking || isExporting ? (
-                        <div className="flex items-center gap-2 text-xs text-blue-400">
+                        <div className="flex items-center gap-2 text-xs text-blue-500 dark:text-blue-400">
                           <Loader2 className="w-3 h-3 animate-spin" />
                           <span>{mode === 'export' ? 'Exportando...' : 'Conectando...'}</span>
                         </div>
                       ) : isConnected ? (
-                        <div className="flex items-center gap-1.5 text-xs text-green-400">
+                        <div className="flex items-center gap-1.5 text-xs text-green-500 dark:text-green-400">
                           <Check className="w-3.5 h-3.5" />
                           <span>Conectado</span>
                         </div>
@@ -377,10 +377,10 @@ export default function CloudIntegration({
                     </div>
 
                     {mode === 'import' && isConnected && (
-                      <Upload className="w-4 h-4 text-blue-400 opacity-50 group-hover/card:opacity-100 transition-opacity" />
+                      <Upload className="w-4 h-4 text-blue-500 dark:text-blue-400 opacity-50 group-hover/card:opacity-100 transition-opacity" />
                     )}
                     {mode === 'export' && isConnected && (
-                      <Download className="w-4 h-4 text-purple-400 opacity-50 group-hover/card:opacity-100 transition-opacity" />
+                      <Download className="w-4 h-4 text-purple-500 dark:text-purple-400 opacity-50 group-hover/card:opacity-100 transition-opacity" />
                     )}
                   </div>
                 </motion.button>
@@ -397,7 +397,7 @@ export default function CloudIntegration({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 dark:bg-black/90 backdrop-blur-md"
             onClick={() => setShowPicker(false)}
           >
             <motion.div
@@ -411,9 +411,9 @@ export default function CloudIntegration({
               <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/30 to-purple-500/30 rounded-3xl blur-xl opacity-50" />
               
               {/* Main modal */}
-              <div className="relative bg-zinc-900 rounded-3xl border border-white/10 overflow-hidden flex flex-col shadow-2xl">
+              <div className="relative bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-white/10 overflow-hidden flex flex-col shadow-2xl">
                 {/* Header */}
-                <div className="p-6 border-b border-white/10 bg-gradient-to-b from-zinc-800/50 to-zinc-900/50">
+                <div className="p-6 border-b border-zinc-200 dark:border-white/10 bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-800/50 dark:to-zinc-900/50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500/10 to-purple-500/10">
@@ -423,19 +423,19 @@ export default function CloudIntegration({
                         })()}
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold text-white">
+                        <h3 className="text-xl font-bold text-zinc-900 dark:text-white">
                           Seleccionar Archivos
                         </h3>
-                        <p className="text-sm text-zinc-400 mt-0.5">
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
                           {selectedProvider && CLOUD_PROVIDERS[selectedProvider].name}
                         </p>
                       </div>
                     </div>
                     <button
                       onClick={() => setShowPicker(false)}
-                      className="p-2 rounded-xl hover:bg-white/5 transition-colors group/close"
+                      className="p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors group/close"
                     >
-                      <X className="w-5 h-5 text-zinc-400 group-hover/close:text-white transition-colors" />
+                      <X className="w-5 h-5 text-zinc-400 group-hover/close:text-zinc-900 dark:group-hover/close:text-white transition-colors" />
                     </button>
                   </div>
                 </div>
@@ -444,15 +444,15 @@ export default function CloudIntegration({
                 <div className="flex-1 overflow-y-auto p-6 min-h-[300px] max-h-[50vh]">
                   {isLoading ? (
                     <div className="flex flex-col items-center justify-center py-16">
-                      <Loader2 className="w-10 h-10 text-blue-400 animate-spin mb-4" />
-                      <p className="text-sm text-zinc-400">Cargando archivos...</p>
+                      <Loader2 className="w-10 h-10 text-blue-500 dark:text-blue-400 animate-spin mb-4" />
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400">Cargando archivos...</p>
                     </div>
                   ) : cloudFiles.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16">
-                      <div className="p-4 rounded-2xl bg-zinc-800/50 mb-4">
-                        <Cloud className="w-12 h-12 text-zinc-600" />
+                      <div className="p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-800/50 mb-4">
+                        <Cloud className="w-12 h-12 text-zinc-400 dark:text-zinc-600" />
                       </div>
-                      <p className="text-sm text-zinc-400">No se encontraron archivos</p>
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400">No se encontraron archivos</p>
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -467,20 +467,20 @@ export default function CloudIntegration({
                             className={`w-full p-4 rounded-2xl border-2 transition-all duration-200 text-left group/file
                               ${isSelected 
                                 ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/50 shadow-lg shadow-blue-500/10' 
-                                : 'bg-zinc-800/30 border-zinc-700/50 hover:bg-zinc-800/50 hover:border-zinc-600'
+                                : 'bg-zinc-50 dark:bg-zinc-800/30 border-zinc-200 dark:border-zinc-700/50 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:border-zinc-300 dark:hover:border-zinc-600'
                               }`}
                           >
                             <div className="flex items-center gap-3">
                               <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all
                                 ${isSelected 
                                   ? 'bg-blue-500 border-blue-500 shadow-lg shadow-blue-500/50' 
-                                  : 'border-zinc-600 group-hover/file:border-zinc-500'
+                                  : 'border-zinc-300 dark:border-zinc-600 group-hover/file:border-zinc-400 dark:group-hover/file:border-zinc-500'
                                 }`}
                               >
                                 {isSelected && <Check className="w-4 h-4 text-white" />}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="font-medium text-white truncate">{file.name}</p>
+                                <p className="font-medium text-zinc-900 dark:text-white truncate">{file.name}</p>
                                 {file.size && (
                                   <p className="text-xs text-zinc-500 mt-0.5">
                                     {(file.size / 1024 / 1024).toFixed(2)} MB
@@ -493,9 +493,9 @@ export default function CloudIntegration({
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   onClick={(e) => e.stopPropagation()}
-                                  className="p-2 rounded-lg hover:bg-white/5 transition-colors"
+                                  className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                                 >
-                                  <ExternalLink className="w-4 h-4 text-zinc-400 hover:text-white transition-colors" />
+                                  <ExternalLink className="w-4 h-4 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors" />
                                 </a>
                               )}
                             </div>
@@ -507,16 +507,16 @@ export default function CloudIntegration({
                 </div>
 
                 {/* Footer */}
-                <div className="p-6 border-t border-white/10 bg-gradient-to-t from-zinc-800/50 to-zinc-900/50">
+                <div className="p-6 border-t border-zinc-200 dark:border-white/10 bg-gradient-to-t from-zinc-50 to-zinc-100 dark:from-zinc-800/50 dark:to-zinc-900/50">
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <p className="text-sm text-zinc-400">
-                      <span className="font-semibold text-white">{selectedFiles.size}</span> archivo(s) seleccionado(s)
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                      <span className="font-semibold text-zinc-900 dark:text-white">{selectedFiles.size}</span> archivo(s) seleccionado(s)
                     </p>
                     <div className="flex gap-3 w-full sm:w-auto">
                       <button
                         onClick={() => setShowPicker(false)}
-                        className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-medium
-                                 transition-all duration-200 border border-zinc-700 hover:border-zinc-600 text-center"
+                        className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white font-medium
+                                 transition-all duration-200 border border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 text-center"
                       >
                         Cancelar
                       </button>

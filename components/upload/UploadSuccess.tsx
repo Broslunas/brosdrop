@@ -49,18 +49,18 @@ export default function UploadSuccess({
                  <CheckCircle className="h-6 w-6" />
              </motion.div>
              <h4 className="text-lg font-bold text-green-500">¡Enviado!</h4>
-             <p className="text-sm text-zinc-500 mb-4">
+             <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4">
                  {downloadUrls.length > 1 ? 'Tus archivos están listos.' : 'Tu archivo está listo para compartir.'}
              </p>
 
              <div className="flex flex-col gap-2">
                  {/* Multiple Links List */}
                  {downloadUrls.length > 1 && (
-                     <div className="text-left bg-zinc-800/50 rounded-xl p-2 mb-2 max-h-[150px] overflow-y-auto custom-scrollbar">
+                     <div className="text-left bg-zinc-100 dark:bg-zinc-800/50 rounded-xl p-2 mb-2 max-h-[150px] overflow-y-auto custom-scrollbar">
                          {downloadUrls.map((url, i) => (
-                             <div key={i} className="flex items-center justify-between p-2 text-xs text-zinc-300 border-b border-white/5 last:border-0">
+                             <div key={i} className="flex items-center justify-between p-2 text-xs text-zinc-700 dark:text-zinc-300 border-b border-zinc-200 dark:border-white/5 last:border-0">
                                  <span className="truncate flex-1">{url}</span>
-                                 <button onClick={() => handleCopyLink(url)} className="p-1 hover:text-white">
+                                 <button onClick={() => handleCopyLink(url)} className="p-1 hover:text-zinc-900 dark:hover:text-white">
                                      <Copy className="w-3 h-3" />
                                  </button>
                              </div>
@@ -69,7 +69,7 @@ export default function UploadSuccess({
                  )}
 
                  <div className="flex gap-2">
-                     <button onClick={onReset} className="flex-1 rounded-xl bg-zinc-800 py-3 text-sm font-medium hover:bg-zinc-700 transition-colors">
+                     <button onClick={onReset} className="flex-1 rounded-xl bg-zinc-100 dark:bg-zinc-800 py-3 text-sm font-medium hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white transition-colors">
                          Enviar otro
                      </button>
                      
@@ -97,7 +97,7 @@ export default function UploadSuccess({
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="pt-6 border-t border-white/10"
+                    className="pt-6 border-t border-zinc-200 dark:border-white/10"
                 >
                     <CloudIntegration
                         planName={planName}
