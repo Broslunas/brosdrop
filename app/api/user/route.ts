@@ -35,9 +35,23 @@ export async function PUT(req: Request) {
     const data = await req.json()
     
     // Validate/Sanitize data if needed
-    // Assuming data contains: { name, image, newsletterSubscribed, emailNotifications }
+    // Assuming data contains: { name, image, newsletterSubscribed, emailNotifications, userNameID, isPublicProfile }
 
     await dbConnect()
+
+    // Validate userNameID if provided
+    if (data.userNameID) {
+        const usernameRegex = /^[a-zA-Z0-9-_]+$/;
+        if (!usernameRegex.test(data.userNameID)) {
+             return NextResponse.json({ error: "Invalid username format. Only letters, numbers, hyphens and underscores allowed." }, { status: 400 })
+        }
+
+        // Check for uniqueness if changed - we can rely on Mongo unique index error but better to be explicit or handle error
+        const existingUser = await User.findOne({ userNameID: data.userNameID, email: { $ne: session.user.email } })
+        if (existingUser) {
+             return NextResponse.json({ error: "Username is already taken" }, { status: 400 })
+        }
+    }
 
     if (data.branding) {
         const currentUser = await User.findOne({ email: session.user.email })

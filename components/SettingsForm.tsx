@@ -32,7 +32,9 @@ export default function SettingsForm() {
                     defaultView: data.defaultView || 'grid',
                     branding: data.branding || { logo: '', background: '', enabled: true },
                     plan: data.plan || 'free',
-                    planExpiresAt: data.planExpiresAt || null
+                    planExpiresAt: data.planExpiresAt || null,
+                    userNameID: data.userNameID || "",
+                    isPublicProfile: data.isPublicProfile || false
                 })
             }
         })
@@ -72,6 +74,8 @@ export default function SettingsForm() {
         <ProfileSection 
             initialName={userData.name}
             initialImage={userData.image}
+            initialUserNameID={userData.userNameID}
+            initialIsPublicProfile={userData.isPublicProfile}
         />
 
         <SubscriptionSection 

@@ -20,7 +20,9 @@ const UserSchema = new Schema({
   planExpiresAt: { type: Date },
   blocked: { type: Boolean, default: false },
   blockedMessage: { type: String },
-    apiKey: { type: String, unique: true, sparse: true },
+  userNameID: { type: String, unique: true, sparse: true, trim: true },
+  isPublicProfile: { type: Boolean, default: false },
+  apiKey: { type: String, unique: true, sparse: true },
   apiUsage: {
     requestsCount: { type: Number, default: 0 },
     windowStart: { type: Date, default: Date.now },

@@ -145,13 +145,6 @@ Version control básico
 
 🎁 Features "Wow"
 
-22. Generación de QR Dinámicos con Arte
-Prioridad: 🟢 BAJA (pero cool)
-Ya tienes QR, mejóralo:
-QR codes artísticos con logo
-Diferentes estilos de QR
-Colores personalizados
-Frames decorativos
 
 24. Compresión Automática Inteligente
 Prioridad: 🔥 ALTA (ahorra bandwidth)
@@ -175,12 +168,3 @@ Subir archivos en chunks
 Reanudar si se interrumpe
 Mejor para archivos grandes
 Progress bar más preciso
-
-📱 Mobile App
-
-29. App Nativa (React Native/Flutter)
-Prioridad: 🟢 BAJA (pero impacto grande)
-Mejor UX en móviles
-Integración con galería del teléfono
-Share extension
-Notifications nativas

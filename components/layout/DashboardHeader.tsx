@@ -2,7 +2,7 @@
 
 import { useSession, signOut } from "next-auth/react"
 import { useState, useEffect } from "react"
-import { LogOut, User, Bell, ChevronLeft, Moon, Crown, Zap, Check } from "lucide-react"
+import { LogOut, User, Bell, ChevronLeft, Moon, Crown, Zap, Check, Menu } from "lucide-react"
 import Image from "next/image"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useModal } from "@/components/ModalProvider"
@@ -13,6 +13,7 @@ export default function DashboardHeader() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { toggleMobileSidebar } = useSidebar()
+  const { showModal } = useModal()
   
   const [avatar, setAvatar] = useState<string | null | undefined>(session?.user?.image)
   const plan = (session?.user as any)?.plan || 'free'
