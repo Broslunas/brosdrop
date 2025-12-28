@@ -20,7 +20,7 @@ export async function PUT(
     }
 
     const { id } = await params
-    const { name, password, removePassword, expiresAt, customLink, maxDownloads, qrOptions } = await req.json()
+    const { name, password, removePassword, expiresAt, customLink, maxDownloads, qrOptions, isPublic } = await req.json()
 
     await dbConnect()
 
@@ -172,6 +172,10 @@ export async function PUT(
         }
 
         transfer.qrOptions = newOptions
+    }
+
+    if (isPublic !== undefined) {
+        transfer.isPublic = isPublic
     }
 
     await transfer.save()

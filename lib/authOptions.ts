@@ -34,6 +34,8 @@ export const authOptions: NextAuthOptions = {
         // @ts-ignore
         session.user.emailVerified = user.emailVerified
         // @ts-ignore
+        session.user.defaultPublicFiles = user.defaultPublicFiles !== undefined ? user.defaultPublicFiles : true
+        // @ts-ignore
         session.user.createdAt = user.createdAt
         // @ts-ignore
         session.user.plan = user.plan

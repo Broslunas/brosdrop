@@ -51,9 +51,17 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays, ex
   const [oneTimeDownload, setOneTimeDownload] = useState<number | null>(null)
   const [recipientEmail, setRecipientEmail] = useState('')
   const [showEmailInput, setShowEmailInput] = useState(false)
+  const [isPublic, setIsPublic] = useState(session?.user?.defaultPublicFiles ?? true)
   
   // Zip/Separate Toggle
   const [zipFiles, setZipFiles] = useState(true)
+
+  // Sync isPublic with user preference when session loads
+  useEffect(() => {
+      if (session?.user?.defaultPublicFiles !== undefined) {
+          setIsPublic(session.user.defaultPublicFiles)
+      }
+  }, [session?.user?.defaultPublicFiles])
   
   const totalSize = useMemo(() => files.reduce((acc, f) => acc + f.size, 0), [files])
 
@@ -148,7 +156,8 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays, ex
                 password: session && password ? password : null,
                 customLink: (session && customLink && total === 1) ? customLink : null, 
                 maxDownloads: oneTimeDownload, 
-                recipientEmail: recipientEmail || null 
+                recipientEmail: recipientEmail || null,
+                isPublic: isPublic
             }),
             headers: { 'Content-Type': 'application/json' }
         })
@@ -182,17 +191,24 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays, ex
                         })
 
                         if (!completeRes.ok) {
-                            throw new Error('Failed to finalize upload')
+                            let errorMessage = 'Failed to finalize upload'
+                            try {
+                                const errorData = await completeRes.json()
+                                if (errorData.error) errorMessage = errorData.error
+                            } catch (e) {
+                                // Default to generic
+                            }
+                            throw new Error(errorMessage)
                         }
 
-                        const { id, link } = await completeRes.json()
+                        const { id, link, expiresAt } = await completeRes.json()
 
                         // Email logic
                         if (recipientEmail) {
                             const recipients = recipientEmail.split(',').map(e => e.trim()).filter(e => e)
                             if (recipients.length > 0) {
                                 // Re-parse basic info for email (safe estimate)
-                                const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL || 'https://n8n.broslunas.com/webhook/brosdrop-send-via-email'
+                                const webhookUrl = 'https://n8n.broslunas.com/webhook/brosdrop-send-via-email'
                                 fetch(webhookUrl, {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
@@ -202,7 +218,7 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays, ex
                                         fileName: file.name,
                                         fileSize: (file.size / 1024 / 1024).toFixed(2) + ' MB',
                                         senderEmail: session?.user?.email || 'guest',
-                                        expiresAt: null, // We might not have this easily available without decoding token, can skip or pass from step 1 if needed.
+                                        expiresAt: expiresAt, 
                                         hasPassword: !!password,
                                         password: password || null
                                     })
@@ -294,6 +310,7 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays, ex
     setOneTimeDownload(null)
     setRecipientEmail('')
     setZipFiles(true)
+    setIsPublic(session?.user?.defaultPublicFiles ?? true)
   }
 
   return (
@@ -376,6 +393,8 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays, ex
                     setZipFiles={setZipFiles}
                     fileInputRef={fileInputRef}
                     totalSize={totalSize}
+                    isPublic={isPublic}
+                    setIsPublic={setIsPublic}
                 />
              )}
              

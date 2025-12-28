@@ -12,6 +12,7 @@ declare module "next-auth" {
       role: 'user' | 'admin'
       plan: string
       emailVerified?: Date | null
+      defaultPublicFiles?: boolean
     } & DefaultSession["user"]
   }
 }

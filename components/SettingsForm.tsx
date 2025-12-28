@@ -29,6 +29,7 @@ export default function SettingsForm() {
                     image: data.image || session?.user?.image || "",
                     newsletterSubscribed: data.newsletterSubscribed || false,
                     emailNotifications: data.emailNotifications ?? true,
+                    defaultPublicFiles: data.defaultPublicFiles ?? true,
                     defaultView: data.defaultView || 'grid',
                     branding: data.branding || { logo: '', background: '', enabled: true },
                     plan: data.plan || 'free',
@@ -87,6 +88,7 @@ export default function SettingsForm() {
             initialData={{
                 newsletterSubscribed: userData.newsletterSubscribed,
                 emailNotifications: userData.emailNotifications,
+                defaultPublicFiles: userData.defaultPublicFiles,
                 defaultView: userData.defaultView
             }}
         />

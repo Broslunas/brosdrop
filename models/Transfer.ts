@@ -25,6 +25,7 @@ export interface ITransfer {
   updatedAt: string
   blocked?: boolean
   blockedMessage?: string // Optional admin message
+  isPublic?: boolean
 }
 
 const TransferSchema = new Schema<ITransfer>({
@@ -46,7 +47,8 @@ const TransferSchema = new Schema<ITransfer>({
     logoUrl: { type: String }
   },
   blocked: { type: Boolean, default: false },
-  blockedMessage: { type: String }
+  blockedMessage: { type: String },
+  isPublic: { type: Boolean, default: true }
 }, { timestamps: true })
 
 // Force model recompilation in development to handle schema changes

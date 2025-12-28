@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react"
 import { motion } from "framer-motion"
-import { Plus, X, Trash2, Clock, Calendar, Lock, Link as LinkIcon, Flame, Mail, Archive, Layers } from "lucide-react"
+import { Plus, X, Trash2, Clock, Calendar, Lock, Link as LinkIcon, Flame, Mail, Archive, Layers, Globe } from "lucide-react"
 import { File as FileIcon, Music, Video, Image as ImageIcon, FileText, FileCode } from "lucide-react"
 
 // Helpercitos
@@ -57,7 +57,10 @@ interface UploadFormProps {
     recipientEmail: string
     setRecipientEmail: (s: string) => void
     showEmailInput: boolean
+    showEmailInput: boolean
     setShowEmailInput: (b: boolean) => void
+    isPublic: boolean
+    setIsPublic: (b: boolean) => void
     
     // Actions
     onAddFiles: (e: React.ChangeEvent<HTMLInputElement>) => void
@@ -97,6 +100,8 @@ export default function UploadForm({
     setRecipientEmail,
     showEmailInput,
     setShowEmailInput,
+    isPublic,
+    setIsPublic,
     onAddFiles,
     onRemoveFile,
     onCancelAll,
@@ -351,6 +356,25 @@ export default function UploadForm({
                             </motion.div>
                         )}
                     </div>
+            </div>
+            {/* Visibility Toggle */}
+            <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                <div className="flex items-center gap-2 text-sm text-zinc-300">
+                    <Globe className={`w-4 h-4 ${isPublic ? 'text-primary' : 'text-zinc-500'}`} />
+                    <span>Mostrar en mi Perfil Público</span>
+                </div>
+                <button
+                    onClick={() => setIsPublic(!isPublic)}
+                    className={`
+                        relative inline-flex h-6 w-11 items-center rounded-full transition-colors
+                        ${isPublic ? 'bg-primary' : 'bg-zinc-700'}
+                    `}
+                >
+                    <span className={`
+                        inline-block h-4 w-4 transform rounded-full bg-white transition-transform
+                        ${isPublic ? 'translate-x-6' : 'translate-x-1'}
+                    `} />
+                </button>
             </div>
             </div>
         )}

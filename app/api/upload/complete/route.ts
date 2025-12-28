@@ -48,7 +48,8 @@ export async function POST(req: Request) {
         expiresAt,
         passwordHash,
         customLink, 
-        maxDownloads
+        maxDownloads,
+        isPublic
     } = data
 
     // Verify Session Match (Security: prevent user A from using user B's signed token if they stole it?)
@@ -84,9 +85,13 @@ export async function POST(req: Request) {
       expiresAt,
       passwordHash,
       customLink: customLink || undefined,
-      maxDownloads: maxDownloads ? parseInt(maxDownloads) : undefined
+      maxDownloads: maxDownloads ? parseInt(maxDownloads) : undefined,
+      isPublic: isPublic !== undefined ? isPublic : true
     })
 
+    // We create the 'ExpiredTransfer' (Log) record. 
+    // Note: 'customLink' is not in ExpiredTransfer schema, so we omit it to avoid confusion, 
+    // although Mongoose strict mode would just strip it.
     await ExpiredTransfer.create({
         transferId: transfer._id,
         fileKey,
@@ -97,7 +102,6 @@ export async function POST(req: Request) {
         senderEmail,
         expiresAt,
         passwordHash,
-        customLink
     })
 
     const identifier = customLink || transfer._id
@@ -106,11 +110,16 @@ export async function POST(req: Request) {
     return NextResponse.json({
         success: true,
         id: transfer._id,
-        link: finalLink
+        link: finalLink,
+        expiresAt: transfer.expiresAt
     })
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Upload completion failed:", error)
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+    // Check for Mongoose Duplicate Key Error (e.g. race condition on customLink despite check)
+    if (error.code === 11000) {
+        return NextResponse.json({ error: "El enlace ya está en uso." }, { status: 409 })
+    }
+    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 })
   }
 }

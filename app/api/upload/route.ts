@@ -19,7 +19,8 @@ export async function POST(req: Request) {
     // Optional: Force login?
     // if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const { name, type, size, expiresInHours, customExpiresAt, password, customLink, maxDownloads } = await req.json()
+    const reqBody = await req.json()
+    const { name, type, size, expiresInHours, customExpiresAt, password, customLink, maxDownloads } = reqBody
 
     if (!process.env.R2_BUCKET_NAME) {
         return NextResponse.json({ error: "Server Configuration Error: R2 Bucket not set" }, { status: 500 })
@@ -159,7 +160,8 @@ export async function POST(req: Request) {
         expiresAt: expirationTime.toISOString(),
         passwordHash,
         customLink: customLink || undefined,
-        maxDownloads: maxDownloads ? parseInt(maxDownloads) : undefined
+        maxDownloads: maxDownloads ? parseInt(maxDownloads) : undefined,
+        isPublic: typeof reqBody.isPublic === 'boolean' ? reqBody.isPublic : true // Default true
     }
 
     const payloadStr = JSON.stringify(payload)

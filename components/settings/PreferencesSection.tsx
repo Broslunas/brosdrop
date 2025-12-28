@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { Mail, Bell, LayoutGrid, List, Save, Loader2 } from "lucide-react"
+import { Mail, Bell, LayoutGrid, List, Save, Loader2, Globe } from "lucide-react"
 import { useModal } from "@/components/ModalProvider"
 
 interface PreferencesSectionProps {
     initialData: {
         newsletterSubscribed: boolean
         emailNotifications: boolean
+        defaultPublicFiles: boolean
         defaultView: string
     }
 }
@@ -104,6 +105,27 @@ export default function PreferencesSection({ initialData }: PreferencesSectionPr
                             onChange={e => handleChange('emailNotifications', e.target.checked)}
                         />
                         <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${data.emailNotifications ? 'translate-x-6' : ''}`} />
+                    </div>
+                </label>
+
+                <label className="flex items-center justify-between p-4 rounded-xl bg-zinc-800/50 border border-zinc-800 cursor-pointer hover:bg-zinc-800 transition-colors">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-green-500/10 text-green-400">
+                             <Globe className="w-5 h-5" /> 
+                        </div>
+                        <div>
+                            <p className="font-medium text-zinc-200">Visibilidad por defecto</p>
+                            <p className="text-xs text-zinc-500">Haz públicos los nuevos archivos automáticamente.</p>
+                        </div>
+                    </div>
+                    <div className={`w-12 h-6 rounded-full transition-colors relative ${data.defaultPublicFiles ? 'bg-primary' : 'bg-zinc-700'}`}>
+                        <input 
+                            type="checkbox" 
+                            className="hidden" 
+                            checked={data.defaultPublicFiles}
+                            onChange={e => handleChange('defaultPublicFiles', e.target.checked)}
+                        />
+                        <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${data.defaultPublicFiles ? 'translate-x-6' : ''}`} />
                     </div>
                 </label>
 

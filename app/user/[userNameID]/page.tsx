@@ -39,6 +39,7 @@ async function getUserAndFiles(userNameID: string) {
     const files = await Transfer.find({
         senderId: user._id.toString(), // Ensure string
         blocked: false,
+        isPublic: true,
         expiresAt: { $gt: now }
     }).sort({ createdAt: -1 })
 
@@ -92,7 +93,7 @@ export default async function PublicProfilePage({ params }: Props) {
                 </div>
             )}
 
-            <main className="relative z-10 container mx-auto px-4 py-12 max-w-5xl">
+            <main className="relative z-10 container mx-auto px-4 pt-28 pb-12 max-w-5xl">
                 {/* Header */}
                 <div className="flex flex-col items-center text-center mb-16 space-y-6">
                     <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-zinc-800 shadow-2xl bg-zinc-900">
@@ -149,7 +150,7 @@ export default async function PublicProfilePage({ params }: Props) {
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                             {files.map((file: any) => (
                                 <Link 
-                                    href={file.customLink ? `/${file.customLink}` : `/d/${file.id}`}
+                                    href={file.customLink ? `/d/${file.customLink}` : `/d/${file.id}`}
                                     key={file._id}
                                     className="group relative bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 hover:border-primary/50 rounded-2xl p-5 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 overflow-hidden"
                                 >

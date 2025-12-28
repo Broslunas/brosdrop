@@ -2,7 +2,8 @@
 
 import { useState, useMemo, useEffect } from "react"
 import { ITransfer } from "@/models/Transfer"
-import { Trash2, ExternalLink, Copy, FileIcon, Calendar, Download, HardDrive, Eye, Search, Filter, ArrowUpDown, Check, X, Grid, List as ListIcon, Edit2, Lock, Music, Video, Image as ImageIcon, FileText, Archive, FileCode, Clock, QrCode, AlertTriangle } from "lucide-react"
+import { Trash2, ExternalLink, Copy, FileIcon, Calendar, Download, HardDrive, Eye, Search, Filter, ArrowUpDown, Check, X, Grid, List as ListIcon, Edit2, Lock, Music, Video, Image as ImageIcon, FileText, Archive, FileCode, Clock, QrCode, AlertTriangle, Globe, EyeOff } from "lucide-react"
+import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useModal } from "@/components/ModalProvider"
@@ -74,7 +75,7 @@ export default function DashboardClient({
   const [editingFile, setEditingFile] = useState<ITransfer | null>(null)
   const [activeModalMode, setActiveModalMode] = useState<'edit' | 'qr'>('edit')
 
-  const handleSaveEdit = async (id: string, newName: string, password?: string | null, newExpiration?: string, customLink?: string, maxDownloads?: number | null, qrOptions?: { fgColor: string, bgColor: string, logoUrl?: string }) => {
+  const handleSaveEdit = async (id: string, newName: string, password?: string | null, newExpiration?: string, customLink?: string, maxDownloads?: number | null, qrOptions?: { fgColor: string, bgColor: string, logoUrl?: string }, isPublic?: boolean) => {
       try {
           const res = await fetch(`/api/files/${id}`, {
               method: 'PUT',
@@ -86,7 +87,8 @@ export default function DashboardClient({
                   expiresAt: newExpiration,
                   customLink: customLink,
                   maxDownloads: maxDownloads,
-                  qrOptions: qrOptions
+                  qrOptions: qrOptions,
+                  isPublic: isPublic
               })
           })
           
@@ -103,7 +105,8 @@ export default function DashboardClient({
               expiresAt: data.transfer.expiresAt || newExpiration,
               customLink: data.transfer.customLink,
               maxDownloads: data.transfer.maxDownloads,
-              qrOptions: data.transfer.qrOptions
+              qrOptions: data.transfer.qrOptions,
+              isPublic: data.transfer.isPublic
           }
           setFiles(prev => prev.map(f => f._id === id ? updated : f))
           if (onFileUpdated) onFileUpdated(updated)
@@ -481,6 +484,34 @@ export default function DashboardClient({
 
                              {/* Single Actions */}
                              <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                                <button 
+                                    onClick={async () => {
+                                        // Quick Toggle without full modal
+                                        // We reuse handleSaveEdit but for just this field
+                                        // But handleSaveEdit shows a modal. Maybe create a lighter version or accept strict mode?
+                                        // Or just call API directly here for speed/UX
+                                        if (file.blocked) return
+                                        try {
+                                             const newStatus = !file.isPublic
+                                             const res = await fetch(`/api/files/${file._id}`, {
+                                                method: 'PUT',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ isPublic: newStatus })
+                                            })
+                                            if (!res.ok) throw new Error("Failed")
+                                            
+                                            setFiles(prev => prev.map(f => f._id === file._id ? { ...f, isPublic: newStatus } : f))
+                                            // No modal for quick toggle, just UI update
+                                        } catch (e) {
+                                            toast.error("Error al cambiar visibilidad")
+                                        }
+                                    }}
+                                    disabled={file.blocked}
+                                    className={`p-2 rounded-lg transition-colors ${file.blocked ? 'text-zinc-700 cursor-not-allowed' : (file.isPublic ? 'hover:bg-primary/10 text-primary hover:text-primary' : 'hover:bg-white/10 text-zinc-500 hover:text-white')}`}
+                                    title={file.blocked ? "Bloqueado" : (file.isPublic ? "Público (Visible en perfil)" : "Privado (Oculto en perfil)")}
+                                >
+                                    {file.isPublic ? <Globe className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                                </button>
                                 <button 
                                     onClick={() => copyLink(file._id)}
                                     disabled={file.blocked}
