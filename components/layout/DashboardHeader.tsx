@@ -6,17 +6,19 @@ import { LogOut, User, Bell, ChevronLeft, Moon, Crown, Zap, Check } from "lucide
 import Image from "next/image"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useModal } from "@/components/ModalProvider"
+import { useSidebar } from "./SidebarContext"
 
 export default function DashboardHeader() {
   const { data: session } = useSession()
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { showModal } = useModal()
+  const { toggleMobileSidebar } = useSidebar()
   
   const [avatar, setAvatar] = useState<string | null | undefined>(session?.user?.image)
   const plan = (session?.user as any)?.plan || 'free'
 
   useEffect(() => {
+    // ... existing useEffect for payment success
     if (searchParams?.get('payment') === 'success') {
          const planName = searchParams.get('plan') || 'plus'
          const isPro = planName.toLowerCase().includes('pro')
@@ -86,9 +88,16 @@ export default function DashboardHeader() {
 
   return (
     <header className="flex h-16 items-center justify-between border-b border-white/5 bg-zinc-900/50 px-6 backdrop-blur-xl">
-      {/* Left side - Breadcrumbs or Back (Optional, keeping it simple or matching image) */}
+      {/* Left side - Mobile Toggle & Title */}
       <div className="flex items-center gap-4">
+          <button 
+            onClick={toggleMobileSidebar}
+            className="md:hidden p-2 -ml-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
           
+          <span className="md:hidden text-lg font-bold text-white">BrosDrop</span>
       </div>
 
       {/* Right side - User Profile & Actions */}

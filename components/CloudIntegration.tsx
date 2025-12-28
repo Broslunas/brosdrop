@@ -508,25 +508,25 @@ export default function CloudIntegration({
 
                 {/* Footer */}
                 <div className="p-6 border-t border-white/10 bg-gradient-to-t from-zinc-800/50 to-zinc-900/50">
-                  <div className="flex items-center justify-between gap-4">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <p className="text-sm text-zinc-400">
                       <span className="font-semibold text-white">{selectedFiles.size}</span> archivo(s) seleccionado(s)
                     </p>
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 w-full sm:w-auto">
                       <button
                         onClick={() => setShowPicker(false)}
-                        className="px-5 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-medium
-                                 transition-all duration-200 border border-zinc-700 hover:border-zinc-600"
+                        className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-medium
+                                 transition-all duration-200 border border-zinc-700 hover:border-zinc-600 text-center"
                       >
                         Cancelar
                       </button>
                       <button
                         onClick={handleImportFiles}
                         disabled={selectedFiles.size === 0 || isLoading}
-                        className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 
+                        className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 
                                  hover:from-blue-600 hover:to-purple-600 text-white font-medium
                                  transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
-                                 flex items-center gap-2 shadow-lg shadow-blue-500/25 disabled:shadow-none"
+                                 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 disabled:shadow-none"
                       >
                         {isLoading ? (
                           <>

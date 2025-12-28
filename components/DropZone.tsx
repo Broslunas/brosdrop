@@ -317,7 +317,7 @@ export default function DropZone({ maxBytes, maxSizeLabel, planName, maxDays, ex
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
           >
-             <div className="flex flex-col items-center justify-center p-16 text-center">
+             <div className="flex flex-col items-center justify-center p-8 md:p-16 text-center">
                 <div className={`
                     mb-6 rounded-2xl p-4 transition-colors duration-300
                     ${isDragging ? 'bg-primary/20 text-primary' : 'bg-zinc-800 text-zinc-400 group-hover:bg-zinc-700 group-hover:text-zinc-200'}

@@ -3,12 +3,14 @@
 import { useSession, signIn, signOut } from "next-auth/react"
 import Link from "next/link"
 import Image from "next/image"
-import { LogIn, LogOut, UploadCloud, User, LayoutDashboard } from "lucide-react"
+import { LogIn, LogOut, UploadCloud, User, LayoutDashboard, Menu, X } from "lucide-react"
 import { usePathname } from "next/navigation"
+import { useState } from "react"
 
 export default function Header() {
   const { data: session } = useSession()
   const pathname = usePathname()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   if (pathname?.startsWith("/dashboard")) return null
 
@@ -37,10 +39,11 @@ export default function Header() {
             <Link href="/help" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors" prefetch={true}>Ayuda</Link>
         </nav>
 
-        <div className="flex items-center gap-4">
+        {/* Desktop Actions */}
+        <div className="hidden md:flex items-center gap-4">
           {session ? (
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-sm text-zinc-400 hidden sm:flex">
+              <div className="flex items-center gap-2 text-sm text-zinc-400">
                 {session?.user?.image ? (
                    <Image 
                      src={session.user.image} 
@@ -62,12 +65,12 @@ export default function Header() {
                 prefetch={true}
               >
                  <LayoutDashboard className="h-4 w-4" />
-                 <span className="hidden sm:inline">Panel</span>
+                 <span>Panel</span>
               </Link>
             </div>
           ) : (
              <>
-                 <Link href="/login" className="hidden sm:block text-sm font-medium text-white hover:text-zinc-300 transition-colors" prefetch={true}>
+                 <Link href="/login" className="text-sm font-medium text-white hover:text-zinc-300 transition-colors" prefetch={true}>
                     Iniciar Sesión
                  </Link>
                 <button
@@ -79,6 +82,50 @@ export default function Header() {
             </>
           )}
         </div>
+
+        {/* Mobile Menu Button */}
+        <button 
+          className="md:hidden p-2 text-zinc-400 hover:text-white"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
+
+        {/* Mobile Menu Overlay */}
+        {isMobileMenuOpen && (
+          <div className="absolute top-16 left-0 w-full h-[calc(100vh-4rem)] bg-zinc-950/95 backdrop-blur-xl border-t border-white/5 p-4 flex flex-col gap-4 md:hidden overflow-y-auto">
+            <nav className="flex flex-col gap-2">
+                <Link href="/features" className="p-4 rounded-xl bg-white/5 text-lg font-medium text-white" onClick={() => setIsMobileMenuOpen(false)}>Características</Link>
+                <Link href="/pricing" className="p-4 rounded-xl bg-white/5 text-lg font-medium text-white" onClick={() => setIsMobileMenuOpen(false)}>Precios</Link>
+                <Link href="/docs/api" className="p-4 rounded-xl bg-white/5 text-lg font-medium text-white" onClick={() => setIsMobileMenuOpen(false)}>API</Link>
+                <Link href="/help" className="p-4 rounded-xl bg-white/5 text-lg font-medium text-white" onClick={() => setIsMobileMenuOpen(false)}>Ayuda</Link>
+            </nav>
+            
+            <div className="mt-auto pb-8 space-y-4">
+               {session ? (
+                 <div className="space-y-4">
+                    <div className="flex items-center gap-3 px-2">
+                      {session?.user?.image ? (
+                        <Image src={session.user.image} alt={session.user.name || "User"} width={40} height={40} className="rounded-full ring-2 ring-white/10" />
+                      ) : <User className="h-10 w-10 text-zinc-400" />}
+                      <div>
+                        <div className="font-bold text-white">{session.user.name}</div>
+                        <div className="text-sm text-zinc-500">{session.user.email}</div>
+                      </div>
+                    </div>
+                    <Link href="/dashboard" className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-indigo-600 text-white font-bold" onClick={() => setIsMobileMenuOpen(false)}>
+                       <LayoutDashboard className="h-5 w-5" /> Ir al Panel
+                    </Link>
+                 </div>
+               ) : (
+                 <div className="flex flex-col gap-3">
+                    <Link href="/login" className="w-full p-4 rounded-xl bg-white/5 text-center font-medium text-white" onClick={() => setIsMobileMenuOpen(false)}>Iniciar Sesión</Link>
+                    <button onClick={() => { signIn(); setIsMobileMenuOpen(false); }} className="w-full p-4 rounded-xl bg-white text-center font-bold text-zinc-950">Comenzar Gratis</button>
+                 </div>
+               )}
+            </div>
+          </div>
+        )}
       </div>
     </header>
   )

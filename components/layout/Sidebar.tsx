@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
+import { useSidebar } from "./SidebarContext"
 import { 
   LayoutDashboard, 
   UploadCloud, 
@@ -20,6 +21,7 @@ import { signOut, useSession } from "next-auth/react"
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const pathname = usePathname()
+  const { isMobileOpen, closeMobileSidebar } = useSidebar()
 
   const navItems = [
     { name: "Mis Archivos", href: "/dashboard", icon: LayoutDashboard },
@@ -34,10 +36,28 @@ export default function Sidebar() {
   }
 
   return (
-    <motion.aside 
-      className="relative z-40 hidden md:flex h-screen flex-col border-r border-white/5 bg-zinc-900/50 backdrop-blur-xl transition-all duration-300"
-      style={{ width: isCollapsed ? 80 : 240 }}
-    >
+    <>
+      {/* Mobile Backdrop */}
+      <AnimatePresence>
+        {isMobileOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={closeMobileSidebar}
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+          />
+        )}
+      </AnimatePresence>
+
+      <motion.aside 
+        className={`
+            fixed md:relative z-50 h-screen flex-col border-r border-white/5 bg-zinc-900/95 md:bg-zinc-900/50 backdrop-blur-xl transition-all duration-300
+            ${isMobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+        `}
+        style={{ width: isCollapsed ? 80 : 240 }}
+        initial={false}
+      >
        <div className="flex h-16 items-center justify-between px-4 mt-2">
          <AnimatePresence>
             {!isCollapsed && (
@@ -51,11 +71,21 @@ export default function Sidebar() {
                 </motion.span>
             )}
          </AnimatePresence>
+         
+         {/* Desktop Collapse Trigger */}
          <button 
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="rounded-lg p-2 text-zinc-400 hover:bg-white/5 hover:text-white transition-colors"
+            className="hidden md:block rounded-lg p-2 text-zinc-400 hover:bg-white/5 hover:text-white transition-colors"
          >
             {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+         </button>
+
+         {/* Mobile Close Trigger */}
+         <button 
+            onClick={closeMobileSidebar}
+            className="md:hidden rounded-lg p-2 text-zinc-400 hover:bg-white/5 hover:text-white transition-colors"
+         >
+            <ChevronLeft className="h-5 w-5" />
          </button>
        </div>
 
@@ -67,6 +97,7 @@ export default function Sidebar() {
                     key={item.href} 
                     href={item.href}
                     prefetch={true}
+                    onClick={() => closeMobileSidebar()}
                     className={`
                         flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200
                         ${isActive 
@@ -90,7 +121,7 @@ export default function Sidebar() {
           })}
        </nav>
 
-
     </motion.aside>
+    </>
   )
 }

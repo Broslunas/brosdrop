@@ -30,7 +30,7 @@ export default function Home() {
           <div className="absolute top-[40%] left-[40%] w-[50rem] h-[50rem] bg-blue-500/10 rounded-full blur-[150px] opacity-30" />
       </div>
 
-      <div className="w-full max-w-7xl mx-auto px-4 relative z-10 flex flex-col space-y-32 pb-32">
+      <div className="w-full max-w-7xl mx-auto px-4 relative z-10 flex flex-col space-y-16 md:space-y-32 pb-32">
       
         {/* Hero Section */}
         <section className="flex flex-col items-center justify-center min-h-[90vh] w-full pt-20 relative">

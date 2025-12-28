@@ -243,7 +243,7 @@ export default function AdminTransfersTable() {
                 {loading && <div className="text-sm text-zinc-500 animate-pulse">Cargando...</div>}
             </div>
 
-            <div className="rounded-2xl border border-white/5 bg-zinc-900/30">
+            <div className="rounded-2xl border border-white/5 bg-zinc-900/30 overflow-x-auto">
                 <table className="w-full text-left text-sm">
                     <thead>
                         <tr className="bg-white/5 border-b border-white/5 text-zinc-400">

@@ -10,6 +10,7 @@ import Transfer from "@/models/Transfer"
 import { PLAN_LIMITS } from "@/lib/plans"
 import LimitEnforcer from "@/components/LimitEnforcer"
 import SidebarWrapper from "@/components/layout/SidebarWrapper"
+import { SidebarProvider } from "@/components/layout/SidebarContext"
 
 export default async function DashboardLayout({
   children,
@@ -59,19 +60,21 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen w-full override-main-layout bg-background overflow-hidden">
-      <LimitEnforcer isOverLimit={overLimit} message={limitMsg} />
-      <SidebarWrapper />
-         <div className="flex flex-col flex-1 w-full h-full overflow-hidden">
-            <DashboardHeader />
-            <VerificationBanner />
-            <BlockedFileBanner count={blockedCount} />
-            <main className="flex-1 overflow-y-auto p-6 md:p-8">
-            <div className="mx-auto max-w-7xl">
-                {children}
-            </div>
-         </main>
+    <SidebarProvider>
+      <div className="flex h-screen w-full override-main-layout bg-background overflow-hidden relative">
+        <LimitEnforcer isOverLimit={overLimit} message={limitMsg} />
+        <SidebarWrapper />
+           <div className="flex flex-col flex-1 w-full h-full overflow-hidden">
+              <DashboardHeader />
+              <VerificationBanner />
+              <BlockedFileBanner count={blockedCount} />
+              <main className="flex-1 overflow-y-auto p-4 md:p-8">
+              <div className="mx-auto max-w-7xl">
+                  {children}
+              </div>
+           </main>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   )
 }
