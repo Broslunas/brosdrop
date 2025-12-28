@@ -127,13 +127,13 @@ export default function PricingPage() {
     }
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-white relative overflow-hidden">
+        <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white relative overflow-hidden transition-colors duration-300">
             {/* Background Effects */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
                  <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-[0.03]" />
-                <div className="absolute top-[-10%] right-[-10%] w-[40rem] h-[40rem] bg-indigo-500/20 rounded-full blur-[128px] animate-pulse" />
-                <div className="absolute bottom-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-purple-500/20 rounded-full blur-[128px] animate-pulse" style={{ animationDelay: '2s' }} />
-                <div className="absolute top-[20%] left-[20%] w-[30rem] h-[30rem] bg-pink-500/10 rounded-full blur-[96px] animate-pulse" style={{ animationDelay: '4s' }} />
+                <div className="absolute top-[-10%] right-[-10%] w-[40rem] h-[40rem] bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-[128px] animate-pulse" />
+                <div className="absolute bottom-[-10%] left-[-10%] w-[40rem] h-[40rem] bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-[128px] animate-pulse" style={{ animationDelay: '2s' }} />
+                <div className="absolute top-[20%] left-[20%] w-[30rem] h-[30rem] bg-pink-500/5 dark:bg-pink-500/10 rounded-full blur-[96px] animate-pulse" style={{ animationDelay: '4s' }} />
             </div>
 
             <div className="relative max-w-7xl mx-auto py-24 px-4 sm:px-6 lg:px-8">
@@ -145,29 +145,29 @@ export default function PricingPage() {
                     className="text-center space-y-6 mb-20"
                 >
                     <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
-                        <span className="bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
+                        <span className="bg-gradient-to-b from-zinc-900 to-zinc-600 dark:from-white dark:to-white/60 bg-clip-text text-transparent">
                             Planes Flexibles
                         </span>
                     </h1>
-                    <p className="text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+                    <p className="text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed">
                         Potencia tus envíos con el plan perfecto para ti. <br className="hidden md:block"/>
                         Desde uso casual hasta flujos de trabajo profesionales.
                     </p>
                     
                     {/* Toggle */}
-                    <div className="inline-flex items-center p-1 bg-zinc-900/50 backdrop-blur-xl border border-white/10 rounded-full mt-8">
+                    <div className="inline-flex items-center p-1 bg-zinc-100 dark:bg-zinc-900/50 backdrop-blur-xl border border-zinc-200 dark:border-white/10 rounded-full mt-8">
                         <button 
                             onClick={() => setIsAnnual(false)}
-                            className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${!isAnnual ? 'bg-white/10 text-white shadow-lg' : 'text-zinc-400 hover:text-white'}`}
+                            className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${!isAnnual ? 'bg-white dark:bg-white/10 text-zinc-900 dark:text-white shadow-lg' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}
                         >
                             Mensual
                         </button>
                         <button 
                             onClick={() => setIsAnnual(true)}
-                            className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 ${isAnnual ? 'bg-white/10 text-white shadow-lg' : 'text-zinc-400 hover:text-white'}`}
+                            className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 ${isAnnual ? 'bg-white dark:bg-white/10 text-zinc-900 dark:text-white shadow-lg' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'}`}
                         >
                             Anual
-                            <span className="text-[10px] font-bold bg-gradient-to-r from-orange-400 to-pink-500 text-black px-1.5 py-0.5 rounded-full">-20%</span>
+                            <span className="text-[10px] font-bold bg-gradient-to-r from-orange-400 to-pink-500 text-white px-1.5 py-0.5 rounded-full">-20%</span>
                         </button>
                     </div>
                 </motion.div>
@@ -187,8 +187,8 @@ export default function PricingPage() {
                                 relative p-8 rounded-[2rem] flex flex-col h-full
                                 backdrop-blur-xl border transition-all duration-500 group
                                 ${plan.popular 
-                                    ? 'bg-zinc-900/60 border-primary/30 shadow-[0_0_40px_-10px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_0_60px_-10px_rgba(var(--primary-rgb),0.5)]' 
-                                    : 'bg-zinc-900/40 border-white/5 hover:border-white/20 hover:bg-zinc-900/60'
+                                    ? 'bg-white/80 dark:bg-zinc-900/60 border-primary/30 shadow-lg dark:shadow-[0_0_40px_-10px_rgba(var(--primary-rgb),0.3)] hover:shadow-xl dark:hover:shadow-[0_0_60px_-10px_rgba(var(--primary-rgb),0.5)]' 
+                                    : 'bg-white/60 dark:bg-zinc-900/40 border-zinc-200 dark:border-white/5 hover:border-primary/20 dark:hover:border-white/20 hover:bg-white/80 dark:hover:bg-zinc-900/60 shadow-sm'
                                 }
                             `}
                         >
@@ -205,11 +205,11 @@ export default function PricingPage() {
                                     </div>
                                 </div>
 
-                                <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
-                                <p className="text-sm text-zinc-400 mb-6 min-h-[40px]">{plan.description}</p>
+                                <h3 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">{plan.name}</h3>
+                                <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6 min-h-[40px]">{plan.description}</p>
                                 
                                 <div className="flex items-baseline gap-1">
-                                    <span className="text-5xl font-bold text-white tracking-tight">
+                                    <span className="text-5xl font-bold text-zinc-900 dark:text-white tracking-tight">
                                         {isAnnual && plan.price !== "€0" 
                                             ? `€${(parseFloat(plan.price.slice(1)) * 0.8).toFixed(2)}` 
                                             : plan.price}
@@ -228,10 +228,10 @@ export default function PricingPage() {
                                             <div className={`mt-0.5 p-0.5 rounded-full bg-gradient-to-br ${plan.gradient}`}>
                                                 <Check className="w-3 h-3 text-black" strokeWidth={3} />
                                             </div>
-                                            <span className="text-zinc-300 flex items-center gap-2">
+                                            <span className="text-zinc-700 dark:text-zinc-300 flex items-center gap-2">
                                                 {text} 
                                                 {isComingSoon && (
-                                                    <span title="Próximamente" className="inline-flex items-center justify-center bg-white/10 rounded-full p-0.5 text-zinc-400">
+                                                    <span title="Próximamente" className="inline-flex items-center justify-center bg-zinc-200 dark:bg-white/10 rounded-full p-0.5 text-zinc-500 dark:text-zinc-400">
                                                         <Clock className="w-3 h-3" />
                                                     </span>
                                                 )}
@@ -258,10 +258,10 @@ export default function PricingPage() {
                                             className={`
                                                 w-full py-4 rounded-xl font-bold text-sm tracking-wide transition-all duration-300 relative overflow-hidden group/btn hover:shadow-lg
                                                 ${isFree || (plan as any).disabled
-                                                    ? 'bg-white/5 text-zinc-500 cursor-not-allowed border border-white/5' 
+                                                    ? 'bg-zinc-100 dark:bg-white/5 text-zinc-400 dark:text-zinc-500 cursor-not-allowed border border-zinc-200 dark:border-white/5' 
                                                     : plan.popular 
-                                                        ? 'bg-white text-black hover:scale-[1.02] shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)]' 
-                                                        : 'bg-white/10 text-white hover:bg-white hover:text-black hover:scale-[1.02]'
+                                                        ? 'bg-zinc-900 dark:bg-white text-white dark:text-black hover:scale-[1.02] shadow-lg' 
+                                                        : 'bg-zinc-100 dark:bg-white/10 text-zinc-900 dark:text-white hover:bg-zinc-900 dark:hover:bg-white hover:text-white dark:hover:text-black hover:scale-[1.02]'
                                                 }
                                             `}
                                         >
@@ -285,13 +285,13 @@ export default function PricingPage() {
                     className="max-w-6xl mx-auto"
                 >
                     <div className="text-center mb-12">
-                        <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-white to-zinc-500 bg-clip-text text-transparent">Comparativa Detallada</h2>
-                        <p className="text-zinc-400">Todo lo que necesitas saber.</p>
+                        <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-zinc-900 to-zinc-600 dark:from-white dark:to-zinc-500 bg-clip-text text-transparent">Comparativa Detallada</h2>
+                        <p className="text-zinc-600 dark:text-zinc-400">Todo lo que necesitas saber.</p>
                     </div>
 
                     {/* Fancy Glass Table */}
                     <div className="relative rounded-[2rem] overflow-hidden">
-                         <div className="absolute inset-0 bg-zinc-900/60 backdrop-blur-xl border border-white/10 rounded-[2rem]" />
+                         <div className="absolute inset-0 bg-white/80 dark:bg-zinc-900/60 backdrop-blur-xl border border-zinc-200 dark:border-white/10 rounded-[2rem]" />
                          
                          {/* Header Glows */}
                          <div className="absolute top-0 right-0 w-[30%] h-full bg-primary/5 blur-[80px]" />
@@ -299,36 +299,36 @@ export default function PricingPage() {
                          <div className="relative overflow-x-auto">
                             <table className="w-full text-left text-sm border-collapse">
                                 <thead>
-                                    <tr className="border-b border-white/10">
-                                        <th className="p-8 font-medium text-zinc-500 uppercase tracking-widest text-xs w-[30%]">Funcionalidad</th>
-                                        <th className="p-8 text-center text-zinc-400 text-xs uppercase tracking-widest w-[15%]">Invitado</th>
-                                        <th className="p-8 text-center text-zinc-300 text-xs uppercase tracking-widest w-[15%]">Free</th>
-                                        <th className="p-8 text-center text-blue-300 text-xs uppercase tracking-widest w-[20%]">Plus</th>
-                                        <th className="p-8 text-center text-primary text-xs uppercase tracking-widest font-bold w-[20%] bg-white/[0.02]">Pro</th>
+                                    <tr className="border-b border-zinc-200 dark:border-white/10">
+                                        <th className="p-8 font-medium text-zinc-500 dark:text-zinc-500 uppercase tracking-widest text-xs w-[30%]">Funcionalidad</th>
+                                        <th className="p-8 text-center text-zinc-400 dark:text-zinc-400 text-xs uppercase tracking-widest w-[15%]">Invitado</th>
+                                        <th className="p-8 text-center text-zinc-600 dark:text-zinc-300 text-xs uppercase tracking-widest w-[15%]">Free</th>
+                                        <th className="p-8 text-center text-blue-600 dark:text-blue-300 text-xs uppercase tracking-widest w-[20%]">Plus</th>
+                                        <th className="p-8 text-center text-primary text-xs uppercase tracking-widest font-bold w-[20%] bg-zinc-50 dark:bg-white/[0.02]">Pro</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-white/5">
+                                <tbody className="divide-y divide-zinc-200 dark:divide-white/5">
                                     {[
                                         { name: "Subida Máxima", vals: ["10 MB", "200 MB", "500 MB", "5 GB"] },
                                         { name: "Caducidad Link", vals: ["30 min", "7 días", "30 días", "1 Año"] },
                                         { name: "Almacenamiento Cloud", vals: ["-", "500 MB", "20 GB", "200 GB"] },
                                         { name: "Archivos Simultáneos", vals: ["-", "5", "50", "250"] },
-                                        { name: "Archivos con Clave", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, "1", "5", "50"] },
+                                        { name: "Archivos con Clave", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-400 dark:text-zinc-600"/>, "1", "5", "50"] },
                                         { name: "Enlaces Personalizados", vals: ["-", "1", "5", "25"] },
-                                        { name: "Personalización QR", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-600"/>, "Colores", "Colores + Logo"] },
-                                        { name: "Acceso API Pública", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-600"/>, <Check key="check" className="w-4 h-4 mx-auto text-blue-400"/>, <Check key="check2" className="w-4 h-4 mx-auto text-primary"/>] },
-                                        { name: "Soporte Prioritario", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-600"/>, <Check key="check" className="w-4 h-4 mx-auto text-blue-400"/>, <Check key="check2" className="w-4 h-4 mx-auto text-primary"/>] },
-                                        { name: "Branding Personal", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x3" className="w-4 h-4 mx-auto text-zinc-600"/>, <Check key="check" className="w-4 h-4 mx-auto text-blue-400"/>] },
-                                        { name: "Multi-archivos (Zip/Separado)", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-600"/>, <Check key="check" className="w-4 h-4 mx-auto text-blue-400"/>, <Check key="check2" className="w-4 h-4 mx-auto text-primary"/>] },
-                                        { name: "Integración Cloud (Drive/Dropbox)", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-600"/>, <Check key="check" className="w-4 h-4 mx-auto text-blue-400"/>, <Check key="check2" className="w-4 h-4 mx-auto text-primary"/>] },
+                                        { name: "Personalización QR", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-400 dark:text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-400 dark:text-zinc-600"/>, "Colores", "Colores + Logo"] },
+                                        { name: "Acceso API Pública", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-400 dark:text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-400 dark:text-zinc-600"/>, <Check key="check" className="w-4 h-4 mx-auto text-blue-500 dark:text-blue-400"/>, <Check key="check2" className="w-4 h-4 mx-auto text-primary"/>] },
+                                        { name: "Soporte Prioritario", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-400 dark:text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-400 dark:text-zinc-600"/>, <Check key="check" className="w-4 h-4 mx-auto text-blue-500 dark:text-blue-400"/>, <Check key="check2" className="w-4 h-4 mx-auto text-primary"/>] },
+                                        { name: "Branding Personal", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-400 dark:text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-400 dark:text-zinc-600"/>, <X key="x3" className="w-4 h-4 mx-auto text-zinc-400 dark:text-zinc-600"/>, <Check key="check" className="w-4 h-4 mx-auto text-blue-500 dark:text-blue-400"/>] },
+                                        { name: "Multi-archivos (Zip/Separado)", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-400 dark:text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-400 dark:text-zinc-600"/>, <Check key="check" className="w-4 h-4 mx-auto text-blue-500 dark:text-blue-400"/>, <Check key="check2" className="w-4 h-4 mx-auto text-primary"/>] },
+                                        { name: "Integración Cloud (Drive/Dropbox)", vals: [<X key="x" className="w-4 h-4 mx-auto text-zinc-400 dark:text-zinc-600"/>, <X key="x2" className="w-4 h-4 mx-auto text-zinc-400 dark:text-zinc-600"/>, <Check key="check" className="w-4 h-4 mx-auto text-blue-500 dark:text-blue-400"/>, <Check key="check2" className="w-4 h-4 mx-auto text-primary"/>] },
                                         { name: "Límite Importación Cloud", vals: ["-", "-", "500 MB", "5 GB"] },
                                     ].map((row, i) => (
-                                        <tr key={i} className="group hover:bg-white/[0.02] transition-colors">
-                                            <td className="p-6 pl-8 font-medium text-zinc-300 group-hover:text-white transition-colors">{row.name}</td>
+                                        <tr key={i} className="group hover:bg-zinc-50 dark:hover:bg-white/[0.02] transition-colors">
+                                            <td className="p-6 pl-8 font-medium text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors">{row.name}</td>
                                             <td className="p-6 text-center text-zinc-500">{row.vals[0]}</td>
-                                            <td className="p-6 text-center text-zinc-400">{row.vals[1]}</td>
-                                            <td className="p-6 text-center text-blue-200 font-medium">{row.vals[2]}</td>
-                                            <td className="p-6 text-center text-white font-bold bg-white/[0.02] group-hover:bg-white/[0.04] transition-colors shadow-[inset_1px_0_0_0_rgba(255,255,255,0.05)]">
+                                            <td className="p-6 text-center text-zinc-600 dark:text-zinc-400">{row.vals[1]}</td>
+                                            <td className="p-6 text-center text-blue-600 dark:text-blue-200 font-medium">{row.vals[2]}</td>
+                                            <td className="p-6 text-center text-zinc-900 dark:text-white font-bold bg-zinc-50 dark:bg-white/[0.02] group-hover:bg-zinc-100 dark:group-hover:bg-white/[0.04] transition-colors shadow-[inset_1px_0_0_0_rgba(0,0,0,0.05)] dark:shadow-[inset_1px_0_0_0_rgba(255,255,255,0.05)]">
                                                 {row.vals[3]}
                                             </td>
                                         </tr>
@@ -339,10 +339,10 @@ export default function PricingPage() {
                     </div>
                 </motion.div>
 
-                <div className="text-center mt-20 pt-10 border-t border-white/10">
-                    <p className="text-zinc-500 text-sm">
+                <div className="text-center mt-20 pt-10 border-t border-zinc-200 dark:border-white/10">
+                    <p className="text-zinc-500 dark:text-zinc-500 text-sm">
                         Todos los precios están en Euros (€). Puedes cancelar en cualquier momento desde tu panel.
-                        ¿Dudas? <Link href="https://broslunas.com/contact" className="text-white hover:underline decoration-primary underline-offset-4">Contáctanos</Link>.
+                        ¿Dudas? <Link href="https://broslunas.com/contact" className="text-zinc-900 dark:text-white hover:underline decoration-primary underline-offset-4">Contáctanos</Link>.
                     </p>
                 </div>
             </div>
