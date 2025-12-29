@@ -202,12 +202,19 @@ export default function DashboardClient({
         throw new Error(data.error || 'Error al mover archivo')
       }
 
-      // Update local state
-      setFiles(prev => prev.map(f => 
-        f._id === fileId 
-          ? { ...f, folderId: folderId === 'none' ? undefined : folderId }
-          : f
-      ))
+      // Update local state - ensure folderId is undefined, not null
+      setFiles(prev => prev.map(f => {
+        if (f._id === fileId) {
+          const updatedFile = { ...f }
+          if (folderId === 'none' || folderId === null) {
+            delete (updatedFile as any).folderId
+          } else {
+            updatedFile.folderId = folderId
+          }
+          return updatedFile
+        }
+        return f
+      }))
 
       toast.success('Archivo movido correctamente')
       router.refresh()
@@ -591,7 +598,7 @@ export default function DashboardClient({
                         transition={{ duration: 0.2 }}
                         key={file._id}
                         draggable={tab === 'active'}
-                        onDragStart={(e) => handleDragStart(e, file._id)}
+                        onDragStart={(e: any) => handleDragStart(e as React.DragEvent, file._id)}
                         onDragEnd={handleDragEnd}
                         className={`
                             group relative border rounded-2xl transition-all duration-300
