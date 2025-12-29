@@ -129,13 +129,6 @@ Roles y permisos (admin, member, viewer)
 Storage compartido
 Billing centralizado
 
-20. Carpetas y Organización
-Prioridad: 🔥 ALTA
-Crear carpetas/proyectos
-Tags para archivos
-Búsqueda avanzada
-Filtros (por fecha, tipo, tamaño)
-
 21. Colaboración
 Prioridad: 🟢 BAJA (complejo)
 Comentarios en archivos

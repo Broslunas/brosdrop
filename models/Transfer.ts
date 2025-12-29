@@ -26,6 +26,8 @@ export interface ITransfer {
   blocked?: boolean
   blockedMessage?: string // Optional admin message
   isPublic?: boolean
+  folderId?: string // Folder organization
+  tags?: string[] // File tags for categorization
 }
 
 const TransferSchema = new Schema<ITransfer>({
@@ -48,8 +50,13 @@ const TransferSchema = new Schema<ITransfer>({
   },
   blocked: { type: Boolean, default: false },
   blockedMessage: { type: String },
-  isPublic: { type: Boolean, default: true }
+  isPublic: { type: Boolean, default: true },
+  folderId: { type: String, ref: 'Folder', index: true },
+  tags: { type: [String], default: [], index: true }
 }, { timestamps: true })
+
+// Compound index for efficient user folder queries
+TransferSchema.index({ senderId: 1, folderId: 1 })
 
 // Force model recompilation in development to handle schema changes
 if (process.env.NODE_ENV === 'development') {

@@ -68,10 +68,8 @@ export default async function DashboardLayout({
               <DashboardHeader />
               <VerificationBanner />
               <BlockedFileBanner count={blockedCount} />
-              <main className="flex-1 overflow-y-auto p-4 md:p-8">
-              <div className="mx-auto max-w-7xl">
+              <main className="flex-1 overflow-hidden">
                   {children}
-              </div>
            </main>
         </div>
       </div>

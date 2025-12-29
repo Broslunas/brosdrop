@@ -20,7 +20,7 @@ export async function PUT(
     }
 
     const { id } = await params
-    const { name, password, removePassword, expiresAt, customLink, maxDownloads, qrOptions, isPublic } = await req.json()
+    const { name, password, removePassword, expiresAt, customLink, maxDownloads, qrOptions, isPublic, folderId, tags } = await req.json()
 
     await dbConnect()
 
@@ -176,6 +176,49 @@ export async function PUT(
 
     if (isPublic !== undefined) {
         transfer.isPublic = isPublic
+    }
+
+    // Handle folder assignment
+    if (folderId !== undefined) {
+        if (folderId === null || folderId === '') {
+            // Remove from folder
+            transfer.folderId = undefined
+        } else {
+            // Assign to folder (validation that folder exists and belongs to user should be done client-side or here)
+            transfer.folderId = folderId
+        }
+    }
+
+    // Handle tags
+    if (tags !== undefined) {
+        if (!Array.isArray(tags)) {
+            return NextResponse.json({ error: "Tags must be an array" }, { status: 400 })
+        }
+
+        // Validate tag count based on plan
+        const maxTags = (currentLimits as any).maxTagsPerFile || 5
+        if (tags.length > maxTags) {
+            return NextResponse.json({ 
+                error: `Tu plan ${currentLimits.name} solo permite ${maxTags} etiquetas por archivo.` 
+            }, { status: 403 })
+        }
+
+        // Validate each tag
+        const validTags = tags.filter(tag => {
+            if (typeof tag !== 'string') return false
+            const trimmed = tag.trim()
+            if (trimmed.length === 0 || trimmed.length > 30) return false
+            // Alphanumeric + spaces, hyphens, underscores only
+            return /^[a-zA-Z0-9\s\-_]+$/.test(trimmed)
+        }).map(tag => tag.trim())
+
+        if (validTags.length !== tags.length) {
+            return NextResponse.json({ 
+                error: "Algunas etiquetas son inválidas. Las etiquetas deben tener entre 1-30 caracteres y solo pueden contener letras, números, espacios, guiones y guiones bajos." 
+            }, { status: 400 })
+        }
+
+        transfer.tags = validTags
     }
 
     await transfer.save()

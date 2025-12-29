@@ -2,13 +2,17 @@
 
 import { useState, useMemo, useEffect } from "react"
 import { ITransfer } from "@/models/Transfer"
-import { Trash2, ExternalLink, Copy, FileIcon, Calendar, Download, HardDrive, Eye, Search, Filter, ArrowUpDown, Check, X, Grid, List as ListIcon, Edit2, Lock, Music, Video, Image as ImageIcon, FileText, Archive, FileCode, Clock, QrCode, AlertTriangle, Globe, EyeOff } from "lucide-react"
+import { Trash2, ExternalLink, Copy, FileIcon, Calendar, Download, HardDrive, Eye, Search, Filter, ArrowUpDown, Check, X, Grid, List as ListIcon, Edit2, Lock, Music, Video, Image as ImageIcon, FileText, Archive, FileCode, Clock, QrCode, AlertTriangle, Globe, EyeOff, SlidersHorizontal, ChevronRight, Tag as TagIcon, FolderPlus } from "lucide-react"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useModal } from "@/components/ModalProvider"
 import EditFileModal from "@/components/EditFileModal"
 import QRModal from "@/components/QRModal"
+import FolderSidebar from "@/components/FolderSidebar"
+import AdvancedFilters, { FilterState } from "@/components/AdvancedFilters"
+import { PLAN_LIMITS } from "@/lib/plans"
+import { useSession } from "next-auth/react"
 
 // Format bytes to human readable
 const formatBytes = (bytes: number, decimals = 2) => {
@@ -53,14 +57,18 @@ export default function DashboardClient({
     historyFiles = [], 
     defaultView = 'grid',
     onFileDeleted,
-    onFileUpdated
+    onFileUpdated,
+    userPlan = 'free'
 }: { 
     initialFiles: any[], 
     historyFiles?: any[], 
     defaultView?: string,
     onFileDeleted?: (id: string) => void,
-    onFileUpdated?: (file: any) => void
+    onFileUpdated?: (file: any) => void,
+    userPlan?: string
 }) {
+  const { data: session } = useSession()
+  const plan = (session?.user as any)?.plan || userPlan
   const [files, setFiles] = useState<ITransfer[]>(initialFiles)
   const [history, setHistory] = useState<any[]>(historyFiles)
   
@@ -75,7 +83,7 @@ export default function DashboardClient({
   const [editingFile, setEditingFile] = useState<ITransfer | null>(null)
   const [activeModalMode, setActiveModalMode] = useState<'edit' | 'qr'>('edit')
 
-  const handleSaveEdit = async (id: string, newName: string, password?: string | null, newExpiration?: string, customLink?: string, maxDownloads?: number | null, qrOptions?: { fgColor: string, bgColor: string, logoUrl?: string }, isPublic?: boolean) => {
+  const handleSaveEdit = async (id: string, newName: string, password?: string | null, newExpiration?: string, customLink?: string, maxDownloads?: number | null, qrOptions?: { fgColor: string, bgColor: string, logoUrl?: string }, isPublic?: boolean, folderId?: string | null, tags?: string[]) => {
       try {
           const res = await fetch(`/api/files/${id}`, {
               method: 'PUT',
@@ -88,7 +96,9 @@ export default function DashboardClient({
                   customLink: customLink,
                   maxDownloads: maxDownloads,
                   qrOptions: qrOptions,
-                  isPublic: isPublic
+                  isPublic: isPublic,
+                  folderId: folderId,
+                  tags: tags
               })
           })
           
@@ -106,7 +116,9 @@ export default function DashboardClient({
               customLink: data.transfer.customLink,
               maxDownloads: data.transfer.maxDownloads,
               qrOptions: data.transfer.qrOptions,
-              isPublic: data.transfer.isPublic
+              isPublic: data.transfer.isPublic,
+              folderId: data.transfer.folderId,
+              tags: data.transfer.tags
           }
           setFiles(prev => prev.map(f => f._id === id ? updated : f))
           if (onFileUpdated) onFileUpdated(updated)
@@ -125,14 +137,130 @@ export default function DashboardClient({
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>(defaultView as 'grid' | 'list')
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  
+  // Folder & Filter States
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null)
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
+  const [activeFilters, setActiveFilters] = useState<FilterState>({})
+  const [folders, setFolders] = useState<any[]>([])
+  const [currentFolder, setCurrentFolder] = useState<any>(null)
+  
+  // Drag and Drop State
+  const [draggedFileId, setDraggedFileId] = useState<string | null>(null)
+  const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null)
+
+  // Fetch folders
+  useEffect(() => {
+    const fetchFolders = async () => {
+      try {
+        const res = await fetch('/api/folders')
+        if (res.ok) {
+          const data = await res.json()
+          setFolders(data.folders || [])
+        }
+      } catch (error) {
+        console.error('Error fetching folders:', error)
+      }
+    }
+    fetchFolders()
+  }, [])
+
+  // Update current folder when selection changes
+  useEffect(() => {
+    if (selectedFolderId && selectedFolderId !== 'none') {
+      const folder = folders.find(f => f._id === selectedFolderId)
+      setCurrentFolder(folder)
+    } else {
+      setCurrentFolder(null)
+    }
+  }, [selectedFolderId, folders])
+
+  // Drag and Drop Handlers
+  const handleDragStart = (e: React.DragEvent, fileId: string) => {
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('fileId', fileId)
+    setDraggedFileId(fileId)
+  }
+
+  const handleDragEnd = () => {
+    setDraggedFileId(null)
+    setDragOverFolderId(null)
+  }
+
+  const handleMoveToFolder = async (fileId: string, folderId: string | null) => {
+    try {
+      const targetFolderId = folderId === 'none' ? 'none' : folderId
+      
+      const res = await fetch(`/api/folders/${targetFolderId}/move`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileIds: [fileId] })
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Error al mover archivo')
+      }
+
+      // Update local state
+      setFiles(prev => prev.map(f => 
+        f._id === fileId 
+          ? { ...f, folderId: folderId === 'none' ? undefined : folderId }
+          : f
+      ))
+
+      toast.success('Archivo movido correctamente')
+      router.refresh()
+    } catch (error: any) {
+      console.error('Error moving file:', error)
+      toast.error(error.message || 'Error al mover archivo')
+    }
+  }
 
   // Filter & Sort Logic
   const filteredAndSortedFiles = useMemo(() => {
       let data = tab === 'active' ? files : history
       
+      // Folder filter
+      if (selectedFolderId) {
+          if (selectedFolderId === 'none') {
+              data = data.filter(f => !f.folderId)
+          } else {
+              data = data.filter(f => f.folderId === selectedFolderId)
+          }
+      }
+      
       // Search
       if (searchTerm) {
           data = data.filter(f => f.originalName.toLowerCase().includes(searchTerm.toLowerCase()))
+      }
+      
+      // Advanced Filters
+      if (activeFilters.tags && activeFilters.tags.length > 0) {
+          data = data.filter(f => f.tags && f.tags.some((tag: string) => activeFilters.tags!.includes(tag)))
+      }
+      
+      if (activeFilters.fileTypes && activeFilters.fileTypes.length > 0) {
+          data = data.filter(f => activeFilters.fileTypes!.some(type => f.mimeType.startsWith(type)))
+      }
+      
+      if (activeFilters.sizeRange) {
+          const { min, max } = activeFilters.sizeRange
+          data = data.filter(f => {
+              if (min && f.size < min) return false
+              if (max && max !== Infinity && f.size > max) return false
+              return true
+          })
+      }
+      
+      if (activeFilters.dateRange) {
+          const { start, end } = activeFilters.dateRange
+          data = data.filter(f => {
+              const fileDate = new Date(f.createdAt)
+              if (start && fileDate < new Date(start)) return false
+              if (end && fileDate > new Date(end)) return false
+              return true
+          })
       }
 
       // Sort
@@ -156,7 +284,7 @@ export default function DashboardClient({
           }
           return sortOrder === 'desc' ? valB - valA : valA - valB
       })
-  }, [files, history, tab, searchTerm, sortBy, sortOrder])
+  }, [files, history, tab, searchTerm, sortBy, sortOrder, selectedFolderId, activeFilters])
 
   const toggleSelect = (id: string) => {
       const newSelected = new Set(selectedIds)
@@ -268,19 +396,81 @@ export default function DashboardClient({
 
   if (files.length === 0 && history.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] text-zinc-400">
-        <HardDrive className="w-16 h-16 mb-4 opacity-50" />
-        <h3 className="text-xl font-medium text-zinc-900 dark:text-white">Sin archivos</h3>
-        <p>Sube archivos para comenzar.</p>
+      <div className="flex h-[calc(100vh-200px)] min-h-[600px]">
+        <FolderSidebar
+          onFolderSelect={setSelectedFolderId}
+          selectedFolderId={selectedFolderId}
+          maxFolders={PLAN_LIMITS[plan as keyof typeof PLAN_LIMITS]?.maxFolders || 3}
+          onFoldersChange={() => router.refresh()}
+        />
+        <div className="flex-1 flex flex-col items-center justify-center text-zinc-400 p-8">
+          <HardDrive className="w-16 h-16 mb-4 opacity-50" />
+          <h3 className="text-xl font-medium text-zinc-900 dark:text-white">Sin archivos</h3>
+          <p>Sube archivos para comenzar.</p>
+        </div>
       </div>
     )
   }
 
+  const activeFilterCount = Object.values(activeFilters).filter(v => v !== undefined && (Array.isArray(v) ? v.length > 0 : true)).length
+
   return (
-    <div className="space-y-6">
+    <div className="flex h-[calc(100vh-200px)] min-h-[600px] gap-0">
+      {/* Folder Sidebar */}
+      <FolderSidebar
+        onFolderSelect={setSelectedFolderId}
+        selectedFolderId={selectedFolderId}
+        maxFolders={PLAN_LIMITS[plan as keyof typeof PLAN_LIMITS]?.maxFolders || 3}
+        onFoldersChange={() => {
+          // Refresh folders list
+          fetch('/api/folders')
+            .then(res => res.json())
+            .then(data => setFolders(data.folders || []))
+            .catch(console.error)
+        }}
+        draggedFileId={draggedFileId}
+        onDropFile={handleMoveToFolder}
+        onDragOverFolder={setDragOverFolderId}
+        dragOverFolderId={dragOverFolderId}
+      />
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
         
-        {/* Toolbar */}
-        <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white/50 dark:bg-zinc-900/50 p-4 rounded-2xl border border-zinc-200 dark:border-white/5 backdrop-blur-sm sticky top-4 z-20">
+          {/* Breadcrumb Navigation */}
+          {(selectedFolderId || activeFilterCount > 0) && (
+            <div className="flex items-center gap-3 px-4 py-2.5 bg-zinc-50 dark:bg-zinc-900/30 rounded-xl border border-zinc-200 dark:border-white/5 mb-4">
+            {selectedFolderId && (
+              <div className="flex items-center gap-2 text-sm">
+                <button 
+                  onClick={() => setSelectedFolderId(null)}
+                  className="text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                >
+                  Todos los archivos
+                </button>
+                <ChevronRight className="w-4 h-4 text-zinc-400" />
+                <span className="text-zinc-900 dark:text-white font-medium">
+                  {selectedFolderId === 'none' ? 'Sin carpeta' : currentFolder?.name || 'Carpeta'}
+                </span>
+              </div>
+            )}
+            {activeFilterCount > 0 && (
+              <div className="flex items-center gap-2 ml-auto">
+                <span className="text-xs text-zinc-500">{activeFilterCount} filtros activos</span>
+                <button
+                  onClick={() => setActiveFilters({})}
+                  className="text-xs text-primary hover:underline"
+                >
+                  Limpiar filtros
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+          
+          {/* Toolbar */}
+          <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white/50 dark:bg-zinc-900/50 p-4 rounded-2xl border border-zinc-200 dark:border-white/5 backdrop-blur-sm sticky top-0 z-20 mb-4">
             {/* Search */}
             <div className="relative w-full md:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
@@ -344,6 +534,24 @@ export default function DashboardClient({
                     <ListIcon className="w-4 h-4" />
                 </button>
             </div>
+            
+            {/* Advanced Filters */}
+            <button
+                onClick={() => setShowAdvancedFilters(true)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    activeFilterCount > 0 
+                        ? 'bg-primary/10 text-primary border border-primary/20' 
+                        : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                }`}
+            >
+                <SlidersHorizontal className="w-4 h-4" />
+                Filtros
+                {activeFilterCount > 0 && (
+                    <span className="px-1.5 py-0.5 bg-primary text-white text-xs rounded-full min-w-[20px] text-center">
+                        {activeFilterCount}
+                    </span>
+                )}
+            </button>
         </div>
 
         {/* Selection Bar */}
@@ -381,12 +589,16 @@ export default function DashboardClient({
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.95 }}
                         transition={{ duration: 0.2 }}
-                        key={file._id} 
+                        key={file._id}
+                        draggable={tab === 'active'}
+                        onDragStart={(e) => handleDragStart(e, file._id)}
+                        onDragEnd={handleDragEnd}
                         className={`
                             group relative border rounded-2xl transition-all duration-300
                             ${selectedIds.has(file._id) ? 'bg-primary/5 border-primary/50' : 'bg-white dark:bg-zinc-900/40 border-zinc-200 dark:border-white/5 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:border-zinc-300 dark:hover:border-white/10'}
                             ${tab === 'history' ? 'opacity-75 grayscale hover:grayscale-0' : ''}
                             ${viewMode === 'list' ? 'flex items-center gap-6 p-4' : 'p-6'}
+                            ${draggedFileId === file._id ? 'opacity-50 cursor-grabbing' : 'cursor-grab'}
                         `}
                         onClick={() => toggleSelect(file._id)}
                     >
@@ -464,6 +676,26 @@ export default function DashboardClient({
                                             </span>
                                         </div>
                                     </>
+                                )}
+                                
+                                {/* Tags Display */}
+                                {file.tags && file.tags.length > 0 && (
+                                    <div className="w-full mt-2 flex flex-wrap gap-1.5">
+                                        {file.tags.slice(0, 3).map((tag: string, idx: number) => (
+                                            <span
+                                                key={idx}
+                                                className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/10 text-primary dark:text-primary-light text-xs rounded-full border border-primary/20"
+                                            >
+                                                <TagIcon className="w-2.5 h-2.5" />
+                                                {tag}
+                                            </span>
+                                        ))}
+                                        {file.tags.length > 3 && (
+                                            <span className="px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 text-xs rounded-full">
+                                                +{file.tags.length - 3}
+                                            </span>
+                                        )}
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -583,6 +815,19 @@ export default function DashboardClient({
                  )
             }}
         />
+        
+        {/* Advanced Filters Modal */}
+        <AdvancedFilters
+            isOpen={showAdvancedFilters}
+            onClose={() => setShowAdvancedFilters(false)}
+            onApply={(filters) => {
+                setActiveFilters(filters)
+                setShowAdvancedFilters(false)
+            }}
+            initialFilters={activeFilters}
+        />
+        </div>
+      </div>
     </div>
   )
 }

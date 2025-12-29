@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Save, Lock, Edit2, Clock, Globe } from "lucide-react"
+import { X, Save, Lock, Edit2, Clock, Globe, Folder, Tag } from "lucide-react"
 import { PLAN_LIMITS } from "@/lib/plans"
+import TagInput from "./TagInput"
 
 import { useSession } from "next-auth/react"
 
@@ -11,7 +12,7 @@ interface EditFileModalProps {
   isOpen: boolean
   onClose: () => void
   file: any
-  onSave: (id: string, newName: string, password?: string | null, newExpiration?: string, customLink?: string, maxDownloads?: number | null) => Promise<void>
+  onSave: (id: string, newName: string, password?: string | null, newExpiration?: string, customLink?: string, maxDownloads?: number | null, qrOptions?: any, isPublic?: boolean, folderId?: string | null, tags?: string[]) => Promise<void>
 }
 
 export default function EditFileModal({ isOpen, onClose, file, onSave }: EditFileModalProps) {
@@ -26,8 +27,27 @@ export default function EditFileModal({ isOpen, onClose, file, onSave }: EditFil
   const [newExpiration, setNewExpiration] = useState("")
   const [customLink, setCustomLink] = useState("")
   const [maxDownloads, setMaxDownloads] = useState<number | null>(null)
+  const [folderId, setFolderId] = useState<string | null>(null)
+  const [tags, setTags] = useState<string[]>([])
+  const [folders, setFolders] = useState<any[]>([])
   
   const [isSaving, setIsSaving] = useState(false)
+
+  // Fetch folders
+  useEffect(() => {
+      const fetchFolders = async () => {
+          try {
+              const res = await fetch('/api/folders')
+              if (res.ok) {
+                  const data = await res.json()
+                  setFolders(data.folders || [])
+              }
+          } catch (error) {
+              console.error('Error fetching folders:', error)
+          }
+      }
+      if (isOpen) fetchFolders()
+  }, [isOpen])
 
   // Reset state when file changes or modal opens
   useEffect(() => {
@@ -43,6 +63,8 @@ export default function EditFileModal({ isOpen, onClose, file, onSave }: EditFil
           }
           setCustomLink(file.customLink || "")
           setMaxDownloads(file.maxDownloads || null)
+          setFolderId(file.folderId || null)
+          setTags(file.tags || [])
       }
   }, [file, isOpen])
 
@@ -53,7 +75,7 @@ export default function EditFileModal({ isOpen, onClose, file, onSave }: EditFil
           if (hasPassword && password) pwd = password
           if (!hasPassword) pwd = null 
           
-          await onSave(file._id, name, pwd, newExpiration, customLink, maxDownloads)
+          await onSave(file._id, name, pwd, newExpiration, customLink, maxDownloads, undefined, undefined, folderId, tags)
           onClose()
       } catch (e) {
           console.error(e)
@@ -236,6 +258,49 @@ export default function EditFileModal({ isOpen, onClose, file, onSave }: EditFil
                                     value={maxDownloads || ''}
                                     onChange={(e) => setMaxDownloads(e.target.value ? parseInt(e.target.value) : null)}
                                     className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:ring-1 focus:ring-orange-500/50 outline-none placeholder:text-zinc-700"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Folder */}
+                    <div className="p-4 rounded-2xl border border-white/5 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors">
+                        <div className="flex items-start gap-3">
+                            <div className="mt-1 p-1.5 bg-cyan-500/10 rounded-lg">
+                                <Folder className="w-4 h-4 text-cyan-400" />
+                            </div>
+                            <div className="flex-1">
+                                <label className="block text-sm font-medium text-zinc-200 mb-1">Carpeta</label>
+                                <p className="text-xs text-zinc-500 mb-3">Organiza tu archivo en una carpeta.</p>
+                                <select
+                                    value={folderId || ''}
+                                    onChange={(e) => setFolderId(e.target.value || null)}
+                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:ring-1 focus:ring-cyan-500/50 outline-none"
+                                >
+                                    <option value="">Sin carpeta</option>
+                                    {folders.map(folder => (
+                                        <option key={folder._id} value={folder._id}>
+                                            {folder.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Tags */}
+                    <div className="p-4 rounded-2xl border border-white/5 bg-zinc-900/30 hover:bg-zinc-900/50 transition-colors">
+                        <div className="flex items-start gap-3">
+                            <div className="mt-1 p-1.5 bg-pink-500/10 rounded-lg">
+                                <Tag className="w-4 h-4 text-pink-400" />
+                            </div>
+                            <div className="flex-1">
+                                <label className="block text-sm font-medium text-zinc-200 mb-1">Etiquetas</label>
+                                <p className="text-xs text-zinc-500 mb-3">Añade etiquetas para organizar mejor.</p>
+                                <TagInput
+                                    value={tags}
+                                    onChange={setTags}
+                                    maxTags={(PLAN_LIMITS[userPlan as keyof typeof PLAN_LIMITS] as any)?.maxTagsPerFile || 5}
                                 />
                             </div>
                         </div>
