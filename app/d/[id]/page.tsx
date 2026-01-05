@@ -13,8 +13,50 @@ import { PLAN_LIMITS } from "@/lib/plans"
 import Link from "next/link"
 import { AlertCircle, Clock, ShieldAlert, AlertTriangle, ArrowLeft } from "lucide-react"
 
+import { Metadata } from "next"
+
 interface Props {
   params: Promise<{ id: string }>
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params
+  await dbConnect()
+
+  // Read-only fetch for metadata
+  let transfer: any = null
+  if (isValidObjectId(id)) {
+    transfer = await Transfer.findById(id).select('originalName mimeType size').lean()
+  }
+  if (!transfer) {
+    transfer = await Transfer.findOne({ customLink: id }).select('originalName mimeType size').lean()
+  }
+
+  // Check expired if not found
+  if (!transfer) {
+    if (isValidObjectId(id)) {
+        transfer = await ExpiredTransfer.findOne({ transferId: id }).select('originalName').lean()
+    }
+    if (!transfer) {
+         transfer = await ExpiredTransfer.findOne({ customLink: id }).select('originalName').lean()
+    }
+  }
+
+  if (!transfer) {
+    return {
+      title: "Archivo no encontrado | BrosDrop",
+      description: "El archivo que buscas no existe o ha sido eliminado."
+    }
+  }
+
+  return {
+    title: `${transfer.originalName} | BrosDrop`,
+    description: `Descarga ${transfer.originalName} de forma segura con BrosDrop.`,
+    openGraph: {
+      title: `${transfer.originalName} - Descargar Archivo`,
+      description: "Archivo listo para descarga en BrosDrop.",
+    }
+  }
 }
 
 export default async function DownloadPage({ params }: Props) {

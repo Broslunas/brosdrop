@@ -1,7 +1,11 @@
 
 export const metadata = {
-  title: "Política de Privacidad",
-  description: "Política de Privacidad de BrosDrop.",
+  title: "Política de Privacidad | BrosDrop",
+  description: "Política de Privacidad de BrosDrop. Conoce qué datos recopilamos y cómo los protegemos.",
+  openGraph: {
+    title: "Política de Privacidad - BrosDrop",
+    description: "Política de Privacidad de BrosDrop.",
+  }
 }
 
 export default function PrivacyPage() {

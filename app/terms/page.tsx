@@ -1,7 +1,11 @@
 
 export const metadata = {
-  title: "Términos de Servicio",
-  description: "Términos de Servicio de BrosDrop.",
+  title: "Términos de Servicio | BrosDrop",
+  description: "Lea nuestros términos de servicio y condiciones de uso.",
+  openGraph: {
+    title: "Términos de Servicio - BrosDrop",
+    description: "Términos de uso de la plataforma BrosDrop.",
+  }
 }
 
 export default function TermsPage() {

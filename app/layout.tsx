@@ -42,21 +42,12 @@ export const metadata: Metadata = {
     title: "BrosDrop - Intercambio de Archivos Premium",
     description: "Comparte archivos de forma simple, segura y con estilo. La mejor forma de enviar archivos por todo el mundo.",
     siteName: "BrosDrop",
-    images: [
-      {
-        url: "https://cdn.broslunas.com/favicon.ico",
-        width: 1200,
-        height: 630,
-        alt: "BrosDrop",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "BrosDrop - Intercambio de Archivos Premium",
     description: "Comparte archivos de forma simple, segura y con estilo.",
     creator: "@broslunas",
-    images: ["https://cdn.broslunas.com/favicon.ico"],
   },
   robots: {
     index: true,

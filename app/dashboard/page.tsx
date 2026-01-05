@@ -10,6 +10,16 @@ import DashboardFiles from "@/components/DashboardFiles"
 // Force dynamic rendering ensure validation on every request
 export const dynamic = 'force-dynamic'
 
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Panel de Control",
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
+
 export default async function Dashboard() {
   const session = await getServerSession(authOptions)
 
