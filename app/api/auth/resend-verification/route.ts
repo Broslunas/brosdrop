@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     user.verificationToken = token
     await user.save()
 
-    let referer = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+    let referer = process.env.NEXTAUTH_URL || 'https://brosdrop.com'
     try {
         const reqReferer = req.headers.get('referer')
         if (reqReferer) {
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
         }
     } catch (e) {
         // Fallback if URL parsing fails
-        referer = new URL(process.env.NEXTAUTH_URL || 'http://localhost:3000').origin
+        referer = new URL(process.env.NEXTAUTH_URL || 'https://brosdrop.com').origin
     }
 
     await fetch('https://n8n.broslunas.com/webhook/brosdrop-welcome-email', {

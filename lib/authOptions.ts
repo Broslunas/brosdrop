@@ -117,7 +117,7 @@ export const authOptions: NextAuthOptions = {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json',
-              'Referer': new URL(process.env.NEXTAUTH_URL || 'http://localhost:3000').origin
+              'Referer': new URL(process.env.NEXTAUTH_URL || 'https://brosdrop.com').origin
             },
             body: JSON.stringify({
                 userId: user.id,

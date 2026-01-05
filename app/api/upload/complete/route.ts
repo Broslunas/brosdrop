@@ -105,7 +105,7 @@ export async function POST(req: Request) {
     })
 
     const identifier = customLink || transfer._id
-    const finalLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/d/${identifier}`
+    const finalLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://brosdrop.com'}/d/${identifier}`
 
     return NextResponse.json({
         success: true,
